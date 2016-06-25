@@ -2,7 +2,6 @@ package tasklogger;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.text.SimpleDateFormat;
@@ -32,7 +31,6 @@ public class Task {
 		actionListender = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("AL=" + getActionListener());
 				String command = e.getActionCommand();
 				if (command.equals("taskButtonPressed")) {
 					actionTask();
@@ -64,7 +62,8 @@ public class Task {
 	}
 
 	private void start() throws Exception {
-		pcs.firePropertyChange("task", running.booleanValue(), !running.booleanValue());
+		System.out.println("start()");
+		pcs.firePropertyChange("taskRunning", running.booleanValue(), !running.booleanValue());
 		timer = new Timer();
 		timerTask = new TimerTask() {						
 			@Override
@@ -83,6 +82,8 @@ public class Task {
 	protected void cancel() {
 		if (timer != null) { 
 			timer.cancel();
+			System.out.println("cancel()");
+			pcs.firePropertyChange("taskRunning", running.booleanValue(), !running.booleanValue());
 			running = false;
 		}
 	}

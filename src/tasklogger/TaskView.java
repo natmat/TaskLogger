@@ -20,7 +20,6 @@ public class TaskView {
 		button = new TaskButton(inTask);
 		button.setActionCommand("taskButtonPressed");
 		button.addActionListener(inTask.getActionListener());
-		System.out.println("AL=" + inTask.getActionListener());
 	}
 
 	private void addTimer() {

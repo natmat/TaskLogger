@@ -6,38 +6,59 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.JButton;
 
-public class TaskButton extends JButton {
+public class TaskButton extends JButton implements PropertyChangeListener {
 
 	private static final long serialVersionUID = -9193221835511157635L;
 	private int taskId;
 	private Task task;
+	private PropertyChangeListener pcl;
 
 	public TaskButton(final Task inTask) {
 		task = inTask;
-		setBackground(Color.green);
 		setActionCommand("taskButton");
 		stop();
+
+		pcl = new PropertyChangeListener() {			
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				System.out.println(">" + evt.getPropertyName());
+				if ("taskRunning".equals(evt.getPropertyName())) {
+					boolean running = (boolean) evt.getNewValue();
+					if (running) {
+						start();
+					}
+					else {
+						stop();
+					}
+				}
+			}
+		};
+		inTask.addPropertyChangeListener(pcl);
 	}
 
 	public void start() {
 		setText("Stop Task");
-		setBackground(Color.red);
+		setButtonColor(Color.red);
 		repaint();
 	}
 
 	public void stop() {
 		setText("Start Task");
-		setBackground(Color.green);
+		setButtonColor(Color.green);
 		repaint();
 	}
 
-	public static class MyPropertyChangeListener implements PropertyChangeListener {
-		// This method is called every time the property value is changed
-		public void propertyChange(PropertyChangeEvent evt) {
-			System.out.println("Name = " + evt.getPropertyName());
-			System.out.println("Old Value = " + evt.getOldValue());
-			System.out.println("New Value = " + evt.getNewValue());
-			System.out.println("**********************************");
-		}
+	private void setButtonColor(Color col) {
+		setBackground(col);
+		setOpaque(true);
+		setBorderPainted(false);
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		System.out.println("Name = " + evt.getPropertyName());
+		System.out.println("Old Value = " + evt.getOldValue());
+		System.out.println("New Value = " + evt.getNewValue());
+		System.out.println("**********************************");
 	}
 }
