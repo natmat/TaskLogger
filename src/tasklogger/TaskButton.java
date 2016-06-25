@@ -11,29 +11,13 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 	private static final long serialVersionUID = -9193221835511157635L;
 	private int taskId;
 	private Task task;
-	private PropertyChangeListener pcl;
 
 	public TaskButton(final Task inTask) {
 		task = inTask;
 		setActionCommand("taskButton");
 		stop();
-
-		pcl = new PropertyChangeListener() {			
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				System.out.println(">" + evt.getPropertyName());
-				if ("taskRunning".equals(evt.getPropertyName())) {
-					boolean running = (boolean) evt.getNewValue();
-					if (running) {
-						start();
-					}
-					else {
-						stop();
-					}
-				}
-			}
-		};
-		inTask.addPropertyChangeListener(pcl);
+		
+		inTask.addPropertyChangeListener(this);
 	}
 
 	public void start() {
@@ -56,9 +40,22 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
+		// TODO Auto-generated method stub
 		System.out.println("Name = " + evt.getPropertyName());
 		System.out.println("Old Value = " + evt.getOldValue());
 		System.out.println("New Value = " + evt.getNewValue());
 		System.out.println("**********************************");
+
+		if ("taskRunning".equals(evt.getPropertyName())) {
+			boolean running = (boolean) evt.getNewValue();
+			if (running) {
+				start();
+			}
+			else {
+				stop();
+			}
+		}
 	}
 }
+
+
