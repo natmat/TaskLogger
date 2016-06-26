@@ -39,6 +39,11 @@ public class Task {
 		};
 	}
 
+	public Task(String inName) {
+		this();
+		name = inName;
+	}
+
 	public void addPropertyChangeListener(PropertyChangeListener l) {
 		pcs.addPropertyChangeListener(l);
 	}

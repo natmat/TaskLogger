@@ -23,6 +23,7 @@ public class TaskLogger {
 		model = new TaskLoggerModel();
 		
 		controller = new TaskLoggerController(getInstance());
+		controller.setModel(model);
 		view = new TaskLoggerView(controller);    
 		controller.setView(view);
 
@@ -56,7 +57,6 @@ public class TaskLogger {
 
 	public void startButtonPressed() {
 		if (taskList.isEmpty()) {
-			newTask();
 		}
 		try {
 			taskList.get(0).actionTask();
@@ -67,17 +67,4 @@ public class TaskLogger {
 		}
 	}
 
-	public void newTask() {
-		// TODO Auto-generated method stub
-		Task t = new Task();
-		enterTaskName(t);
-		taskList.add(t);
-		controller.addTaskToView(t);
-	}
-
-	private void enterTaskName(Task inTask) {
-		// TODO Auto-generated method stub
-		String taskName = JOptionPane.showInputDialog(this, "Enter Task : [WBS][Summary]");
-		inTask.setTitle(taskName);
-	}
 }
