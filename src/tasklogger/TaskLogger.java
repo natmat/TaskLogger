@@ -20,7 +20,7 @@ public class TaskLogger {
 	}
 
 	protected static void createAndShowGUI() {
-		model = new TaskLoggerModel();
+		model = TaskLoggerModel.getInstance();
 		
 		controller = new TaskLoggerController(getInstance());
 		controller.setModel(model);

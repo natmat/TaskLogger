@@ -13,9 +13,11 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 
 	public TaskButton(final int id) {
 		taskID = id;
-		setActionCommand("taskButton" + taskID);
+		String cmd = new String("taskButton:" + taskID);
+		setActionCommand(cmd);
+		TaskLoggerModel m = TaskLoggerModel.getInstance();
+		addPropertyChangeListener(getActionCommand(), m);
 		stop();
-		TaskLoggerModel.addPropertyChangeListener(this);
 	}
 
 	public void start() {
@@ -38,7 +40,6 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		// TODO Auto-generated method stub
 		System.out.println("Name = " + evt.getPropertyName());
 		System.out.println("Old Value = " + evt.getOldValue());
 		System.out.println("New Value = " + evt.getNewValue());

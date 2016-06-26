@@ -39,7 +39,7 @@ public class TaskLoggerController implements ActionListener{
 	}
 
 	public void addTaskToView(Task t) {
-		view.addTask(t);    
+		view.addTask(t.getTaskID());    
 	}
 
 	public void setView(TaskLoggerView inView) {

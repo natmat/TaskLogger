@@ -15,10 +15,8 @@ public class TaskView {
 		addTimer();
 	}
 
-	private void addButton(Task inTask) {
-		button = new TaskButton(inTask);
-		button.setActionCommand("taskButtonPressed");
-		button.addActionListener(inTask.getActionListener());
+	private void addButton(final int id) {
+		button = new TaskButton(id);
 	}
 
 	private void addTimer() {
