@@ -21,17 +21,15 @@ public class TaskLoggerModel implements PropertyChangeListener {
 		// Find task in arrayTask
 		for (Task t : taskArray) {
 			if (t.getName().equals(inName)) {
-				JOptionPane.showMessageDialog(new JFrame(),
-					    "Task already exists.",
-					    "New task error",
-					    JOptionPane.ERROR_MESSAGE);
-				return(null);
+				JOptionPane.showMessageDialog(new JFrame(), "Task already exists.", "New task error",
+						JOptionPane.ERROR_MESSAGE);
+				return (null);
 			}
 		}
 
 		Task task = new Task(inName);
 		taskArray.add(task);
-		return(task);
+		return (task);
 	}
 
 	@Override
@@ -39,5 +37,10 @@ public class TaskLoggerModel implements PropertyChangeListener {
 		if ("pressTaskButton".equals(evt.getPropertyName())) {
 			System.out.println("pressTaskButton");
 		}
+	}
+
+	public static void addPropertyChangeListener(TaskButton taskButton) {
+		// TODO Auto-generated method stub
+		System.out.println("pcl");
 	}
 }

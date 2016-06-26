@@ -27,7 +27,7 @@ public class TaskLoggerView extends JFrame implements ActionListener {
 	public TaskLoggerView(final TaskLoggerController inController) {
 		super();
 
-		controller = inController;    
+		controller = inController;
 		taskViewList = new ArrayList<TaskView>();
 
 		setupFrame();
@@ -38,13 +38,13 @@ public class TaskLoggerView extends JFrame implements ActionListener {
 
 	private void setupFrame() {
 		mainPanel = new JPanel();
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));  
+		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
 		topPanel = new JPanel();
 		addNewTaskButtonToView();
 		mainPanel.add(topPanel);
 
-		bottomPanel= new JPanel();
+		bottomPanel = new JPanel();
 		bottomPanel.setLayout(new GridLayout(0, 2));
 		mainPanel.add(bottomPanel);
 
@@ -73,7 +73,7 @@ public class TaskLoggerView extends JFrame implements ActionListener {
 
 	public void setTime(final Task inTask) {
 		for (TaskView tv : taskViewList) {
-			if (tv.getTask().getTaskID() == inTask.getTaskID()) {
+			if (tv.getTaskID() == inTask.getTaskID()) {
 				tv.getTimer().setText(inTask.getHMSString());
 				return;
 			}
@@ -83,25 +83,24 @@ public class TaskLoggerView extends JFrame implements ActionListener {
 
 	public void setTaskState(Boolean running) {
 		if (running) {
-			startButton.start();    
-		}
-		else {
-			startButton.stop();   
+			startButton.start();
+		} else {
+			startButton.stop();
 		}
 	}
 
 	public void addTaskToPanel(String code, String name) {
 	}
 
-	public void addTask(Task inTask) {
+	public void addTask(int taskID) {
 		for (TaskView t : taskViewList) {
-			if (t.getTask() == inTask) {
+			if (t.getTaskID() == taskID) {
 				System.err.println("Duplicate task");
 				return;
 			}
 		}
 
-		TaskView tv = new TaskView(inTask);
+		TaskView tv = new TaskView(taskID);
 		taskViewList.add(tv);
 
 		bottomPanel.add(tv.getButton());
@@ -112,4 +111,3 @@ public class TaskLoggerView extends JFrame implements ActionListener {
 
 	}
 }
-

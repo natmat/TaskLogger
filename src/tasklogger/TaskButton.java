@@ -9,15 +9,13 @@ import javax.swing.JButton;
 public class TaskButton extends JButton implements PropertyChangeListener {
 
 	private static final long serialVersionUID = -9193221835511157635L;
-	private int taskId;
-	private Task task;
+	private int taskID;
 
-	public TaskButton(final Task inTask) {
-		task = inTask;
-		setActionCommand("taskButton");
+	public TaskButton(final int id) {
+		taskID = id;
+		setActionCommand("taskButton" + taskID);
 		stop();
-		
-		inTask.addPropertyChangeListener(this);
+		TaskLoggerModel.addPropertyChangeListener(this);
 	}
 
 	public void start() {
@@ -50,12 +48,9 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 			boolean running = (boolean) evt.getNewValue();
 			if (running) {
 				start();
-			}
-			else {
+			} else {
 				stop();
 			}
 		}
 	}
 }
-
-

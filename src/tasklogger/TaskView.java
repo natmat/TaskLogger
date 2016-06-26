@@ -2,17 +2,16 @@ package tasklogger;
 
 import java.awt.Component;
 
-import javax.swing.AbstractButton;
 import javax.swing.JTextField;
 
 public class TaskView {
-	private Task task;
 	private TaskButton button;
 	private JTextField timer;
+	private int taskID;
 
-	public TaskView(Task inTask) {
-		task = inTask;
-		addButton(inTask);
+	public TaskView(int id) {
+		taskID = id;
+		addButton(id);
 		addTimer();
 	}
 
@@ -28,14 +27,14 @@ public class TaskView {
 	}
 
 	public Component getButton() {
-		return(button);
+		return (button);
 	}
 
-	public Task getTask() {
-		return task;
+	public int getTaskID() {
+		return taskID;
 	}
 
 	public JTextField getTimer() {
-		return(timer);
+		return (timer);
 	}
 }
