@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 public class TaskLoggerModel implements PropertyChangeListener {
 
 	private static ArrayList<Task> taskArray;
+	private static Task activeTask;
 	private static TaskLoggerModel instance;
 
 	public static TaskLoggerModel getInstance() {
@@ -18,9 +19,10 @@ public class TaskLoggerModel implements PropertyChangeListener {
 		}
 		return(instance);
 	}
-	
+
 	private TaskLoggerModel() {
 		taskArray = new ArrayList<>();
+		activeTask = null;
 	}
 
 	public static Task newTask(final String inName) {
@@ -40,8 +42,19 @@ public class TaskLoggerModel implements PropertyChangeListener {
 		return (task);
 	}
 
+	private int extractTaskIDFromString(final String name) {
+		int taskID = 0;
+		if (name.contains("taskButton")) {
+			int iID = name.indexOf(':') + 1;		
+			taskID = Integer.parseInt(name.substring(iID, name.length()));
+			System.out.println("taskID=" + taskID);
+		}
+		return(taskID);
+	}
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
+		System.out.println("TLM: PC");
 		int taskID = extractTaskIDFromString(evt.getPropertyName());
 		for (Task t : taskArray) {
 			if (taskID == t.getTaskID()) {
@@ -49,13 +62,23 @@ public class TaskLoggerModel implements PropertyChangeListener {
 				return;
 			}
 		}
-		System.out.println("pcl not found");
 	}
-	
-	private int extractTaskIDFromString(final String name) {
-		int iID = name.indexOf(':') + 1;
-		int taskID = Integer.parseInt(name.substring(iID, name.length()));
-		System.out.println("taskID=" + taskID);
-		return taskID;
+
+	public void startButtonPressed(int taskID) {
+		Task task = null;
+		for (Task t : taskArray) {
+			if (t.getTaskID() == taskID) {
+				task = t;
+				break;
+			}
+		}
+		
+		if (task == null) {
+			return;
+		}
+		task.actionTask();
+		if (task.getTaskState()) {
+			activeTask = task;
+		}
 	}
 }

@@ -1,6 +1,8 @@
 package tasklogger;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -12,11 +14,18 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 	private int taskID;
 
 	public TaskButton(final int id) {
+		super();
 		taskID = id;
-		String cmd = new String("taskButton:" + taskID);
-		setActionCommand(cmd);
-		TaskLoggerModel m = TaskLoggerModel.getInstance();
-		addPropertyChangeListener(getActionCommand(), m);
+		setActionCommand("taskButton");
+		addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println(">AL");
+				TaskLoggerView.buttonPressed(taskID);
+			}
+		});
+		addPropertyChangeListener(TaskLoggerModel.getInstance());
+		setText("Stop");
 		stop();
 	}
 

@@ -17,7 +17,7 @@ public class TaskLoggerView extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	private TaskButton startButton;
 	private JTextField timerField;
-	private TaskLoggerController controller;
+	private static TaskLoggerController controller;
 	private JPanel mainPanel;
 	private JPanel topPanel;
 	private JButton addNewTaskButton;
@@ -109,5 +109,9 @@ public class TaskLoggerView extends JFrame implements ActionListener {
 		pack();
 		mainPanel.repaint();
 
+	}
+
+	public static void buttonPressed(int taskID) {
+		controller.startButtonPressed(taskID);
 	}
 }
