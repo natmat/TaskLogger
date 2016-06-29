@@ -1,14 +1,11 @@
 package tasklogger;
 
-import java.util.ArrayList;
 import javax.swing.SwingUtilities;
 
 public class TaskLogger {
 	private static TLController controller;
 	private static TLView view;
 	private static TLModel model;
-	private static ArrayList<TLTask> taskList;
-	private static TaskLogger instance = null;
 
 	public static void main(String[] args) {    
 		SwingUtilities.invokeLater(new Runnable() {
@@ -19,15 +16,16 @@ public class TaskLogger {
 	}
 
 	protected static void createAndShowGUI() {
-		model = TLModel.getInstance();		
+		model = TLModel.getInstance();
 		controller = TLController.getInstance();
+		view = TLView.getInstance();
+		
 		controller.setView(view);
 		controller.setModel(model);
-		view = TLView.getInstance();
+		
+		view.setController(controller);
 		view.setTitle("Pomodoro tasker");   
 		view.setVisible(true);
-
-		taskList = new ArrayList<>();
 	}
 
 	public static void taskPulse(TLTask task) {

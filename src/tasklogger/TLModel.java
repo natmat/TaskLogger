@@ -15,7 +15,7 @@ public class TLModel implements PropertyChangeListener {
 	private static TLModel instance;
 	private static PropertyChangeListener pcl;
 	private PropertyChangeSupport pcs;
-	private static ArrayList<Task> taskList;
+	private static ArrayList<TLTask> taskList;
 	
 	private TLModel() {
 		taskArray = new ArrayList<>();
@@ -106,7 +106,7 @@ public class TLModel implements PropertyChangeListener {
 		}
 		try {
 			taskList.get(0).actionTask();
-			view.setTaskState(taskList.get(0).getTaskState());
+//			view.setTaskState(taskList.get(0).getTaskState());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

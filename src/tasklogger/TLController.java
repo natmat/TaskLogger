@@ -20,8 +20,8 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	}
 	
 	private TLController() {
-		model.addPropertyChangeListener(this);
-		view.addPropertyChangeListener(this);
+//		model.addPropertyChangeListener(this);
+//		view.addPropertyChangeListener(this);
 	}
 	
 	public void setModel(final TLModel inModel) {

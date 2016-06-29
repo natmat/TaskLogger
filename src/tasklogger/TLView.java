@@ -35,8 +35,6 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 	}
 	
 	private TLView() { 
-		instance = new TLView();
-
 		taskViewList = new ArrayList<TaskView>();
 		setupFrame();
 
