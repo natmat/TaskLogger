@@ -1,14 +1,13 @@
 package tasklogger;
 
 import java.util.ArrayList;
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 public class TaskLogger {
-	private static TaskLoggerController controller;
-	private static TaskLoggerView view;
-	private static ArrayList< Task> taskList;
-	private static TaskLoggerModel model;
+	private static TLController controller;
+	private static TLView view;
+	private static TLModel model;
+	private static ArrayList<TLTask> taskList;
 	private static TaskLogger instance = null;
 
 	public static void main(String[] args) {    
@@ -20,51 +19,19 @@ public class TaskLogger {
 	}
 
 	protected static void createAndShowGUI() {
-		model = TaskLoggerModel.getInstance();
-		
-		controller = new TaskLoggerController(getInstance());
-		controller.setModel(model);
-		view = new TaskLoggerView(controller);    
+		model = TLModel.getInstance();		
+		controller = TLController.getInstance();
 		controller.setView(view);
-
-		taskList = new ArrayList<>();
-
+		controller.setModel(model);
+		view = TLView.getInstance();
 		view.setTitle("Pomodoro tasker");   
 		view.setVisible(true);
+
+		taskList = new ArrayList<>();
 	}
 
-	// Private CTOR for singleton
-	private TaskLogger() {}
-
-	public static TaskLogger getInstance() {
-		if (instance == null) {
-			instance = new TaskLogger();
-		}
-		return(instance);
-	}
-
-	public static TaskLoggerController getController() {
-		return controller;
-	}
-
-	public static void setController(TaskLoggerController controller) {
-		TaskLogger.controller = controller;
-	}
-
-	public static void taskPulse(Task task) {
+	public static void taskPulse(TLTask task) {
 		view.setTime(task);
-	}
-
-	public void startButtonPressed() {
-		if (taskList.isEmpty()) {
-		}
-		try {
-			taskList.get(0).actionTask();
-			view.setTaskState(taskList.get(0).getTaskState());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 }

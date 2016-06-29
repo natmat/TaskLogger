@@ -4,6 +4,8 @@ import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
@@ -13,29 +15,39 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
-public class TaskLoggerView extends JFrame implements ActionListener {
+public class TLView extends JFrame implements ActionListener, PropertyChangeListener {
 	private static final long serialVersionUID = 1L;
 	private TaskButton startButton;
 	private JTextField timerField;
-	private static TaskLoggerController controller;
+	private static TLController controller;
 	private JPanel mainPanel;
 	private JPanel topPanel;
 	private JButton addNewTaskButton;
 	private JPanel bottomPanel;
 	private ArrayList<TaskView> taskViewList;
+	private static TLView instance;
+	
+	public static TLView getInstance() {
+		if (instance == null) {
+			instance = new TLView();
+		}
+		return(instance);
+	}
+	
+	private TLView() { 
+		instance = new TLView();
 
-	public TaskLoggerView(final TaskLoggerController inController) {
-		super();
-
-		controller = inController;
 		taskViewList = new ArrayList<TaskView>();
-
 		setupFrame();
 
 		pack();
 		setLocationRelativeTo(null);
 	}
 
+	public void setController(TLController inController) {
+		controller = inController;
+	}
+	
 	private void setupFrame() {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -71,7 +83,7 @@ public class TaskLoggerView extends JFrame implements ActionListener {
 		}
 	}
 
-	public void setTime(final Task inTask) {
+	public void setTime(final TLTask inTask) {
 		for (TaskView tv : taskViewList) {
 			if (tv.getTaskID() == inTask.getTaskID()) {
 				tv.getTimer().setText(inTask.getHMSString());
@@ -111,7 +123,13 @@ public class TaskLoggerView extends JFrame implements ActionListener {
 
 	}
 
-	public static void buttonPressed(int taskID) {
-		controller.startButtonPressed(taskID);
+	public static void taskButtonPressed(int taskID) {
+		controller.taskButtonPressed(taskID);
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		String name = evt.getPropertyName();
+		System.out.println("name="+name);		
 	}
 }

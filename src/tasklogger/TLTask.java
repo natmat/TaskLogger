@@ -2,7 +2,6 @@ package tasklogger;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.text.SimpleDateFormat;
@@ -11,7 +10,7 @@ import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Task {
+public class TLTask {
 	private TimerTask timerTask;
 	private Timer timer;
 	private int seconds;
@@ -21,7 +20,7 @@ public class Task {
 	private int taskID;
 	private PropertyChangeSupport pcs;
 
-	public Task() {
+	public TLTask() {
 		taskID = System.identityHashCode(this);
 		seconds = 0;		
 		running = new Boolean(false);
@@ -32,13 +31,17 @@ public class Task {
 		actionListender = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("AL=" + getActionListener());
 				String command = e.getActionCommand();
 				if (command.equals("taskButtonPressed")) {
 					actionTask();
 				}
 			}
 		};
+	}
+
+	public TLTask(String inName) {
+		this();
+		name = inName;
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener l) {
@@ -64,14 +67,15 @@ public class Task {
 	}
 
 	private void start() throws Exception {
-		pcs.firePropertyChange("task", running.booleanValue(), !running.booleanValue());
+		System.out.println("start()");
+		pcs.firePropertyChange("taskRunning", running.booleanValue(), !running.booleanValue());
 		timer = new Timer();
 		timerTask = new TimerTask() {						
 			@Override
 			public void run() {
 				// Update text with hh:mm:ss count
 				System.out.println("hms=" + convertSecondToHHMMString(seconds));
-				TimeLogger.taskPulse(Task.this);
+				TaskLogger.taskPulse(TLTask.this);
 				seconds++;
 			}
 		};
@@ -83,6 +87,8 @@ public class Task {
 	protected void cancel() {
 		if (timer != null) { 
 			timer.cancel();
+			System.out.println("cancel()");
+			pcs.firePropertyChange("taskRunning", running.booleanValue(), !running.booleanValue());
 			running = false;
 		}
 	}
@@ -119,6 +125,10 @@ public class Task {
 
 	public int getTaskID() {
 		return taskID;
+	}
+
+	public Boolean getRunning() {
+		return(running);
 	}
 }
 
