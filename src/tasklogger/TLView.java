@@ -99,9 +99,6 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		}
 	}
 
-	public void addTaskToPanel(String code, String name) {
-	}
-
 	public void addTask(int taskID) {
 		for (TaskView t : taskViewList) {
 			if (t.getTaskID() == taskID) {
@@ -137,6 +134,7 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 				else {
 					tv.getButton().stop();
 				}
+				return;
 			}
 		}
 		

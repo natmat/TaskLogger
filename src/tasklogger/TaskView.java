@@ -1,7 +1,5 @@
 package tasklogger;
 
-import java.awt.Component;
-
 import javax.swing.JTextField;
 
 public class TaskView {

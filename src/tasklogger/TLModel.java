@@ -40,7 +40,7 @@ public class TLModel implements PropertyChangeListener {
 		return(instance);
 	}
 
-	private TLTask getTaskWithID(int taskID) {
+	private static TLTask getTaskWithID(int taskID) {
 		for (TLTask t : taskArray) {
 			if (t.getTaskID() == taskID) {
 				return(t);
@@ -113,6 +113,10 @@ public class TLModel implements PropertyChangeListener {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static String getTaskName(int inTaskID) {
+		return(getTaskWithID(inTaskID).getName());
 	}
 }
 

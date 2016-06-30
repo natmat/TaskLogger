@@ -12,10 +12,12 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 
 	private static final long serialVersionUID = -9193221835511157635L;
 	private int taskID;
+	private String taskName;
 
 	public TaskButton(final int id) {
 		super();
 		taskID = id;
+		taskName = TLModel.getTaskName(taskID);
 		setActionCommand("taskButton");
 		addActionListener(new ActionListener() {
 			@Override
@@ -32,13 +34,13 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 	}
 
 	public void start() {
-		setText("Stop Task");
+		setText("Stop: [" + taskName + "]");
 		setButtonColor(Color.red);
 		repaint();
 	}
 
 	public void stop() {
-		setText("Start Task");
+		setText("Start: [" + taskName + "]");
 		setButtonColor(Color.green);
 		repaint();
 	}
