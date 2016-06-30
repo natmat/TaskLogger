@@ -21,10 +21,12 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println(">AL:" + taskID);
-				TLView.taskButtonPressed(taskID);
+				TLController.taskButtonPressed(taskID);
 			}
 		});
+		
 		addPropertyChangeListener(TLModel.getInstance());
+		TLModel.addPropertyChangeListener(this);
 		setText("Stop");
 		stop();
 	}

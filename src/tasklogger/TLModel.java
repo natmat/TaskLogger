@@ -14,7 +14,7 @@ public class TLModel implements PropertyChangeListener {
 	private static TLTask activeTask;
 	private static TLModel instance;
 	private static PropertyChangeListener pcl;
-	private PropertyChangeSupport pcs;
+	private static PropertyChangeSupport pcs;
 	private static ArrayList<TLTask> taskList;
 	
 	private TLModel() {
@@ -71,7 +71,7 @@ public class TLModel implements PropertyChangeListener {
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		System.out.println("TLM: PC");
+		System.out.println("PC:"+evt.getPropertyName());
 		int taskID = extractTaskIDFromString(evt.getPropertyName());
 		for (TLTask t : taskArray) {
 			if (taskID == t.getTaskID()) {
@@ -93,16 +93,17 @@ public class TLModel implements PropertyChangeListener {
 		}
 	}
 
-	public void addPropertyChangeListener(PropertyChangeListener l) {
+	public static void addPropertyChangeListener(PropertyChangeListener l) {
 		pcs.addPropertyChangeListener(l);
 	}
 
-	public void removePropertyChangeListener(PropertyChangeListener l) {
+	public static void removePropertyChangeListener(PropertyChangeListener l) {
 		pcs.removePropertyChangeListener(l);
 	}
 
-	public void startButtonPressed() {
+	public void taskViewButtonPressed() throws Exception {
 		if (taskList.isEmpty()) {
+			throw (new Exception("empty taskList"));
 		}
 		try {
 			taskList.get(0).actionTask();

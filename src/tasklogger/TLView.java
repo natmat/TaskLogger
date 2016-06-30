@@ -117,17 +117,14 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		bottomPanel.add(tv.getTimer());
 
 		pack();
-		mainPanel.repaint();
-
-	}
-
-	public static void taskButtonPressed(int taskID) {
-		controller.taskButtonPressed(taskID);
 	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
+		System.out.println("TLV:PC");
 		String name = evt.getPropertyName();
-		System.out.println("name="+name);		
+		System.out.println("name="+name);
+		int taskID = Integer.parseInt(name.substring(name.indexOf(":"), name.length()));
+		System.out.println("taskID="+taskID);
 	}
 }

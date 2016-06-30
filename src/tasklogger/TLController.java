@@ -40,7 +40,7 @@ public class TLController implements ActionListener, PropertyChangeListener {
 		}
 	}
 
-	public void taskButtonPressed(int taskID) {
+	public static void taskButtonPressed(int taskID) {
 		model.tasktButtonPressed(taskID);
 	}
 
@@ -58,9 +58,15 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		String name = evt.getPropertyName();
-		System.out.println("pC name="+name);
-		if (name.equals("taskRunning")) {
-		}
+		System.out.println("name="+name);
+		
+		int i = name.indexOf(':');
+		System.out.println(i);
+		System.out.println(name.substring(i));
+		
+		int taskID = Integer.parseInt(name.substring(name.indexOf(":")+1, name.length()));
+		System.out.println("taskID="+taskID);
+		
 	}
 }
 

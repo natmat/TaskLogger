@@ -27,7 +27,6 @@ public class TLTask {
 
 		pcs = new PropertyChangeSupport(this);
 
-
 		actionListender = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -53,7 +52,10 @@ public class TLTask {
 	}
 
 	protected void actionTask() {
-		if (!running) {
+		if (running) {
+			cancel();
+		}
+		else {
 			try {
 				start();
 			} catch (Exception e) {
@@ -61,14 +63,11 @@ public class TLTask {
 				e.printStackTrace();
 			}
 		}
-		else {
-			cancel();
-		}
 	}
 
 	private void start() throws Exception {
 		System.out.println("start()");
-		pcs.firePropertyChange("taskRunning", running.booleanValue(), !running.booleanValue());
+		toggleState();
 		timer = new Timer();
 		timerTask = new TimerTask() {						
 			@Override
@@ -79,18 +78,22 @@ public class TLTask {
 				seconds++;
 			}
 		};
-
 		timer.scheduleAtFixedRate(timerTask, 0, 1000);
-		running = true;
 	}
 
 	protected void cancel() {
 		if (timer != null) { 
 			timer.cancel();
 			System.out.println("cancel()");
-			pcs.firePropertyChange("taskRunning", running.booleanValue(), !running.booleanValue());
-			running = false;
+			toggleState();
 		}
+	}
+
+	private void toggleState() {
+		Boolean before = running;
+		running = new Boolean(!running.booleanValue());
+		Boolean after = running;
+		pcs.firePropertyChange("task:"+taskID, before, after);
 	}
 
 	private String convertSecondToHHMMString(int seconds)
