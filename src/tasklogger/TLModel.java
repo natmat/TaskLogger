@@ -16,7 +16,7 @@ public class TLModel implements PropertyChangeListener {
 	private static PropertyChangeListener pcl;
 	private static PropertyChangeSupport pcs;
 	private static ArrayList<TLTask> taskList;
-	
+
 	private TLModel() {
 		taskArray = new ArrayList<>();
 		activeTask = null;
@@ -71,12 +71,14 @@ public class TLModel implements PropertyChangeListener {
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		System.out.println("PC:"+evt.getPropertyName());
 		int taskID = extractTaskIDFromString(evt.getPropertyName());
-		for (TLTask t : taskArray) {
-			if (taskID == t.getTaskID()) {
-				t.actionTask();
-				return;
+		if (taskID > 0) {
+			System.out.println("TLM>" + evt.getPropertyName());
+			for (TLTask t : taskArray) {
+				if (taskID == t.getTaskID()) {
+					t.actionTask();
+					return;
+				}
 			}
 		}
 	}
@@ -86,7 +88,7 @@ public class TLModel implements PropertyChangeListener {
 		if (task == null) {
 			return;
 		}
-		
+
 		task.actionTask();
 		if (task.getTaskState()) {
 			activeTask = task;
@@ -109,8 +111,8 @@ public class TLModel implements PropertyChangeListener {
 			taskList.get(0).actionTask();
 //			view.setTaskState(taskList.get(0).getTaskState());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 }
+

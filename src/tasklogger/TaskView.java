@@ -24,7 +24,7 @@ public class TaskView {
 		timer.setText("00:00:00");
 	}
 
-	public Component getButton() {
+	public TaskButton getButton() {
 		return (button);
 	}
 

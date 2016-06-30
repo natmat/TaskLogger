@@ -24,7 +24,7 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 	private JPanel topPanel;
 	private JButton addNewTaskButton;
 	private JPanel bottomPanel;
-	private ArrayList<TaskView> taskViewList;
+	private static ArrayList<TaskView> taskViewList;
 	private static TLView instance;
 	
 	public static TLView getInstance() {
@@ -121,10 +121,24 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		System.out.println("TLV:PC");
 		String name = evt.getPropertyName();
-		System.out.println("name="+name);
+		System.out.println("TLV>name="+name);
 		int taskID = Integer.parseInt(name.substring(name.indexOf(":"), name.length()));
 		System.out.println("taskID="+taskID);
+	}
+
+	public static void taskEvent(int taskID, Object inNewValue) {
+		Boolean taskRunning = ((Boolean)inNewValue).booleanValue();
+		for (TaskView tv : taskViewList) {
+			if (tv.getTaskID() == taskID) {
+				if (taskRunning) {
+					tv.getButton().start();
+				}
+				else {
+					tv.getButton().stop();
+				}
+			}
+		}
+		
 	}
 }
