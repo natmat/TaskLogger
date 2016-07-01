@@ -81,7 +81,7 @@ public class TLTask {
 		timer.scheduleAtFixedRate(timerTask, 0, 1000);
 	}
 
-	protected void cancel() {
+	private void cancel() {
 		if (timer != null) { 
 			timer.cancel();
 			System.out.println("cancel()");

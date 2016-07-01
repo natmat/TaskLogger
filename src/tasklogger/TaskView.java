@@ -9,17 +9,8 @@ public class TaskView {
 
 	public TaskView(int id) {
 		taskID = id;
-		addButton(id);
-		addTimer();
-	}
-
-	private void addButton(final int id) {
-		button = new TaskButton(id);
-	}
-
-	private void addTimer() {
-		timer = new JTextField();
-		timer.setText("00:00:00");
+		button = new TaskButton(taskID);
+		timer = new JTextField("00:00:00", 8);
 	}
 
 	public TaskButton getButton() {

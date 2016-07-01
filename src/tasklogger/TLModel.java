@@ -8,6 +8,14 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+/**
+ * @author Nathan
+ *
+ */
+/**
+ * @author Nathan
+ *
+ */
 public class TLModel implements PropertyChangeListener {
 
 	private static ArrayList<TLTask> taskArray;
@@ -83,26 +91,49 @@ public class TLModel implements PropertyChangeListener {
 		}
 	}
 
+	/**
+	 * @param taskID
+	 */
 	public void tasktButtonPressed(int taskID) {
 		TLTask task = getTaskWithID(taskID);
 		if (task == null) {
 			return;
 		}
 
+		if (task != activeTask) {
+			stopActiveTask();
+		}
+		
 		task.actionTask();
 		if (task.getTaskState()) {
 			activeTask = task;
 		}
 	}
 
+	private void stopActiveTask() {
+		if (activeTask == null) {
+			return;
+		}
+		activeTask.actionTask();
+	}
+
+	/**
+	 * @param l listener for model changes
+	 */
 	public static void addPropertyChangeListener(PropertyChangeListener l) {
 		pcs.addPropertyChangeListener(l);
 	}
 
+	/**
+	 * @param l model listener to remove
+	 */
 	public static void removePropertyChangeListener(PropertyChangeListener l) {
 		pcs.removePropertyChangeListener(l);
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public void taskViewButtonPressed() throws Exception {
 		if (taskList.isEmpty()) {
 			throw (new Exception("empty taskList"));
