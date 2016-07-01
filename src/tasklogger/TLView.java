@@ -1,12 +1,16 @@
 package tasklogger;
 
 import java.awt.Container;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.TimeZone;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -24,16 +28,17 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 	private JPanel topPanel;
 	private JButton addNewTaskButton;
 	private JPanel bottomPanel;
+	private static JTextField totalTimer;
 	private static ArrayList<TaskView> taskViewList;
 	private static TLView instance;
-	
+
 	public static TLView getInstance() {
 		if (instance == null) {
 			instance = new TLView();
 		}
 		return(instance);
 	}
-	
+
 	private TLView() { 
 		taskViewList = new ArrayList<TaskView>();
 		setupFrame();
@@ -45,13 +50,16 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 	public void setController(TLController inController) {
 		controller = inController;
 	}
-	
+
 	private void setupFrame() {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
 		topPanel = new JPanel();
+		topPanel.setLayout(new GridLayout(1,2));
 		addNewTaskButtonToView();
+		totalTimer = new JTextField("00:00:00", 8);
+		topPanel.add(totalTimer);
 		mainPanel.add(topPanel);
 
 		bottomPanel = new JPanel();
@@ -81,14 +89,28 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		}
 	}
 
-	public void setTime(final TLTask inTask) {
+	/**
+	 * @param inTask
+	 * @param inSeconds
+	 * @param inTotalSeconds
+	 */
+	public static void tickTimers(final TLTask inTask, int inSeconds, int inTotalSeconds) {
+		totalTimer.setText(getHMSString(inTotalSeconds));
 		for (TaskView tv : taskViewList) {
 			if (tv.getTaskID() == inTask.getTaskID()) {
-				tv.getTimer().setText(inTask.getHMSString());
+				tv.getTimer().setText(getHMSString(inSeconds));
 				return;
 			}
 		}
 		System.err.println("setTimer");
+	}
+
+	private static String getHMSString(int inSeconds) {
+		TimeZone tz = TimeZone.getTimeZone("UTC");
+		SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
+		df.setTimeZone(tz);
+		String time = df.format(new Date(inSeconds*1000L));
+		return time;
 	}
 
 	public void setTaskState(Boolean running) {
@@ -137,6 +159,6 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 				return;
 			}
 		}
-		
+
 	}
 }

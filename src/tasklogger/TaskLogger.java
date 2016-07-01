@@ -27,9 +27,4 @@ public class TaskLogger {
 		view.setTitle("Pomodoro tasker");   
 		view.setVisible(true);
 	}
-
-	public static void taskPulse(TLTask task) {
-		view.setTime(task);
-	}
-
 }

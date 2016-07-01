@@ -19,6 +19,7 @@ public class TLTask {
 	private ActionListener actionListender;
 	private int taskID;
 	private PropertyChangeSupport pcs;
+	static private int totalSeconds;
 
 	public TLTask() {
 		taskID = System.identityHashCode(this);
@@ -73,9 +74,9 @@ public class TLTask {
 			@Override
 			public void run() {
 				// Update text with hh:mm:ss count
-				System.out.println("hms=" + convertSecondToHHMMString(seconds));
-				TaskLogger.taskPulse(TLTask.this);
+				TLView.tickTimers(TLTask.this, seconds, totalSeconds);
 				seconds++;
+				setTotalSeconds(getTotalSeconds() + 1);
 			}
 		};
 		timer.scheduleAtFixedRate(timerTask, 0, 1000);
@@ -94,19 +95,6 @@ public class TLTask {
 		running = new Boolean(!running.booleanValue());
 		Boolean after = running;
 		pcs.firePropertyChange("task:"+taskID, before, after);
-	}
-
-	private String convertSecondToHHMMString(int seconds)
-	{
-		TimeZone tz = TimeZone.getTimeZone("UTC");
-		SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
-		df.setTimeZone(tz);
-		String time = df.format(new Date(seconds*1000L));
-		return time;
-	}
-
-	public String getHMSString() {
-		return(convertSecondToHHMMString(seconds));
 	}
 
 	public Boolean getTaskState() {
@@ -132,6 +120,14 @@ public class TLTask {
 
 	public Boolean getRunning() {
 		return(running);
+	}
+
+	public static int getTotalSeconds() {
+		return totalSeconds;
+	}
+
+	public static void setTotalSeconds(int totalSeconds) {
+		TLTask.totalSeconds = totalSeconds;
 	}
 }
 
