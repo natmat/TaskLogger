@@ -34,24 +34,24 @@ public class TLModel implements PropertyChangeListener {
 	private int extractTaskIDFromString(final String name) {
 		int taskID = 0;
 		if (name.contains("taskButton")) {
-			int iID = name.indexOf(':') + 1;		
+			int iID = name.indexOf(':') + 1;
 			taskID = Integer.parseInt(name.substring(iID, name.length()));
 			System.out.println("taskID=" + taskID);
 		}
-		return(taskID);
+		return (taskID);
 	}
 
 	public static TLModel getInstance() {
 		if (instance == null) {
 			instance = new TLModel();
 		}
-		return(instance);
+		return (instance);
 	}
 
 	private static TLTask getTaskWithID(int taskID) {
 		for (TLTask t : taskArray) {
 			if (t.getTaskID() == taskID) {
-				return(t);
+				return (t);
 			}
 		}
 		return null;
@@ -61,9 +61,7 @@ public class TLModel implements PropertyChangeListener {
 		// Find task in arrayTask
 		for (TLTask t : taskArray) {
 			if (t.getName().equals(inName)) {
-				JOptionPane.showMessageDialog(new JFrame(), 
-						"Task already exists.", 
-						"New task error",
+				JOptionPane.showMessageDialog(new JFrame(), "Task already exists.", "New task error",
 						JOptionPane.ERROR_MESSAGE);
 				return (null);
 			}
@@ -71,8 +69,7 @@ public class TLModel implements PropertyChangeListener {
 
 		TLTask task = new TLTask(inName);
 		PropertyChangeSupport pcs = new PropertyChangeSupport(TLModel.getInstance());
-		pcs.firePropertyChange("taskAction:"+task.getTaskID(), 
-				task.getRunning().booleanValue(), 0);
+		pcs.firePropertyChange("taskAction:" + task.getTaskID(), task.getRunning().booleanValue(), 0);
 		taskArray.add(task);
 		return (task);
 	}
@@ -103,10 +100,12 @@ public class TLModel implements PropertyChangeListener {
 		if (task != activeTask) {
 			stopActiveTask();
 		}
-		
+
 		task.actionTask();
 		if (task.getTaskState()) {
 			activeTask = task;
+		} else {
+			activeTask = null;
 		}
 	}
 
@@ -118,14 +117,16 @@ public class TLModel implements PropertyChangeListener {
 	}
 
 	/**
-	 * @param l listener for model changes
+	 * @param l
+	 *            listener for model changes
 	 */
 	public static void addPropertyChangeListener(PropertyChangeListener l) {
 		pcs.addPropertyChangeListener(l);
 	}
 
 	/**
-	 * @param l model listener to remove
+	 * @param l
+	 *            model listener to remove
 	 */
 	public static void removePropertyChangeListener(PropertyChangeListener l) {
 		pcs.removePropertyChangeListener(l);
@@ -140,14 +141,13 @@ public class TLModel implements PropertyChangeListener {
 		}
 		try {
 			taskList.get(0).actionTask();
-//			view.setTaskState(taskList.get(0).getTaskState());
+			// view.setTaskState(taskList.get(0).getTaskState());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public static String getTaskName(int inTaskID) {
-		return(getTaskWithID(inTaskID).getName());
+		return (getTaskWithID(inTaskID).getName());
 	}
 }
-
