@@ -75,8 +75,8 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
-		String command = e.getActionCommand();
+	public void actionPerformed(ActionEvent evt) {
+		String command = evt.getActionCommand();
 		if (command.equals("newTaskButtonPressed")) {
 			System.out.println("newTaskButtonPressed");
 			TLController.newTask();

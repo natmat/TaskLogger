@@ -10,6 +10,8 @@ import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.swing.JOptionPane;
+
 public class TLTask {
 	private TimerTask timerTask;
 	private Timer timer;
@@ -33,10 +35,16 @@ public class TLTask {
 
 		actionListender = new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				String command = e.getActionCommand();
+			public void actionPerformed(ActionEvent evt) {
+				String command = evt.getActionCommand();
 				if (command.equals("taskButtonPressed")) {
-					actionTask();
+					int i = evt.getModifiers();
+					if ((evt.getModifiers() & ActionEvent.CTRL_MASK) > 0) {
+//						editTaskNameView();
+					}
+					else {
+						actionTask();
+					}
 				}
 			}
 		};

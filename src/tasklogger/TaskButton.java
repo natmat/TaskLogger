@@ -7,6 +7,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 
 public class TaskButton extends JButton implements PropertyChangeListener {
@@ -25,15 +26,28 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 		setActionCommand("taskButton");
 		addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				System.out.println(">AL:" + taskID);
-				TLController.taskButtonPressed(taskID);
+			public void actionPerformed(ActionEvent evt) {
+				if ((evt.getModifiers() & ActionEvent.META_MASK) > 0) {					
+					System.out.println("CMD pressed");
+					editTaskNameView();
+				}
+				else {
+					TLController.taskButtonPressed(taskID);
+				}
+			}
+
+			private void editTaskNameView() {
+				String taskName = JOptionPane.showInputDialog("Enter new task name", getText());
+				if (taskName.length() > 0) {
+					setText(taskName);
+				}
 			}
 		});
 		
 		addPropertyChangeListener(TLModel.getInstance());
 		TLModel.addPropertyChangeListener(this);
 		stop();
+
 	}
 
 	public void start() {
