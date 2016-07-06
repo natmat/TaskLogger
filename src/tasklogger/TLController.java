@@ -59,11 +59,8 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	public void propertyChange(PropertyChangeEvent evt) {
 		String name = evt.getPropertyName();
 		if ("task:".equals(name.substring(0, 5))) {
-			System.out.println("TLC>name="+name);
 			int taskID = Integer.parseInt(name.substring(name.indexOf(":")+1, name.length()));
-			System.out.println("taskID="+taskID);
 			TLView.taskEvent(taskID, evt.getNewValue());
-			
 		}
 	}
 }

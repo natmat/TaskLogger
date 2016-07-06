@@ -44,7 +44,6 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 			}
 		});
 		
-		addPropertyChangeListener(TLModel.getInstance());
 		TLModel.addPropertyChangeListener(this);
 		stop();
 

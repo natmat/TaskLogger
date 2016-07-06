@@ -1,6 +1,5 @@
 package tasklogger;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
@@ -12,7 +11,7 @@ import javax.swing.JOptionPane;
  * @author Nathan
  *
  */
-public class TLModel implements PropertyChangeListener {
+public class TLModel {
 
 	private static ArrayList<TLTask> taskArray;
 	private static TLModel instance;
@@ -22,16 +21,6 @@ public class TLModel implements PropertyChangeListener {
 	private TLModel() {
 		taskArray = new ArrayList<>();
 		pcs = new PropertyChangeSupport(this);
-	}
-
-	private int extractTaskIDFromString(final String name) {
-		int taskID = 0;
-		if (name.contains("taskButton")) {
-			int iID = name.indexOf(':') + 1;
-			taskID = Integer.parseInt(name.substring(iID, name.length()));
-			System.out.println("taskID=" + taskID);
-		}
-		return (taskID);
 	}
 
 	public static TLModel getInstance() {
@@ -65,20 +54,6 @@ public class TLModel implements PropertyChangeListener {
 		pcs.firePropertyChange("taskAction:" + task.getTaskID(), task.getRunning().booleanValue(), 0);
 		taskArray.add(task);
 		return (task);
-	}
-
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		int taskID = extractTaskIDFromString(evt.getPropertyName());
-		if (taskID > 0) {
-			System.out.println("TLM>" + evt.getPropertyName());
-			for (TLTask t : taskArray) {
-				if (taskID == t.getTaskID()) {
-					t.actionTask(); 
-					return;
-				}
-			}
-		}
 	}
 
 	/**
