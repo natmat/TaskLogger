@@ -1,7 +1,6 @@
 package tasklogger;
 
 import java.awt.Container;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,8 +21,6 @@ import javax.swing.WindowConstants;
 public class TLView extends JFrame implements ActionListener, PropertyChangeListener {
 	private static final long serialVersionUID = 1L;
 	private TaskButton startButton;
-	private JTextField timerField;
-	private static TLController controller;
 	private JPanel mainPanel;
 	private JPanel topPanel;
 	private JButton addNewTaskButton;
@@ -42,16 +39,14 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 	private TLView() { 
 		taskViewList = new ArrayList<TaskView>();
 		setupFrame();
+		setAlwaysOnTop(true);
 
 		pack();
 		setLocationRelativeTo(null);
 	}
 
-	public void setController(TLController inController) {
-		controller = inController;
-	}
-
 	private void setupFrame() {
+		// Draw frame with top and bottom panels.
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
@@ -69,7 +64,6 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		Container container = this.getContentPane();
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 		container.add(mainPanel);
-
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 	}
 
@@ -85,15 +79,10 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		String command = e.getActionCommand();
 		if (command.equals("newTaskButtonPressed")) {
 			System.out.println("newTaskButtonPressed");
-			controller.newTask();
+			TLController.newTask();
 		}
 	}
 
-	/**
-	 * @param inTask
-	 * @param inSeconds
-	 * @param inTotalSeconds
-	 */
 	public static void tickTimers(final TLTask inTask, int inSeconds, int inTotalSeconds) {
 		totalTimer.setText(getHMSString(inTotalSeconds));
 		for (TaskView tv : taskViewList) {

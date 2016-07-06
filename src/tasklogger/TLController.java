@@ -44,15 +44,15 @@ public class TLController implements ActionListener, PropertyChangeListener {
 		model.tasktButtonPressed(taskID);
 	}
 
-	public void newTask() {
-		String taskName = JOptionPane.showInputDialog(this, "Enter Task : [WBS][Summary]");
-		TLTask task = model.newTask(taskName);
+	public static void newTask() {
+		String taskName = JOptionPane.showInputDialog(TLController.getInstance(), "Enter Task : [WBS][Summary]");
+		TLTask task = TLModel.newTask(taskName);
 		if (task == null) {
 			return;
 		}
 	
 		view.addTask(task.getTaskID());
-		task.addPropertyChangeListener(this);
+		task.addPropertyChangeListener(TLController.getInstance());
 	}
 
 	@Override

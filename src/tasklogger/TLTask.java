@@ -20,11 +20,13 @@ public class TLTask {
 	private int taskID;
 	private PropertyChangeSupport pcs;
 	static private int totalSeconds;
+	private static TLTask activeTask;
 
 	public TLTask() {
 		taskID = System.identityHashCode(this);
 		seconds = 0;		
 		running = new Boolean(false);
+		activeTask = null;
 
 		pcs = new PropertyChangeSupport(this);
 
@@ -67,26 +69,29 @@ public class TLTask {
 	}
 
 	private void start() throws Exception {
-		System.out.println("start()");
 		toggleState();
 		timer = new Timer();
-		timerTask = new TimerTask() {						
+		long startTime = System.currentTimeMillis();
+		timerTask = new TimerTask() {		
 			@Override
 			public void run() {
 				// Update text with hh:mm:ss count
 				TLView.tickTimers(TLTask.this, seconds, totalSeconds);
 				seconds++;
+				long elapsedTime = System.currentTimeMillis() - startTime;
+				totalSeconds += (int)elapsedTime;
 				setTotalSeconds(getTotalSeconds() + 1);
 			}
 		};
 		timer.scheduleAtFixedRate(timerTask, 0, 1000);
+		activeTask = this;
 	}
 
 	private void cancel() {
 		if (timer != null) { 
 			timer.cancel();
-			System.out.println("cancel()");
 			toggleState();
+			activeTask = null;
 		}
 	}
 
@@ -128,6 +133,10 @@ public class TLTask {
 
 	public static void setTotalSeconds(int totalSeconds) {
 		TLTask.totalSeconds = totalSeconds;
+	}
+
+	public static TLTask getActiveTask() {
+		return(activeTask);
 	}
 }
 

@@ -12,22 +12,15 @@ import javax.swing.JOptionPane;
  * @author Nathan
  *
  */
-/**
- * @author Nathan
- *
- */
 public class TLModel implements PropertyChangeListener {
 
 	private static ArrayList<TLTask> taskArray;
-	private static TLTask activeTask;
 	private static TLModel instance;
-	private static PropertyChangeListener pcl;
 	private static PropertyChangeSupport pcs;
 	private static ArrayList<TLTask> taskList;
 
 	private TLModel() {
 		taskArray = new ArrayList<>();
-		activeTask = null;
 		pcs = new PropertyChangeSupport(this);
 	}
 
@@ -97,44 +90,20 @@ public class TLModel implements PropertyChangeListener {
 			return;
 		}
 
-		if (task != activeTask) {
-			stopActiveTask();
+		if (task != TLTask.getActiveTask()) {
+			TLTask.getActiveTask().actionTask();
 		}
-
 		task.actionTask();
-		if (task.getTaskState()) {
-			activeTask = task;
-		} else {
-			activeTask = null;
-		}
 	}
 
-	private void stopActiveTask() {
-		if (activeTask == null) {
-			return;
-		}
-		activeTask.actionTask();
-	}
-
-	/**
-	 * @param l
-	 *            listener for model changes
-	 */
 	public static void addPropertyChangeListener(PropertyChangeListener l) {
 		pcs.addPropertyChangeListener(l);
 	}
 
-	/**
-	 * @param l
-	 *            model listener to remove
-	 */
 	public static void removePropertyChangeListener(PropertyChangeListener l) {
 		pcs.removePropertyChangeListener(l);
 	}
 
-	/**
-	 * @throws Exception
-	 */
 	public void taskViewButtonPressed() throws Exception {
 		if (taskList.isEmpty()) {
 			throw (new Exception("empty taskList"));
@@ -149,5 +118,9 @@ public class TLModel implements PropertyChangeListener {
 
 	public static String getTaskName(int inTaskID) {
 		return (getTaskWithID(inTaskID).getName());
+	}
+
+	public static void addTeamLeaderTask() {
+		newTask("Team Leader");
 	}
 }

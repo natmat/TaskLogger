@@ -19,6 +19,7 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 		super();
 		taskID = id;
 		taskName = TLModel.getTaskName(taskID);
+		setText(taskName);
 		setHorizontalAlignment(SwingConstants.LEFT);
 		
 		setActionCommand("taskButton");
@@ -32,18 +33,15 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 		
 		addPropertyChangeListener(TLModel.getInstance());
 		TLModel.addPropertyChangeListener(this);
-		setText("Stop");
 		stop();
 	}
 
 	public void start() {
-		setText("Stop: \"" + taskName + "\"");
 		setButtonColor(Color.red);
 		repaint();
 	}
 
 	public void stop() {
-		setText("Start: \"" + taskName + "\"");
 		setButtonColor(Color.green);
 		repaint();
 	}
