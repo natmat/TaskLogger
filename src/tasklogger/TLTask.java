@@ -13,18 +13,19 @@ import java.util.TimerTask;
 public class TLTask {
 	private TimerTask timerTask;
 	private Timer timer;
-	private int seconds;
+	private long taskRunTimeInMs;
 	private Boolean running;
 	private String name;
 	private ActionListener actionListender;
 	private int taskID;
 	private PropertyChangeSupport pcs;
-	static private int totalSeconds;
+	private long elapsedTimeInMs;
+	static private long totalTimeInMs;
 	private static TLTask activeTask;
 
 	public TLTask() {
 		taskID = System.identityHashCode(this);
-		seconds = 0;		
+		taskRunTimeInMs = 0;		
 		running = new Boolean(false);
 		activeTask = null;
 
@@ -71,16 +72,16 @@ public class TLTask {
 	private void start() throws Exception {
 		toggleState();
 		timer = new Timer();
-		long startTime = System.currentTimeMillis();
+		final long startTime = System.currentTimeMillis();
 		timerTask = new TimerTask() {		
 			@Override
 			public void run() {
 				// Update text with hh:mm:ss count
-				TLView.tickTimers(TLTask.this, seconds, totalSeconds);
-				seconds++;
-				long elapsedTime = System.currentTimeMillis() - startTime;
-				totalSeconds += (int)elapsedTime;
-				setTotalSeconds(getTotalSeconds() + 1);
+				elapsedTimeInMs = System.currentTimeMillis() - startTime;
+				TLView.tickTimers(TLTask.this, 
+						(taskRunTimeInMs + elapsedTimeInMs), 
+						(totalTimeInMs + elapsedTimeInMs));
+						
 			}
 		};
 		timer.scheduleAtFixedRate(timerTask, 0, 1000);
@@ -92,6 +93,8 @@ public class TLTask {
 			timer.cancel();
 			toggleState();
 			activeTask = null;
+			totalTimeInMs += elapsedTimeInMs;
+			taskRunTimeInMs += elapsedTimeInMs;
 		}
 	}
 
@@ -127,12 +130,8 @@ public class TLTask {
 		return(running);
 	}
 
-	public static int getTotalSeconds() {
-		return totalSeconds;
-	}
-
 	public static void setTotalSeconds(int totalSeconds) {
-		TLTask.totalSeconds = totalSeconds;
+		TLTask.totalTimeInMs = totalSeconds;
 	}
 
 	public static TLTask getActiveTask() {

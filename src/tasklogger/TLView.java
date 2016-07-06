@@ -83,22 +83,22 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		}
 	}
 
-	public static void tickTimers(final TLTask inTask, int inSeconds, int inTotalSeconds) {
-		totalTimer.setText(getHMSString(inTotalSeconds));
+	public static void tickTimers(final TLTask inTask, long taskTimeInMs, long totalTimeInMs) {
+		totalTimer.setText(getHMSString(totalTimeInMs));
 		for (TaskView tv : taskViewList) {
 			if (tv.getTaskID() == inTask.getTaskID()) {
-				tv.getTimer().setText(getHMSString(inSeconds));
+				tv.getTimer().setText(getHMSString(taskTimeInMs));
 				return;
 			}
 		}
 		System.err.println("setTimer");
 	}
 
-	private static String getHMSString(int inSeconds) {
+	private static String getHMSString(long totalTime) {
 		TimeZone tz = TimeZone.getTimeZone("UTC");
 		SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
 		df.setTimeZone(tz);
-		String time = df.format(new Date(inSeconds*1000L));
+		String time = df.format(new Date(totalTime));
 		return time;
 	}
 

@@ -74,7 +74,7 @@ public class TLModel implements PropertyChangeListener {
 			System.out.println("TLM>" + evt.getPropertyName());
 			for (TLTask t : taskArray) {
 				if (taskID == t.getTaskID()) {
-					t.actionTask();
+					t.actionTask(); 
 					return;
 				}
 			}
@@ -91,7 +91,9 @@ public class TLModel implements PropertyChangeListener {
 		}
 
 		if (task != TLTask.getActiveTask()) {
-			TLTask.getActiveTask().actionTask();
+			if (TLTask.getActiveTask() != null) {
+				TLTask.getActiveTask().actionTask();
+			}
 		}
 		task.actionTask();
 	}
