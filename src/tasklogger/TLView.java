@@ -1,5 +1,6 @@
 package tasklogger;
 
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -51,10 +52,21 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
 		topPanel = new JPanel();
-		topPanel.setLayout(new GridLayout(1,2));
+		topPanel.setLayout(new GridLayout(2,2));
 		addNewTaskButtonToView();
 		totalTimer = new JTextField("00:00:00", 8);
 		topPanel.add(totalTimer);
+		
+		JButton printButton = new JButton("Print");
+		printButton.setBackground(Color.YELLOW);
+		printButton.setOpaque(true);
+		printButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				TLModel.printTaskTimes();
+			}
+		});
+		topPanel.add(printButton);
 		mainPanel.add(topPanel);
 
 		bottomPanel = new JPanel();
@@ -84,22 +96,14 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 	}
 
 	public static void tickTimers(final TLTask inTask, long taskTimeInMs, long totalTimeInMs) {
-		totalTimer.setText(getHMSString(totalTimeInMs));
+		totalTimer.setText(TLUtilities.getHMSString(totalTimeInMs));
 		for (TaskView tv : taskViewList) {
 			if (tv.getTaskID() == inTask.getTaskID()) {
-				tv.getTimer().setText(getHMSString(taskTimeInMs));
+				tv.getTimer().setText(TLUtilities.getHMSString(taskTimeInMs));
 				return;
 			}
 		}
 		System.err.println("setTimer");
-	}
-
-	private static String getHMSString(long totalTime) {
-		TimeZone tz = TimeZone.getTimeZone("UTC");
-		SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
-		df.setTimeZone(tz);
-		String time = df.format(new Date(totalTime));
-		return time;
 	}
 
 	public void setTaskState(Boolean running) {

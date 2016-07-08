@@ -23,9 +23,7 @@ public class TaskLogger {
 		controller.setView(view);
 		controller.setModel(model);
 		
-		view.setTitle("Pomodoro tasker");   
+		view.setTitle("Task tasker");   
 		view.setVisible(true);
-		
-		TLModel.addTeamLeaderTask();
 	}
 }

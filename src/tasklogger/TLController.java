@@ -45,7 +45,12 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	}
 
 	public static void newTask() {
-		String taskName = JOptionPane.showInputDialog(TLController.getInstance(), "Enter task name");
+		final String dialogString = "Enter task name"; 
+		String taskName = JOptionPane.showInputDialog(TLController.getInstance(), dialogString);
+		if (!TLUtilities.isValidName(taskName, dialogString)) {
+			return;
+		}
+		
 		TLTask task = TLModel.newTask(taskName);
 		if (task == null) {
 			return;

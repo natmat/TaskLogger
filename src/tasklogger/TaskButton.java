@@ -27,7 +27,7 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 		addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evt) {
-				if ((evt.getModifiers() & ActionEvent.META_MASK) > 0) {					
+				if ((evt.getModifiers() & ActionEvent.CTRL_MASK) > 0) {					
 					System.out.println("CMD pressed");
 					editTaskNameView();
 				}
@@ -59,26 +59,14 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 		repaint();
 	}
 
-	private void setButtonColor(Color col) {
-		setBackground(col);
+	private void setButtonColor(Color buttonColor) {
+		setBackground(buttonColor);
 		setOpaque(true);
-		setBorderPainted(false);
+		setBorderPainted(true);
 	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		System.out.println("Name = " + evt.getPropertyName());
-		System.out.println("Old Value = " + evt.getOldValue());
-		System.out.println("New Value = " + evt.getNewValue());
-		System.out.println("**********************************");
-
-		if ("taskRunning".equals(evt.getPropertyName())) {
-			boolean running = (boolean) evt.getNewValue();
-			if (running) {
-				start();
-			} else {
-				stop();
-			}
-		}
+		// TODO
 	}
 }

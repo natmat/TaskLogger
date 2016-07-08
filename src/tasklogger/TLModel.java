@@ -2,7 +2,11 @@ package tasklogger;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -97,7 +101,16 @@ public class TLModel {
 		return (getTaskWithID(inTaskID).getName());
 	}
 
-	public static void addTeamLeaderTask() {
-		newTask("Team Leader");
+	public static void printTaskTimes() {
+		// Print 
+		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Calendar cal = Calendar.getInstance();
+		System.out.println(dateFormat.format(cal.getTime()));
+
+		System.out.println(TLUtilities.getHMSString(TLTask.getTotalRunTimeInMs()) + " << Total time");
+		for (TLTask t : taskArray) {
+			System.out.println(TLUtilities.getHMSString(t.getTaskTimeInMs()) + " : " + t.getName());
+		}
+		System.out.println();
 	}
 }
