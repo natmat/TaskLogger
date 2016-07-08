@@ -96,7 +96,6 @@ public class TLTask {
 	}
 
 	public void setTitle(String taskName) {
-		// TODO Auto-generated method stub
 		name = taskName;
 	}
 

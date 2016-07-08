@@ -39,6 +39,7 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 			private void editTaskNameView() {
 				String taskName = JOptionPane.showInputDialog("Enter new task name", getText());
 				if (taskName.length() > 0) {
+					TLModel.setTaskName(taskID, taskName);
 					setText(taskName);
 				}
 			}

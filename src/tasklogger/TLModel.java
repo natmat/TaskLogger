@@ -113,4 +113,11 @@ public class TLModel {
 		}
 		System.out.println();
 	}
+
+	public static void setTaskName(int taskID, String taskName) {
+		TLTask t = getTaskWithID(taskID);
+		if (t != null) {
+			t.setTitle(taskName);
+		}
+	}	
 }
