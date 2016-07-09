@@ -2,6 +2,9 @@ package tasklogger;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.WildcardType;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -120,4 +123,22 @@ public class TLModel {
 			t.setTitle(taskName);
 		}
 	}	
+
+	public static void exportCVSFile() {
+		String fileName = "./logger" + TLUtilities.getToday() + ".csv";
+		FileWriter writer = null;
+		try {
+			writer = new FileWriter(fileName);
+			long timeValue = TLTask.getTotalRunTimeInMs();
+			writer.append("Total," + timeValue + "," + TLUtilities.getHMSString(timeValue));
+			for (TLTask t : taskArray) {
+				timeValue = t.getTaskTimeInMs();
+				writer.append(t.getName() +"," + timeValue + "," + TLUtilities.getHMSString(timeValue));
+			}
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
