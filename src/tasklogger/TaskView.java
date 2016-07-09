@@ -24,4 +24,10 @@ public class TaskView {
 	public JTextField getTimer() {
 		return (timer);
 	}
+
+	public void deleteTask() {
+		button = null;
+		timer = null;
+		taskID = 0;
+	}
 }

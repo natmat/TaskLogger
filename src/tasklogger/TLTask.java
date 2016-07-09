@@ -71,14 +71,14 @@ public class TLTask {
 			}
 		};
 		timer.scheduleAtFixedRate(timerTask, 0, 1000);
-		activeTask = this;
+		setActiveTask(this);
 	}
 
 	private void cancel() {
 		if (timer != null) { 
 			timer.cancel();
 			toggleState();
-			activeTask = null;
+			setActiveTask(null);
 			totalRunTimeInMs += runTimeInMS;
 			activeTimeInMs += runTimeInMS;
 		}
@@ -121,12 +121,12 @@ public class TLTask {
 
 	public static long getTotalRunTimeInMs() {
 		long timeInMs = 0;
-		if (activeTask != null) {
-			TLTask t = activeTask;
+		if (getActiveTask() != null) {
+			TLTask t = getActiveTask();
 			t.cancel();
 			timeInMs = totalRunTimeInMs;
 			t.start();
-			activeTask = t;
+			setActiveTask(t);
 		}
 		else {
 			timeInMs = totalRunTimeInMs;
@@ -136,6 +136,10 @@ public class TLTask {
 
 	public long getTaskTimeInMs() {
 		return(activeTimeInMs + runTimeInMS);
+	}
+
+	public static void setActiveTask(final TLTask inTask) {
+		activeTask = inTask;
 	}
 }
 

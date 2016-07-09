@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.nio.charset.MalformedInputException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,10 +23,10 @@ import javax.swing.WindowConstants;
 public class TLView extends JFrame implements ActionListener, PropertyChangeListener {
 	private static final long serialVersionUID = 1L;
 	private TaskButton startButton;
-	private JPanel mainPanel;
+	private static JPanel mainPanel;
 	private JPanel topPanel;
 	private JButton addNewTaskButton;
-	private JPanel bottomPanel;
+	private static JPanel bottomPanel;
 	private static JTextField totalTimer;
 	private static ArrayList<TaskView> taskViewList;
 	private static TLView instance;
@@ -124,10 +125,8 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 
 		TaskView tv = new TaskView(taskID);
 		taskViewList.add(tv);
-
 		bottomPanel.add(tv.getButton());
 		bottomPanel.add(tv.getTimer());
-
 		pack();
 	}
 
@@ -153,5 +152,23 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 			}
 		}
 
+	}
+
+	public static void deleteTask(int taskID) {
+		for (TaskView tv : taskViewList) {
+			if (tv.getTaskID() == taskID) {
+				removeTaskViewFromPanel(tv);
+				tv.deleteTask();
+				tv = null;
+				return;
+			}
+		}
+	}
+
+	private static void removeTaskViewFromPanel(final TaskView tv) {
+		bottomPanel.remove(tv.getButton());
+		bottomPanel.remove(tv.getTimer());
+		bottomPanel.revalidate();
+		getInstance().pack();
 	}
 }

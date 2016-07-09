@@ -68,5 +68,9 @@ public class TLController implements ActionListener, PropertyChangeListener {
 			TLView.taskEvent(taskID, evt.getNewValue());
 		}
 	}
+
+	public static void deleteTask(int taskID) {
+		TLView.deleteTask(taskID);
+	}
 }
 

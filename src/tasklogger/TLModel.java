@@ -116,7 +116,7 @@ public class TLModel {
 			System.out.println(TLUtilities.getHMSString(t.getTaskTimeInMs()) + " : " + t.getName());
 		}
 		System.out.println();
-		
+
 		exportCVSFile();
 	}
 
@@ -133,6 +133,7 @@ public class TLModel {
 		try {
 			writer = new FileWriter(fileName);
 			long timeValue = TLTask.getTotalRunTimeInMs();
+			writer.append("Task,ms,HHmmss\n");
 			writer.append("Total," + timeValue + "," + TLUtilities.getHMSString(timeValue));
 			for (TLTask t : taskArray) {
 				timeValue = t.getTaskTimeInMs();
@@ -143,5 +144,29 @@ public class TLModel {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public static void importCSVFile() {
+		String fileName = "/Users/Nathan/tmp/logger" + TLUtilities.getToday() + ".csv";
+		File f = new File(fileName);
+		if(f.exists() && !f.isDirectory()) {
+			
+		}
+	}
+	
+	private static void deleteModel() {
+		for (TLTask t : taskArray) {
+			deleteTask(t.getTaskID());
+			t = null;
+		}
+		TLTask.setActiveTask(null);
+	}
+
+	public static void deleteTask(int taskID) {
+		TLController.deleteTask(taskID);
+		TLTask t = getTaskWithID(taskID);
+		taskArray.remove(t);
+		t = null;
+		
 	}
 }

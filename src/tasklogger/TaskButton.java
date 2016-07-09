@@ -28,8 +28,12 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 			@Override
 			public void actionPerformed(ActionEvent evt) {
 				if ((evt.getModifiers() & ActionEvent.CTRL_MASK) > 0) {					
-					System.out.println("CMD pressed");
+					System.out.println("CTRL pressed");
 					editTaskNameView();
+				}
+				else if ((evt.getModifiers() & ActionEvent.META_MASK) > 0) {					
+					System.out.println("CMD pressed");
+					TLModel.deleteTask(taskID);
 				}
 				else {
 					TLController.taskButtonPressed(taskID);
@@ -37,8 +41,9 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 			}
 
 			private void editTaskNameView() {
-				String taskName = JOptionPane.showInputDialog("Enter new task name", getText());
-				if (taskName.length() > 0) {
+				String dialogString = "Enter new task name";
+				String taskName = JOptionPane.showInputDialog(dialogString, getText());
+				if (TLUtilities.isValidName(taskName, dialogString)) {
 					TLModel.setTaskName(taskID, taskName);
 					setText(taskName);
 				}
