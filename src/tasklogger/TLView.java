@@ -7,10 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.TimeZone;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -34,10 +31,10 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		if (instance == null) {
 			instance = new TLView();
 		}
-		return(instance);
+		return (instance);
 	}
 
-	private TLView() { 
+	private TLView() {
 		taskViewList = new ArrayList<TaskView>();
 		setupFrame();
 		setAlwaysOnTop(true);
@@ -52,11 +49,11 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
 		topPanel = new JPanel();
-		topPanel.setLayout(new GridLayout(2,2));
+		topPanel.setLayout(new GridLayout(2, 2));
 		addNewTaskButtonToView();
 		totalTimer = new JTextField("00:00:00", 8);
 		topPanel.add(totalTimer);
-		
+
 		JButton printButton = new JButton("Print");
 		printButton.setBackground(Color.YELLOW);
 		printButton.setOpaque(true);
@@ -134,24 +131,28 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		String name = evt.getPropertyName();
-		System.out.println("TLV>name="+name);
+		System.out.println("TLV>name=" + name);
 		int taskID = Integer.parseInt(name.substring(name.indexOf(":"), name.length()));
-		System.out.println("taskID="+taskID);
+		System.out.println("taskID=" + taskID);
 	}
 
 	public static void taskEvent(int taskID, Object inNewValue) {
-		Boolean taskRunning = ((Boolean)inNewValue).booleanValue();
+		Boolean taskRunning = ((Boolean) inNewValue).booleanValue();
 		for (TaskView tv : taskViewList) {
 			if (tv.getTaskID() == taskID) {
 				if (taskRunning) {
 					tv.getButton().start();
-				}
-				else {
+				} else {
 					tv.getButton().stop();
 				}
 				return;
 			}
 		}
+
+	}
+
+	public static void removeTask(int taskID) {
+		// TODO Auto-generated method stub
 
 	}
 }

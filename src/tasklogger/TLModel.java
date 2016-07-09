@@ -4,12 +4,10 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.WildcardType;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -105,7 +103,7 @@ public class TLModel {
 	}
 
 	public static void printTaskTimes() {
-		// Print 
+		// Print
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Calendar cal = Calendar.getInstance();
 		System.out.println(dateFormat.format(cal.getTime()));
@@ -115,6 +113,8 @@ public class TLModel {
 			System.out.println(TLUtilities.getHMSString(t.getTaskTimeInMs()) + " : " + t.getName());
 		}
 		System.out.println();
+
+		exportCVSFile();
 	}
 
 	public static void setTaskName(int taskID, String taskName) {
@@ -122,7 +122,7 @@ public class TLModel {
 		if (t != null) {
 			t.setTitle(taskName);
 		}
-	}	
+	}
 
 	public static void exportCVSFile() {
 		String fileName = "./logger" + TLUtilities.getToday() + ".csv";
@@ -130,15 +130,24 @@ public class TLModel {
 		try {
 			writer = new FileWriter(fileName);
 			long timeValue = TLTask.getTotalRunTimeInMs();
-			writer.append("Total," + timeValue + "," + TLUtilities.getHMSString(timeValue));
+			writer.append("Task, ms, HHmms\n");
+			writer.append("Total," + timeValue + "," + TLUtilities.getHMSString(timeValue) + "\n");
 			for (TLTask t : taskArray) {
 				timeValue = t.getTaskTimeInMs();
-				writer.append(t.getName() +"," + timeValue + "," + TLUtilities.getHMSString(timeValue));
+				writer.append(t.getName() + "," + timeValue + "," + TLUtilities.getHMSString(timeValue) + "\n");
 			}
 			writer.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+
+	public static void clearModel() {
+		for (TLTask t : taskArray) {
+			taskArray.remove(t);
+			TLController.removeTask(t.getTaskID());
+			t = null;
 		}
 	}
 }

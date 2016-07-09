@@ -14,16 +14,16 @@ public class TLController implements ActionListener, PropertyChangeListener {
 
 	public static TLController getInstance() {
 		if (instance == null) {
-			instance = new TLController();			
+			instance = new TLController();
 		}
-		return(instance);
+		return (instance);
 	}
-	
+
 	private TLController() {
-//		model.addPropertyChangeListener(this);
-//		view.addPropertyChangeListener(this);
+		// model.addPropertyChangeListener(this);
+		// view.addPropertyChangeListener(this);
 	}
-	
+
 	public void setModel(final TLModel inModel) {
 		model = inModel;
 	}
@@ -45,17 +45,17 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	}
 
 	public static void newTask() {
-		final String dialogString = "Enter task name"; 
+		final String dialogString = "Enter task name";
 		String taskName = JOptionPane.showInputDialog(TLController.getInstance(), dialogString);
 		if (!TLUtilities.isValidName(taskName, dialogString)) {
 			return;
 		}
-		
+
 		TLTask task = TLModel.newTask(taskName);
 		if (task == null) {
 			return;
 		}
-	
+
 		view.addTask(task.getTaskID());
 		task.addPropertyChangeListener(TLController.getInstance());
 	}
@@ -64,9 +64,12 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	public void propertyChange(PropertyChangeEvent evt) {
 		String name = evt.getPropertyName();
 		if ("task:".equals(name.substring(0, 5))) {
-			int taskID = Integer.parseInt(name.substring(name.indexOf(":")+1, name.length()));
+			int taskID = Integer.parseInt(name.substring(name.indexOf(":") + 1, name.length()));
 			TLView.taskEvent(taskID, evt.getNewValue());
 		}
 	}
-}
 
+	public static void removeTask(int taskID) {
+		TLView.removeTask(taskID);
+	}
+}
