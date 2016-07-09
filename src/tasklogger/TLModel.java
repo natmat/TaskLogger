@@ -2,6 +2,7 @@ package tasklogger;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.WildcardType;
@@ -115,6 +116,8 @@ public class TLModel {
 			System.out.println(TLUtilities.getHMSString(t.getTaskTimeInMs()) + " : " + t.getName());
 		}
 		System.out.println();
+		
+		exportCVSFile();
 	}
 
 	public static void setTaskName(int taskID, String taskName) {
@@ -125,8 +128,8 @@ public class TLModel {
 	}	
 
 	public static void exportCVSFile() {
-		String fileName = "./logger" + TLUtilities.getToday() + ".csv";
-		FileWriter writer = null;
+		String fileName = "/Users/Nathan/tmp/logger" + TLUtilities.getToday() + ".csv";
+		FileWriter writer;
 		try {
 			writer = new FileWriter(fileName);
 			long timeValue = TLTask.getTotalRunTimeInMs();
