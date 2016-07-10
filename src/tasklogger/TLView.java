@@ -7,12 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.nio.charset.MalformedInputException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.TimeZone;
-
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -97,7 +92,7 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 	}
 
 	public static void tickTimers(final TLTask inTask, long taskTimeInMs, long totalTimeInMs) {
-		totalTimer.setText(TLUtilities.getHMSString(totalTimeInMs));
+		setTotalTimer(totalTimeInMs);
 		for (TaskView tv : taskViewList) {
 			if (tv.getTaskID() == inTask.getTaskID()) {
 				tv.getTimer().setText(TLUtilities.getHMSString(taskTimeInMs));
@@ -105,6 +100,10 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 			}
 		}
 		System.err.println("setTimer");
+	}
+	
+	public static void setTotalTimer(long timeInMs) {
+		totalTimer.setText(TLUtilities.getHMSString(timeInMs));
 	}
 
 	public void setTaskState(Boolean running) {
@@ -115,7 +114,7 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		}
 	}
 
-	public void addTask(int taskID) {
+	public static void addTask(int taskID) {
 		for (TaskView t : taskViewList) {
 			if (t.getTaskID() == taskID) {
 				System.err.println("Duplicate task");
@@ -127,7 +126,7 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		taskViewList.add(tv);
 		bottomPanel.add(tv.getButton());
 		bottomPanel.add(tv.getTimer());
-		pack();
+		getInstance().pack();
 	}
 
 	@Override

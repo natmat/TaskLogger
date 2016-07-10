@@ -2,16 +2,16 @@ package tasklogger;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.WildcardType;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -26,9 +26,20 @@ public class TLModel {
 	private static PropertyChangeSupport pcs;
 	private static ArrayList<TLTask> taskList;
 
+	private enum CsvFormat {
+		TASKNAME, TIME_IN_MS, CSV_TIME_IS_HMS
+	}
+
 	private TLModel() {
 		taskArray = new ArrayList<>();
 		pcs = new PropertyChangeSupport(this);
+	}
+
+	public static void addModelToView() {
+		TLView.setTotalTimer(TLTask.getTotalRunTimeInMs());
+		for (TLTask t : taskArray) {
+			TLView.addTask(t.getTaskID());
+		}
 	}
 
 	public static TLModel getInstance() {
@@ -106,7 +117,7 @@ public class TLModel {
 	}
 
 	public static void printTaskTimes() {
-		// Print 
+		// Print
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Calendar cal = Calendar.getInstance();
 		System.out.println(dateFormat.format(cal.getTime()));
@@ -125,19 +136,19 @@ public class TLModel {
 		if (t != null) {
 			t.setTitle(taskName);
 		}
-	}	
+	}
 
 	public static void exportCVSFile() {
-		String fileName = "/Users/Nathan/tmp/logger" + TLUtilities.getToday() + ".csv";
+		String fileName = "/Users/Nathan/tmp/logger_" + TLUtilities.getToday() + ".csv";
 		FileWriter writer;
 		try {
 			writer = new FileWriter(fileName);
 			long timeValue = TLTask.getTotalRunTimeInMs();
 			writer.append("Task,ms,HHmmss\n");
-			writer.append("Total," + timeValue + "," + TLUtilities.getHMSString(timeValue));
+			writer.append("Total," + timeValue + "," + TLUtilities.getHMSString(timeValue) + "\n");
 			for (TLTask t : taskArray) {
 				timeValue = t.getTaskTimeInMs();
-				writer.append(t.getName() +"," + timeValue + "," + TLUtilities.getHMSString(timeValue));
+				writer.append(t.getName() + "," + timeValue + "," + TLUtilities.getHMSString(timeValue) + "\n");
 			}
 			writer.close();
 		} catch (IOException e) {
@@ -146,14 +157,25 @@ public class TLModel {
 		}
 	}
 
-	public static void importCSVFile() {
-		String fileName = "/Users/Nathan/tmp/logger" + TLUtilities.getToday() + ".csv";
+	public static void importCSVFile() throws FileNotFoundException, IOException {
+		String fileName = "/Users/Nathan/tmp/logger_" + TLUtilities.getToday() + ".csv";
 		File f = new File(fileName);
-		if(f.exists() && !f.isDirectory()) {
-			
+		if (f.exists() && !f.isDirectory()) {
+			BufferedReader br = new BufferedReader(new FileReader(f));
+			String line = br.readLine(); // Header
+			line = br.readLine(); // Total times
+			String[] input = line.split(",");
+			TLTask.setTotalTime(Long.parseLong(input[CsvFormat.TIME_IN_MS.ordinal()]));
+			while ((line = br.readLine()) != null) {
+				// Task times
+				input = line.split(",");
+				TLTask t = new TLTask(input[CsvFormat.TASKNAME.ordinal()], Long.parseLong(input[CsvFormat.TIME_IN_MS.ordinal()]));
+				taskArray.add(t);
+			}
+			br.close();
 		}
 	}
-	
+
 	private static void deleteModel() {
 		for (TLTask t : taskArray) {
 			deleteTask(t.getTaskID());
@@ -167,6 +189,6 @@ public class TLModel {
 		TLTask t = getTaskWithID(taskID);
 		taskArray.remove(t);
 		t = null;
-		
+
 	}
 }

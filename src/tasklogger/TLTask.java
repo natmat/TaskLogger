@@ -7,21 +7,21 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class TLTask {
-	private TimerTask timerTask;
-	private Timer timer;
-	private long activeTimeInMs;
-	private Boolean running;
-	private String name;
-	private ActionListener actionListender;
-	private int taskID;
-	private PropertyChangeSupport pcs;
-	private long runTimeInMS;
-	static private long totalRunTimeInMs;
 	private static TLTask activeTask = null;
+	private long activeTimeInMs;
+	private ActionListener actionListender;
+	private String name;
+	private PropertyChangeSupport pcs;
+	private Boolean running;
+	private long runTimeInMS;
+	private int taskID;
+	private Timer timer;
+	private TimerTask timerTask;
+	static private long totalRunTimeInMs;
 
 	public TLTask() {
 		taskID = System.identityHashCode(this);
-		activeTimeInMs = 0;		
+		activeTimeInMs = 0;
 		running = new Boolean(false);
 
 		pcs = new PropertyChangeSupport(this);
@@ -30,6 +30,12 @@ public class TLTask {
 	public TLTask(String inName) {
 		this();
 		name = inName;
+	}
+
+	public TLTask(String inName, long timeInMs) {
+		new TLTask(inName);
+		System.out.println("TLTask[" + this.getTaskID() + "]:" + inName + "," + timeInMs);
+		runTimeInMS = timeInMs;
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener l) {
@@ -44,8 +50,7 @@ public class TLTask {
 		if (running) {
 			cancel();
 			runTimeInMS = 0;
-		}
-		else {
+		} else {
 			try {
 				start();
 			} catch (Exception e) {
@@ -59,14 +64,12 @@ public class TLTask {
 		toggleState();
 		timer = new Timer();
 		final long startTime = System.currentTimeMillis();
-		timerTask = new TimerTask() {		
+		timerTask = new TimerTask() {
 			@Override
 			public void run() {
 				// Update text with hh:mm:ss count
 				runTimeInMS = System.currentTimeMillis() - startTime;
-				TLView.tickTimers(TLTask.this, 
-						(activeTimeInMs + runTimeInMS), 
-						(totalRunTimeInMs + runTimeInMS));
+				TLView.tickTimers(TLTask.this, (activeTimeInMs + runTimeInMS), (totalRunTimeInMs + runTimeInMS));
 
 			}
 		};
@@ -75,7 +78,7 @@ public class TLTask {
 	}
 
 	private void cancel() {
-		if (timer != null) { 
+		if (timer != null) {
 			timer.cancel();
 			toggleState();
 			setActiveTask(null);
@@ -88,23 +91,23 @@ public class TLTask {
 		Boolean before = running;
 		running = new Boolean(!running.booleanValue());
 		Boolean after = running;
-		pcs.firePropertyChange("task:"+taskID, before, after);
+		pcs.firePropertyChange("task:" + taskID, before, after);
 	}
 
 	public Boolean getTaskState() {
-		return(running);
+		return (running);
 	}
 
 	public void setTitle(String taskName) {
 		name = taskName;
 	}
 
-	public String getName() {		
+	public String getName() {
 		return name;
 	}
 
 	public ActionListener getActionListener() {
-		return(actionListender);
+		return (actionListender);
 	}
 
 	public int getTaskID() {
@@ -112,11 +115,11 @@ public class TLTask {
 	}
 
 	public Boolean getRunning() {
-		return(running);
+		return (running);
 	}
 
 	public static TLTask getActiveTask() {
-		return(activeTask);
+		return (activeTask);
 	}
 
 	public static long getTotalRunTimeInMs() {
@@ -127,19 +130,29 @@ public class TLTask {
 			timeInMs = totalRunTimeInMs;
 			t.start();
 			setActiveTask(t);
-		}
-		else {
+		} else {
 			timeInMs = totalRunTimeInMs;
 		}
-		return(timeInMs);
+		return (timeInMs);
 	}
 
 	public long getTaskTimeInMs() {
-		return(activeTimeInMs + runTimeInMS);
+		return (activeTimeInMs + runTimeInMS);
 	}
 
+	/**
+	 * @param inTask
+	 *            The task that is the active task
+	 */
 	public static void setActiveTask(final TLTask inTask) {
 		activeTask = inTask;
 	}
-}
 
+	/**
+	 * @param timeInMs
+	 *            The sum time tasks have been active
+	 */
+	public static void setTotalTime(long timeInMs) {
+		totalRunTimeInMs = timeInMs;
+	}
+}
