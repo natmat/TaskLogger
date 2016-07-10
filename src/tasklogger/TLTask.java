@@ -33,7 +33,7 @@ public class TLTask {
 	}
 
 	public TLTask(String inName, long timeInMs) {
-		new TLTask(inName);
+		this();
 		System.out.println("TLTask[" + this.getTaskID() + "]:" + inName + "," + timeInMs);
 		runTimeInMS = timeInMs;
 	}
