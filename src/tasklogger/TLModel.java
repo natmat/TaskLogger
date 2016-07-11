@@ -191,4 +191,9 @@ public class TLModel {
 		t = null;
 
 	}
+
+	public static String getTaskTimeWithID(int taskID) {
+		final TLTask t = getTaskWithID(taskID);
+		return(TLUtilities.getHMSString(t.getTaskTimeInMs()));
+	}
 }

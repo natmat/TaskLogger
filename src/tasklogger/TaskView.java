@@ -10,7 +10,8 @@ public class TaskView {
 	public TaskView(int id) {
 		taskID = id;
 		button = new TaskButton(taskID);
-		timer = new JTextField("00:00:00", 8);
+		button.setText(TLModel.getTaskName(taskID));
+		timer = new JTextField(TLModel.getTaskTimeWithID(taskID), 8);
 	}
 
 	public TaskButton getButton() {
