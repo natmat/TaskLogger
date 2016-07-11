@@ -25,6 +25,7 @@ public class TLModel {
 	private static TLModel instance;
 	private static PropertyChangeSupport pcs;
 	private static ArrayList<TLTask> taskList;
+	private final static String ROOT_FILE_NAME = "tasklogger"; 
 
 	private enum CsvFormat {
 		TASKNAME, TIME_IN_MS, CSV_TIME_IS_HMS
@@ -39,6 +40,7 @@ public class TLModel {
 		TLView.setTotalTimer(TLTask.getTotalRunTimeInMs());
 		for (TLTask t : taskArray) {
 			TLView.addTask(t.getTaskID());
+			t.addPropertyChangeListener(TLController.getInstance());
 		}
 	}
 
@@ -139,7 +141,8 @@ public class TLModel {
 	}
 
 	public static void exportCVSFile() {
-		String fileName = "/Users/Nathan/tmp/logger_" + TLUtilities.getToday() + ".csv";
+//		String fileName = System.getProperty("user.dir") + "\\" + ROOT_FILE_NAME + TLUtilities.getToday() + ".csv";
+		String fileName = ROOT_FILE_NAME + "_" + TLUtilities.getToday() + ".csv";
 		FileWriter writer;
 		try {
 			writer = new FileWriter(fileName);
@@ -158,7 +161,7 @@ public class TLModel {
 	}
 
 	public static void importCSVFile() throws FileNotFoundException, IOException {
-		String fileName = "/Users/Nathan/tmp/logger_" + TLUtilities.getToday() + ".csv";
+		String fileName = ROOT_FILE_NAME + "_" + TLUtilities.getToday() + ".csv";
 		File f = new File(fileName);
 		if (f.exists() && !f.isDirectory()) {
 			BufferedReader br = new BufferedReader(new FileReader(f));
@@ -176,19 +179,25 @@ public class TLModel {
 		}
 	}
 
-	private static void deleteModel() {
-		for (TLTask t : taskArray) {
-			deleteTask(t.getTaskID());
-			t = null;
-		}
-		TLTask.setActiveTask(null);
-	}
+//	private static void deleteModel() {
+//		for (TLTask t : taskArray) {
+//			deleteTask(t.getTaskID());
+//			t = null;
+//		}
+//		TLTask.setActiveTask(null);
+//	}
 
 	public static void deleteTask(int taskID) {
 		TLController.deleteTask(taskID);
 		TLTask t = getTaskWithID(taskID);
+		TLTask.setTotalTime(TLTask.getTotalRunTimeInMs() - t.getTaskTimeInMs());
 		taskArray.remove(t);
 		t = null;
 
+	}
+
+	public static String getTaskTimeWithID(int taskID) {
+		final TLTask t = getTaskWithID(taskID);
+		return(TLUtilities.getHMSString(t.getTaskTimeInMs()));
 	}
 }

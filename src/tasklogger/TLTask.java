@@ -33,9 +33,9 @@ public class TLTask {
 	}
 
 	public TLTask(String inName, long timeInMs) {
-		new TLTask(inName);
+		this(inName);
+		activeTimeInMs = timeInMs;
 		System.out.println("TLTask[" + this.getTaskID() + "]:" + inName + "," + timeInMs);
-		runTimeInMS = timeInMs;
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener l) {

@@ -2,9 +2,12 @@ package tasklogger;
 
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -25,6 +28,7 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 	private static JTextField totalTimer;
 	private static ArrayList<TaskView> taskViewList;
 	private static TLView instance;
+	final private Color yellowColor = new Color(51,204,255);
 
 	public static TLView getInstance() {
 		if (instance == null) {
@@ -37,9 +41,7 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		taskViewList = new ArrayList<TaskView>();
 		setupFrame();
 		setAlwaysOnTop(true);
-
 		pack();
-		setLocationRelativeTo(null);
 	}
 
 	private void setupFrame() {
@@ -51,10 +53,12 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		topPanel.setLayout(new GridLayout(2,2));
 		addNewTaskButtonToView();
 		totalTimer = new JTextField("00:00:00", 8);
+		totalTimer.setHorizontalAlignment(JTextField.CENTER);
+		totalTimer.setFont(new Font("monospaced", Font.PLAIN, 16));
 		topPanel.add(totalTimer);
 		
 		JButton printButton = new JButton("Print");
-		printButton.setBackground(Color.YELLOW);
+		printButton.setBackground(yellowColor);
 		printButton.setOpaque(true);
 		printButton.addActionListener(new ActionListener() {
 			@Override
@@ -71,8 +75,18 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 
 		Container container = this.getContentPane();
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
+		setLocation(1200, 600);
+
 		container.add(mainPanel);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		addWindowListener(new WindowAdapter() {
+			@Override
+	        public void windowClosing(WindowEvent event) {
+				TLModel.exportCVSFile();
+	            dispose();
+	            System.exit(0);
+			}
+		});
 	}
 
 	private void addNewTaskButtonToView() {

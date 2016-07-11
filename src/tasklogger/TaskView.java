@@ -1,5 +1,7 @@
 package tasklogger;
 
+import java.awt.Font;
+
 import javax.swing.JTextField;
 
 public class TaskView {
@@ -10,7 +12,10 @@ public class TaskView {
 	public TaskView(int id) {
 		taskID = id;
 		button = new TaskButton(taskID);
-		timer = new JTextField("00:00:00", 8);
+		button.setText(TLModel.getTaskName(taskID));
+		timer = new JTextField(TLModel.getTaskTimeWithID(taskID), 8);
+		timer.setHorizontalAlignment(JTextField.CENTER);
+		timer.setFont(new Font("monospaced", Font.PLAIN, 16));
 	}
 
 	public TaskButton getButton() {
