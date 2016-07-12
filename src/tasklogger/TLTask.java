@@ -33,9 +33,9 @@ public class TLTask {
 	}
 
 	public TLTask(String inName, long timeInMs) {
-		this();
+		this(inName);
+		activeTimeInMs = timeInMs;
 		System.out.println("TLTask[" + this.getTaskID() + "]:" + inName + "," + timeInMs);
-		runTimeInMS = timeInMs;
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener l) {
@@ -91,7 +91,7 @@ public class TLTask {
 		Boolean before = running;
 		running = new Boolean(!running.booleanValue());
 		Boolean after = running;
-		pcs.firePropertyChange("task:" + taskID, before, after);
+		pcs.firePropertyChange("taskStateChange" + taskID, before, after);
 	}
 
 	public Boolean getTaskState() {
@@ -154,5 +154,9 @@ public class TLTask {
 	 */
 	public static void setTotalTime(long timeInMs) {
 		totalRunTimeInMs = timeInMs;
+	}
+
+	public void setActiveTime(long timeInMs) {
+		activeTimeInMs = timeInMs;
 	}
 }

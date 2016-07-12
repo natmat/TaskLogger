@@ -8,7 +8,6 @@ import java.beans.PropertyChangeListener;
 import javax.swing.JOptionPane;
 
 public class TLController implements ActionListener, PropertyChangeListener {
-	private static TLView view;
 	private static TLModel model;
 	private static TLController instance;
 
@@ -20,8 +19,6 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	}
 	
 	private TLController() {
-//		model.addPropertyChangeListener(this);
-//		view.addPropertyChangeListener(this);
 	}
 	
 	public void setModel(final TLModel inModel) {
@@ -29,7 +26,6 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	}
 
 	public void setView(final TLView inView) {
-		view = inView;
 	}
 
 	@Override
@@ -41,6 +37,7 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	}
 
 	public static void taskButtonPressed(int taskID) {
+		System.out.println("taskButtonPressed");
 		model.tasktButtonPressed(taskID);
 	}
 
@@ -55,17 +52,18 @@ public class TLController implements ActionListener, PropertyChangeListener {
 		if (task == null) {
 			return;
 		}
-	
-		view.addTask(task.getTaskID());
+		TLView.addTask(task.getTaskID());
 		task.addPropertyChangeListener(TLController.getInstance());
-	}
+	}	
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		String name = evt.getPropertyName();
-		if ("task:".equals(name.substring(0, 5))) {
+		if ("taskStateChange".equals(name.substring(0, 5))) {
 			int taskID = Integer.parseInt(name.substring(name.indexOf(":")+1, name.length()));
 			TLView.taskEvent(taskID, evt.getNewValue());
+		}
+		else if ("taskActiveTime".equals(name.substring(0, 5))) {
 		}
 	}
 
