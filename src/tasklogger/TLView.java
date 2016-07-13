@@ -75,7 +75,7 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("RESET");
-				TLModel.reset();
+				TLModel.reset();				
 			}
 		});
 		topPanel.add(resetButton );
