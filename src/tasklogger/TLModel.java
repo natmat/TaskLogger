@@ -37,10 +37,9 @@ public class TLModel {
 	}
 
 	public static void addModelToView() {
-		TLView.setTotalTimer(TLTask.getTotalRunTimeInMs());
+		TLView.setTotalTimerInMs(TLTask.getTotalRunTimeInMs());
 		for (TLTask t : taskArray) {
 			TLView.addTask(t.getTaskID());
-			t.addPropertyChangeListener(TLController.getInstance());
 		}
 	}
 
@@ -71,7 +70,6 @@ public class TLModel {
 		}
 
 		TLTask task = new TLTask(inName);
-		PropertyChangeSupport pcs = new PropertyChangeSupport(TLModel.getInstance());
 		pcs.firePropertyChange("taskAction:" + task.getTaskID(), task.getRunning().booleanValue(), 0);
 		taskArray.add(task);
 		return (task);
@@ -82,16 +80,17 @@ public class TLModel {
 	 */
 	public void tasktButtonPressed(int taskID) {
 		TLTask task = getTaskWithID(taskID);
-		if (task == null) {
-			return;
-		}
 
-		if (task != TLTask.getActiveTask()) {
-			if (TLTask.getActiveTask() != null) {
-				TLTask.getActiveTask().actionTask();
-			}
+		// Toggle activeTask
+		if ((TLTask.getActiveTask() != null) && (TLTask.getActiveTask() != task) && (TLTask.getActiveTask().getRunning())) {
+			final int activeTaskID = TLTask.getActiveTask().getTaskID(); 
+			TLTask.getActiveTask().actionTask();
+			pcs.fireIndexedPropertyChange("taskStateChange", activeTaskID, true, false);
 		}
+		
+		Boolean before = task.getRunning();
 		task.actionTask();
+		pcs.fireIndexedPropertyChange("taskStateChange", task.getTaskID(), before, task.getRunning());
 	}
 
 	public static void addPropertyChangeListener(PropertyChangeListener l) {
@@ -126,7 +125,7 @@ public class TLModel {
 
 		System.out.println(TLUtilities.getHMSString(TLTask.getTotalRunTimeInMs()) + " << Total time");
 		for (TLTask t : taskArray) {
-			System.out.println(TLUtilities.getHMSString(t.getTaskTimeInMs()) + " : " + t.getName());
+			System.out.println(TLUtilities.getHMSString(t.getActiveTimeInMs()) + " : " + t.getName());
 		}
 		System.out.println();
 
@@ -140,8 +139,9 @@ public class TLModel {
 		}
 	}
 
-	public static void exportCVSFile() {
-//		String fileName = System.getProperty("user.dir") + "\\" + ROOT_FILE_NAME + TLUtilities.getToday() + ".csv";
+	public static boolean exportCVSFile() {
+		boolean exported = true;
+		
 		String fileName = ROOT_FILE_NAME + "_" + TLUtilities.getToday() + ".csv";
 		FileWriter writer;
 		try {
@@ -150,14 +150,20 @@ public class TLModel {
 			writer.append("Task,ms,HHmmss\n");
 			writer.append("Total," + timeValue + "," + TLUtilities.getHMSString(timeValue) + "\n");
 			for (TLTask t : taskArray) {
-				timeValue = t.getTaskTimeInMs();
+				timeValue = t.getActiveTimeInMs();
 				writer.append(t.getName() + "," + timeValue + "," + TLUtilities.getHMSString(timeValue) + "\n");
 			}
 			writer.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
+			int option = JOptionPane.showConfirmDialog(null,
+					"Export failed.\nQuit anyway?", "Export CSV logging",
+					JOptionPane.YES_NO_OPTION);
+			if (option != JOptionPane.YES_OPTION) {
+				exported = false;
 		}
+		}
+		return(exported);
 	}
 
 	public static void importCSVFile() throws FileNotFoundException, IOException {
@@ -179,18 +185,10 @@ public class TLModel {
 		}
 	}
 
-//	private static void deleteModel() {
-//		for (TLTask t : taskArray) {
-//			deleteTask(t.getTaskID());
-//			t = null;
-//		}
-//		TLTask.setActiveTask(null);
-//	}
-
 	public static void deleteTask(int taskID) {
 		TLController.deleteTask(taskID);
 		TLTask t = getTaskWithID(taskID);
-		TLTask.setTotalTime(TLTask.getTotalRunTimeInMs() - t.getTaskTimeInMs());
+		TLTask.setTotalTime(TLTask.getTotalRunTimeInMs() - t.getActiveTimeInMs());
 		taskArray.remove(t);
 		t = null;
 
@@ -198,6 +196,34 @@ public class TLModel {
 
 	public static String getTaskTimeWithID(int taskID) {
 		final TLTask t = getTaskWithID(taskID);
-		return(TLUtilities.getHMSString(t.getTaskTimeInMs()));
+		return(TLUtilities.getHMSString(t.getActiveTimeInMs()));
 	}
+
+	public static void reset() {
+		int dialogResult = JOptionPane.showConfirmDialog(null,
+				"Reset all tasks?",
+				"Reset TaskLogger", JOptionPane.YES_NO_OPTION);
+		if (dialogResult != JOptionPane.YES_OPTION) {
+			return;
+		}
+		
+		for (TLTask t : taskArray) {
+			setActiveTimeInMs(t.getTaskID(), 0);
+		}
+		setTotalRunTimeInMs(0);
+	}
+	
+	public static void setTotalRunTimeInMs(long timeInMs) {
+		final long before = TLTask.getTotalRunTimeInMs();
+		TLTask.setTotalTime(timeInMs);		
+		pcs.firePropertyChange("totalRunTimeInMs", before, TLTask.getTotalRunTimeInMs());
+	}
+
+	public static void setActiveTimeInMs(int taskID, long timeInMs) {
+		TLTask t = getTaskWithID(taskID);
+		final long before = t.getActiveTimeInMs();
+		t.setActiveTimeInMs(timeInMs);		
+		pcs.fireIndexedPropertyChange("activeTimeInMs", taskID, before, t.getActiveTimeInMs());
+	}
+
 }

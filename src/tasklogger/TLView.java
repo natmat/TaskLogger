@@ -4,14 +4,22 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -22,13 +30,16 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 	private static final long serialVersionUID = 1L;
 	private TaskButton startButton;
 	private static JPanel mainPanel;
-	private JPanel topPanel;
 	private JButton addNewTaskButton;
-	private static JPanel bottomPanel;
+	private static JPanel controlsPanel;
+	private static JPanel taskPanel;
+	private static JPanel pomodoroPanel;
 	private static JTextField totalTimer;
 	private static ArrayList<TaskView> taskViewList;
 	private static TLView instance;
-	final private Color yellowColor = new Color(51,204,255);
+	final private Color redColor = new Color(204,0,0);
+	final private Color blueColor = new Color(0,102,204);
+	
 
 	public static TLView getInstance() {
 		if (instance == null) {
@@ -49,16 +60,16 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-		topPanel = new JPanel();
-		topPanel.setLayout(new GridLayout(2,2));
+		controlsPanel = new JPanel();
+		controlsPanel.setLayout(new GridLayout(2,2));
 		addNewTaskButtonToView();
 		totalTimer = new JTextField("00:00:00", 8);
 		totalTimer.setHorizontalAlignment(JTextField.CENTER);
 		totalTimer.setFont(new Font("monospaced", Font.PLAIN, 16));
-		topPanel.add(totalTimer);
+		controlsPanel.add(totalTimer);
 		
 		JButton printButton = new JButton("Print");
-		printButton.setBackground(yellowColor);
+		printButton.setBackground(blueColor);
 		printButton.setOpaque(true);
 		printButton.addActionListener(new ActionListener() {
 			@Override
@@ -66,12 +77,42 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 				TLModel.printTaskTimes();
 			}
 		});
-		topPanel.add(printButton);
-		mainPanel.add(topPanel);
+		controlsPanel.add(printButton);
 
-		bottomPanel = new JPanel();
-		bottomPanel.setLayout(new GridLayout(0, 2));
-		mainPanel.add(bottomPanel);
+		JButton resetButton = new JButton("Reset");
+		resetButton .setBackground(redColor);
+		resetButton .setOpaque(true);
+		resetButton .addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("RESET");
+				TLModel.reset();				
+			}
+		});
+		controlsPanel.add(resetButton );
+		mainPanel.add(controlsPanel);
+
+		taskPanel = new JPanel();
+		taskPanel.setLayout(new GridLayout(0, 2));
+		mainPanel.add(taskPanel);
+
+		pomodoroPanel = new JPanel();
+		pomodoroPanel.setLayout(new GridLayout(0, 2));
+		JButton pomodoro = new JButton("Pomodoro");
+//		try {
+//			Image img = ImageIO.read(new File("/resources/pomodoro.png"));
+//			final URL img = this.getClass().getResource("pomodoro.png");
+//			pomodoro.setIcon(new ImageIcon(img));
+//			throw(new IOException());
+//		} catch (IOException ex) {
+//			ex.printStackTrace();
+//		}
+
+//		URL url = getClass().getResource("/pomodoro.png");
+//	    System.out.println(url.getPath());
+	    
+		pomodoroPanel.add(pomodoro);
+		mainPanel.add(pomodoroPanel);
 
 		Container container = this.getContentPane();
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
@@ -82,9 +123,10 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		addWindowListener(new WindowAdapter() {
 			@Override
 	        public void windowClosing(WindowEvent event) {
-				TLModel.exportCVSFile();
+				if (TLModel.exportCVSFile()) {
 	            dispose();
 	            System.exit(0);
+				}
 			}
 		});
 	}
@@ -93,20 +135,19 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		addNewTaskButton = new JButton("Add new task...");
 		addNewTaskButton.addActionListener(this);
 		addNewTaskButton.setActionCommand("newTaskButtonPressed");
-		topPanel.add(addNewTaskButton);
+		controlsPanel.add(addNewTaskButton);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent evt) {
 		String command = evt.getActionCommand();
 		if (command.equals("newTaskButtonPressed")) {
-			System.out.println("newTaskButtonPressed");
 			TLController.newTask();
 		}
 	}
 
 	public static void tickTimers(final TLTask inTask, long taskTimeInMs, long totalTimeInMs) {
-		setTotalTimer(totalTimeInMs);
+		setTotalTimerInMs(totalTimeInMs);
 		for (TaskView tv : taskViewList) {
 			if (tv.getTaskID() == inTask.getTaskID()) {
 				tv.getTimer().setText(TLUtilities.getHMSString(taskTimeInMs));
@@ -116,7 +157,7 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 		System.err.println("setTimer");
 	}
 	
-	public static void setTotalTimer(long timeInMs) {
+	public static void setTotalTimerInMs(long timeInMs) {
 		totalTimer.setText(TLUtilities.getHMSString(timeInMs));
 	}
 
@@ -138,17 +179,14 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 
 		TaskView tv = new TaskView(taskID);
 		taskViewList.add(tv);
-		bottomPanel.add(tv.getButton());
-		bottomPanel.add(tv.getTimer());
+		taskPanel.add(tv.getButton());
+		taskPanel.add(tv.getTimer());
 		getInstance().pack();
 	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		String name = evt.getPropertyName();
-		System.out.println("TLV>name="+name);
-		int taskID = Integer.parseInt(name.substring(name.indexOf(":"), name.length()));
-		System.out.println("taskID="+taskID);
+		System.out.println("PCE:" + evt);
 	}
 
 	public static void taskEvent(int taskID, Object inNewValue) {
@@ -179,9 +217,18 @@ public class TLView extends JFrame implements ActionListener, PropertyChangeList
 	}
 
 	private static void removeTaskViewFromPanel(final TaskView tv) {
-		bottomPanel.remove(tv.getButton());
-		bottomPanel.remove(tv.getTimer());
-		bottomPanel.revalidate();
+		taskPanel.remove(tv.getButton());
+		taskPanel.remove(tv.getTimer());
+		taskPanel.revalidate();
 		getInstance().pack();
+	}
+
+	public static void setActiveTimeInMs(int taskId, Object inObj) {
+		long timeInMs = ((Number)inObj).longValue();
+		for (TaskView tv : taskViewList) {
+			if (tv.getTaskID() == taskId) {
+				tv.getTimer().setText(TLUtilities.getHMSString(timeInMs));
+			}
+		}
 	}
 }

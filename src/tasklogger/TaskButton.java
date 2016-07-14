@@ -17,6 +17,7 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 	private String taskName;
 	final private Color redColor = new Color(255,99,71); 
 	final private Color greenColor = new Color(124,252,0);
+	final private Color yellowColor = new Color(255,255,51);
 
 	public TaskButton(final int id) {
 		super();
@@ -39,7 +40,6 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 						setText(taskName);
 					}
 				} else if ((evt.getModifiers() & ActionEvent.ALT_MASK) > 0) {
-					System.out.println("CMD pressed");
 					int dialogResult = JOptionPane.showConfirmDialog(null,
 							"Delete task " + TaskButton.this.taskName + "?",
 							"Delete?", JOptionPane.YES_NO_OPTION);
@@ -58,7 +58,7 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 	}
 
 	public void start() {
-		setButtonColor(redColor);
+		setButtonColor(yellowColor);
 		repaint();
 	}
 
