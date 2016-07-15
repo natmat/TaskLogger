@@ -2,13 +2,13 @@ package tasklogger;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.IndexedPropertyChangeEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.JOptionPane;
 
 public class TLController implements ActionListener, PropertyChangeListener {
-	private static TLView view;
 	private static TLModel model;
 	private static TLController instance;
 
@@ -20,8 +20,7 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	}
 
 	private TLController() {
-		// model.addPropertyChangeListener(this);
-		// view.addPropertyChangeListener(this);
+		TLModel.addPropertyChangeListener(this);
 	}
 
 	public void setModel(final TLModel inModel) {
@@ -29,7 +28,6 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	}
 
 	public void setView(final TLView inView) {
-		view = inView;
 	}
 
 	@Override
@@ -41,6 +39,7 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	}
 
 	public static void taskButtonPressed(int taskID) {
+		System.out.println("taskButtonPressed");
 		model.tasktButtonPressed(taskID);
 	}
 
@@ -55,18 +54,37 @@ public class TLController implements ActionListener, PropertyChangeListener {
 		if (task == null) {
 			return;
 		}
-
-		view.addTask(task.getTaskID());
-		task.addPropertyChangeListener(TLController.getInstance());
-	}
+		TLView.addTask(task.getTaskID());
+	}	
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		String name = evt.getPropertyName();
-		if ("task:".equals(name.substring(0, 5))) {
-			int taskID = Integer.parseInt(name.substring(name.indexOf(":") + 1, name.length()));
+		if (evt instanceof IndexedPropertyChangeEvent) {
+			// Process per task pce's
+		     taskIndexedPropertyChange((IndexedPropertyChangeEvent)evt);
+		}
+		else {
+			// Process per class pce's
+			String name = evt.getPropertyName();
+			if (name.startsWith("totalRunTimeInMs")) {
+				TLView.setTotalTimerInMs(((Number)evt.getNewValue()).longValue());
+			}
+		}
+	}
+	
+	private void taskIndexedPropertyChange(IndexedPropertyChangeEvent evt) {
+		String name = evt.getPropertyName();			
+		int taskID = evt.getIndex();
+		if (name.startsWith("taskStateChange")) {
 			TLView.taskEvent(taskID, evt.getNewValue());
 		}
+		else if (name.startsWith("activeTimeInMs")) {
+			TLView.setActiveTimeInMs(taskID, evt.getNewValue());
+		}
+	}
+
+	public static void deleteTask(int taskID) {
+		TLView.deleteTask(taskID);
 	}
 
 	public static void removeTask(int taskID) {

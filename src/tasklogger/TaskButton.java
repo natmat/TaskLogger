@@ -15,6 +15,8 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 	private static final long serialVersionUID = -9193221835511157635L;
 	private int taskID;
 	private String taskName;
+	final private Color redColor = new Color(255,153,153); 
+	final private Color greenColor = new Color(124,252,0);
 
 	public TaskButton(final int id) {
 		super();
@@ -22,41 +24,45 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 		taskName = TLModel.getTaskName(taskID);
 		setText(taskName);
 		setHorizontalAlignment(SwingConstants.LEFT);
-		
+
 		setActionCommand("taskButton");
 		addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evt) {
-				if ((evt.getModifiers() & ActionEvent.CTRL_MASK) > 0) {					
-					System.out.println("CMD pressed");
-					editTaskNameView();
-				}
-				else {
+				if ((evt.getModifiers() & ActionEvent.CTRL_MASK) > 0) {
+					final String dialogString = "Enter new task name";
+					String taskName = JOptionPane.showInputDialog(null,
+							"Enter new task name", "Edit task name",
+							JOptionPane.QUESTION_MESSAGE);
+					if (TLUtilities.isValidName(taskName, dialogString)) {
+						TLModel.setTaskName(taskID, taskName);
+						setText(taskName);
+					}
+				} else if ((evt.getModifiers() & ActionEvent.ALT_MASK) > 0) {
+					int dialogResult = JOptionPane.showConfirmDialog(null,
+							"Delete task " + TaskButton.this.taskName + "?",
+							"Delete?", JOptionPane.YES_NO_OPTION);
+					if (dialogResult == JOptionPane.YES_OPTION) {
+						TLModel.deleteTask(taskID);
+					}
+				} else {
 					TLController.taskButtonPressed(taskID);
 				}
 			}
-
-			private void editTaskNameView() {
-				String taskName = JOptionPane.showInputDialog("Enter new task name", getText());
-				if (taskName.length() > 0) {
-					TLModel.setTaskName(taskID, taskName);
-					setText(taskName);
-				}
-			}
 		});
-		
+
 		TLModel.addPropertyChangeListener(this);
 		stop();
 
 	}
 
 	public void start() {
-		setButtonColor(Color.red);
+		setButtonColor(redColor);
 		repaint();
 	}
 
 	public void stop() {
-		setButtonColor(Color.green);
+		setButtonColor(greenColor);
 		repaint();
 	}
 

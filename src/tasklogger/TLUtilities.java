@@ -31,6 +31,16 @@ public class TLUtilities {
 		Calendar cal = Calendar.getInstance();
 		return(dateFormat.format(cal.getTime()));
 	}
+	
+	public static String getOsDirectory() {
+//		String osName = System.getProperty("os.name").toLowerCase();
+//		String cwd = System.getProperty("user.dir");
+		return null;
+	}
+	
+	public enum ePropertyNames {
+		TASK_STATE_CHANGE
+	}
 }
 
 
