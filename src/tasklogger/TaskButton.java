@@ -15,9 +15,8 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 	private static final long serialVersionUID = -9193221835511157635L;
 	private int taskID;
 	private String taskName;
-	final private Color redColor = new Color(255,99,71); 
+	final private Color redColor = new Color(255,153,153); 
 	final private Color greenColor = new Color(124,252,0);
-	final private Color yellowColor = new Color(255,255,51);
 
 	public TaskButton(final int id) {
 		super();
@@ -58,7 +57,7 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 	}
 
 	public void start() {
-		setButtonColor(yellowColor);
+		setButtonColor(redColor);
 		repaint();
 	}
 

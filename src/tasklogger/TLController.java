@@ -39,6 +39,7 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	}
 
 	public static void taskButtonPressed(int taskID) {
+		System.out.println("taskButtonPressed");
 		model.tasktButtonPressed(taskID);
 	}
 
