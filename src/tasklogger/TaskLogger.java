@@ -1,5 +1,7 @@
 package tasklogger;
 
+import java.io.IOException;
+
 import javax.swing.SwingUtilities;
 
 public class TaskLogger {
@@ -23,7 +25,15 @@ public class TaskLogger {
 		controller.setView(view);
 		controller.setModel(model);
 		
-		view.setTitle("Task tasker");   
+		view.setTitle("Task logger");   
 		view.setVisible(true);
+		
+		try {
+			TLModel.importCSVFile();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		TLModel.addModelToView();
 	}
 }
