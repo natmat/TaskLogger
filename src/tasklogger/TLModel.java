@@ -12,7 +12,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -25,7 +24,6 @@ public class TLModel {
 	private static ArrayList<TLTask> taskArray;
 	private static TLModel instance;
 	private static PropertyChangeSupport pcs;
-	private static ArrayList<TLTask> taskList;
 	private final static String ROOT_FILE_NAME = "tasklogger";
 
 	private enum CsvFormat {
@@ -108,18 +106,6 @@ public class TLModel {
 		pcs.removePropertyChangeListener(l);
 	}
 
-	public void taskViewButtonPressed() throws Exception {
-		if (taskList.isEmpty()) {
-			throw (new Exception("empty taskList"));
-		}
-		try {
-			taskList.get(0).actionTask();
-			// view.setTaskState(taskList.get(0).getTaskState());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
 	public static String getTaskName(int inTaskID) {
 		return (getTaskWithID(inTaskID).getName());
 	}
@@ -155,6 +141,7 @@ public class TLModel {
 	public static void exportCVSFile() throws IOException {
 		String fileName = ROOT_FILE_NAME + "_" + TLUtilities.getToday()
 				+ ".csv";
+//		System.out.println(fileName);
 		FileWriter writer;
 		writer = new FileWriter(fileName);
 		long timeValue = TLTask.getTotalRunTimeInMs();
@@ -168,7 +155,6 @@ public class TLModel {
 		}
 		writer.close();
 	}
-
 
 	public static void importCSVFile() throws FileNotFoundException,
 			IOException {
@@ -239,4 +225,5 @@ public class TLModel {
 		pcs.fireIndexedPropertyChange("activeTimeInMs", taskID, before,
 				t.getActiveTimeInMs());
 	}
+
 }

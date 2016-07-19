@@ -14,15 +14,15 @@ public class TLController implements ActionListener, PropertyChangeListener {
 
 	public static TLController getInstance() {
 		if (instance == null) {
-			instance = new TLController();
+			instance = new TLController();			
 		}
-		return (instance);
+		return(instance);
 	}
-
+	
 	private TLController() {
 		TLModel.addPropertyChangeListener(this);
 	}
-
+	
 	public void setModel(final TLModel inModel) {
 		model = inModel;
 	}
@@ -44,12 +44,16 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	}
 
 	public static void newTask() {
-		final String dialogString = "Enter task name";
-		String taskName = JOptionPane.showInputDialog(TLController.getInstance(), dialogString);
+		final String dialogString = "Enter task name"; 
+//		String taskName1 = JOptionPane.showInputDialog(TLController.getInstance(), dialogString);
+		String taskName = JOptionPane.showInputDialog(null,
+				 "What is your name?",
+				 "Enter your name",
+				 JOptionPane.QUESTION_MESSAGE);
 		if (!TLUtilities.isValidName(taskName, dialogString)) {
 			return;
 		}
-
+		
 		TLTask task = TLModel.newTask(taskName);
 		if (task == null) {
 			return;
@@ -86,8 +90,5 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	public static void deleteTask(int taskID) {
 		TLView.deleteTask(taskID);
 	}
-
-	public static void removeTask(int taskID) {
-		TLView.removeTask(taskID);
-	}
 }
+
