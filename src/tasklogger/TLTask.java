@@ -2,7 +2,6 @@ package tasklogger;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import javax.swing.Timer;
@@ -12,7 +11,6 @@ public class TLTask {
 	private long activeTimeInMs;
 	private ActionListener actionListender;
 	private String name;
-	private static PropertyChangeSupport pcs;
 	private Boolean running;
 	private int taskID;
 	private Timer clockTimer;
@@ -38,7 +36,7 @@ public class TLTask {
 		clock = new ClockListener();
 		clockTimer = new javax.swing.Timer(1000, clock);
 
-		pcs = new PropertyChangeSupport(this);
+		new PropertyChangeSupport(this);
 	}
 
 	public TLTask(String inName) {

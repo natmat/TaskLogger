@@ -2,6 +2,7 @@ package tasklogger;
 
 import java.io.IOException;
 
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 public class TaskLogger {
@@ -31,8 +32,8 @@ public class TaskLogger {
 		try {
 			TLModel.importCSVFile();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Import error",
+					"Could not import times from file.", JOptionPane.WARNING_MESSAGE);
 		}
 		TLModel.addModelToView();
 	}
