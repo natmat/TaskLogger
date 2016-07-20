@@ -2,6 +2,7 @@ package tasklogger;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -74,7 +75,8 @@ public class PomodoroTimer {
 
 	private static void setProgressBarStatus() {
 		progressBar.setValue(duration - countdown);
-		progressBar.setString(TLUtilities.getHMSString(countdown));
+		progressBar.setString(TLUtilities.getHMSString(countdown).substring(3));
+		progressBar.setFont(new Font("monospaced", Font.PLAIN, 24));
 		progressBar.setStringPainted(true);
 	}
 
