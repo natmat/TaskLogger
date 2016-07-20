@@ -61,7 +61,7 @@ public class TLView extends JFrame implements ActionListener,
 		add(new TLMenu());
 		
 		controlsPanel = new JPanel();
-		controlsPanel.setLayout(new GridLayout(2, 2));		
+		controlsPanel.setLayout(new GridLayout(0, 2));		
 		addResetButtonToControls();
 		addTotalTimerFieldToControls();
 		addNewTaskButtonToControls();
@@ -160,8 +160,7 @@ public class TLView extends JFrame implements ActionListener,
 
 	private void addNewTaskButtonToControls() {
 		newTaskButton = new JButton("Add New Task");
-		newTaskButton
-				.setToolTipText("Add a new task to the left column's task list");
+//		newTaskButton.setToolTipText("Add a new task to the left column's task list");
 		newTaskButton.setHorizontalAlignment(SwingConstants.LEFT);
 		newTaskButton.addActionListener(this);
 		newTaskButton.setActionCommand("newTaskButtonPressed");

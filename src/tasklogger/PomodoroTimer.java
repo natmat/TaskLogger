@@ -2,13 +2,12 @@ package tasklogger;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.JButton;
 import javax.swing.JProgressBar;
 import javax.swing.Timer;
+import javax.swing.plaf.basic.BasicProgressBarUI;
 
 public class PomodoroTimer {
 	private static Timer timer;
@@ -18,6 +17,9 @@ public class PomodoroTimer {
 	private static JButton button;
 	private static PomodoroTimer instance;
 	private static int flashCounter;
+	final static Color lightRed = new Color(255, 200, 200);
+	final static Color darkRed = new Color(255, 100, 100);
+
 
 	private PomodoroTimer() {
 		progressBar = new JProgressBar(0, duration);
@@ -25,6 +27,7 @@ public class PomodoroTimer {
 		progressBar.setStringPainted(false);
 		countdown = duration;
 		button = new JButton("Pomodoro");
+//		button.setFont(new Font("monospaced", Font.PLAIN, 16));
 		button.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -42,16 +45,32 @@ public class PomodoroTimer {
 			cancelCountdownTimer();
 		}
 
-		progressBar.setBackground(new Color(255, 204, 204));
-		timer = new Timer(1000, new ActionListener() {
+		button.setBackground(lightRed);
+		progressBar.setForeground(lightRed);
+		final int timerTick = 1000;
+		timer = new Timer(timerTick, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (countdown > 1000) {
-					countdown -= 1000;
+				progressBar.setUI( new BasicProgressBarUI() {
+		            protected Color getSelectionBackground() {
+		                return Color.BLACK;
+		            }
+		            protected Color getSelectionForeground() {
+		                return Color.BLACK;
+		            }
+				});
+				
+				countdown -= timerTick;
+				if (countdown > 0) {
 					setProgressBarStatus();
+					if (progressBar.getForeground().equals(lightRed) && (countdown < 0.20*duration)) {
+						progressBar.setForeground(darkRed);
+					}
 				} else {
 					timer.stop();
 					flashCounter = 0;
+					progressBar.setValue(0);
+					progressBar.setString("Time Up");
 					PomodoroTimer.flashPomodoro();
 				}
 			}
@@ -76,15 +95,15 @@ public class PomodoroTimer {
 	private static void setProgressBarStatus() {
 		progressBar.setValue(duration - countdown);
 		progressBar.setString(TLUtilities.getHMSString(countdown).substring(3));
-		progressBar.setFont(new Font("monospaced", Font.PLAIN, 24));
+//		progressBar.setFont(new Font("monospaced", Font.PLAIN, 16));
 		progressBar.setStringPainted(true);
 	}
 
-	public static Component getButton() {
+	public Component getButton() {
 		return (button);
 	}
 
-	public static Component getProgressBar() {
+	public Component getProgressBar() {
 		return (progressBar);
 	}
 
@@ -99,16 +118,11 @@ public class PomodoroTimer {
 		timer = new Timer(50, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (flashCounter > 20) {
-					flashCounter = 0;
-					timer.stop();
+				flashCounter++;
+				if ((flashCounter %= 2) == 0) {
+					progressBar.setBackground(Color.RED);
 				} else {
-					flashCounter++;
-					if (PomodoroTimer.flashCounter % 2 == 0) {
-						progressBar.setBackground(Color.RED);
-					} else {
-						progressBar.setBackground(Color.WHITE);
-					}
+					progressBar.setBackground(Color.WHITE);
 				}
 			}
 		});

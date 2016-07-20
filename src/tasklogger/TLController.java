@@ -39,16 +39,14 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	}
 
 	public static void taskButtonPressed(int taskID) {
-		System.out.println("taskButtonPressed");
 		model.tasktButtonPressed(taskID);
 	}
 
 	public static void newTask() {
 		final String dialogString = "Enter task name"; 
-//		String taskName1 = JOptionPane.showInputDialog(TLController.getInstance(), dialogString);
 		String taskName = JOptionPane.showInputDialog(null,
-				 "What is your name?",
-				 "Enter your name",
+				 dialogString,
+				 "Add new task",
 				 JOptionPane.QUESTION_MESSAGE);
 		if (!TLUtilities.isValidName(taskName, dialogString)) {
 			return;
@@ -59,6 +57,7 @@ public class TLController implements ActionListener, PropertyChangeListener {
 			return;
 		}
 		TLView.addTask(task.getTaskID());
+		TLController.taskButtonPressed(task.getTaskID());
 	}	
 
 	@Override

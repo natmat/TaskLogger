@@ -47,7 +47,6 @@ public class TLTask {
 	public TLTask(String inName, long timeInMs) {
 		this(inName);
 		activeTimeInMs = timeInMs;
-		System.out.println("TLTask[" + this.getTaskID() + "]:" + inName + "," + timeInMs);
 	}
 
 	protected void actionTask() {
