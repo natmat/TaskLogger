@@ -148,11 +148,22 @@ public class TLModel {
 		writer.append("Task,ms,HHmmss\n");
 		writer.append("Total," + timeValue + ","
 				+ TLUtilities.getHMSString(timeValue) + "\n");
+		
+		// Pad the name to align the ','
+		int maxNameLength = 0;
+		for (TLTask t : taskArray) {
+			if (t.getName().length() > maxNameLength) {
+				maxNameLength = t.getName().length();
+			}
+		}
+		String padString = "%0$-" + maxNameLength + "s";
+		
 		for (TLTask t : taskArray) {
 			timeValue = t.getActiveTimeInMs();
-			writer.append(t.getName() + "," + timeValue + ","
+			writer.append(String.format(padString, t.getName()) + "," + timeValue + ","
 					+ TLUtilities.getHMSString(timeValue) + "\n");
 		}
+		
 		writer.close();
 	}
 

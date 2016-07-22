@@ -31,12 +31,15 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 			public void actionPerformed(ActionEvent evt) {
 				if ((evt.getModifiers() & ActionEvent.CTRL_MASK) > 0) {
 					final String dialogString = "Enter new task name";
-					String taskName = JOptionPane.showInputDialog(null,
+					Object dialogObj = JOptionPane.showInputDialog(null,
 							"Enter new task name", "Edit task name",
-							JOptionPane.QUESTION_MESSAGE);
-					if (TLUtilities.isValidName(taskName, dialogString)) {
-						TLModel.setTaskName(taskID, taskName);
-						setText(taskName);
+							JOptionPane.QUESTION_MESSAGE, null, null, getText());
+					if (dialogObj != null) {
+						String taskRenamed = dialogObj.toString();
+						if (TLUtilities.isValidName(taskRenamed, dialogString)) {
+							TLModel.setTaskName(taskID, taskRenamed);
+							setText(taskRenamed);
+						}
 					}
 				} else if ((evt.getModifiers() & ActionEvent.ALT_MASK) > 0) {
 					int dialogResult = JOptionPane.showConfirmDialog(null,

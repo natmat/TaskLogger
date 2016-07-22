@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.MenuBar;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -12,7 +11,6 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -23,8 +21,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
-public class TLView extends JFrame implements ActionListener,
-		PropertyChangeListener {
+public class TLView extends JFrame implements PropertyChangeListener {
 	private static final long serialVersionUID = 1L;
 	private TaskButton startButton;
 	private static JPanel mainPanel;
@@ -162,18 +159,20 @@ public class TLView extends JFrame implements ActionListener,
 		newTaskButton = new JButton("Add New Task");
 //		newTaskButton.setToolTipText("Add a new task to the left column's task list");
 		newTaskButton.setHorizontalAlignment(SwingConstants.LEFT);
-		newTaskButton.addActionListener(this);
+		newTaskButton.addActionListener(new AddNewTaskListener());
 		newTaskButton.setActionCommand("newTaskButtonPressed");
 		newTaskButton.setBackground(newTaskColor);
 		controlsPanel.add(newTaskButton);
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent evt) {
-		String command = evt.getActionCommand();
-		if (command.equals("newTaskButtonPressed")) {
-			System.out.println("newTaskButtonPressed");
-			TLController.newTask();
+	private class AddNewTaskListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			String command = e.getActionCommand();
+			if (command.equals("newTaskButtonPressed")) {
+				System.out.println("newTaskButtonPressed");
+				TLController.newTask();
+			}
 		}
 	}
 

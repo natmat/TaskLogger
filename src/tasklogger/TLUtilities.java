@@ -3,8 +3,8 @@ package tasklogger;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
+import java.util.Date; 
 
 public class TLUtilities {
 
@@ -41,6 +41,18 @@ public class TLUtilities {
 	public enum ePropertyNames {
 		TASK_STATE_CHANGE
 	}
+	
+//	public static void importFromExcel() {
+//		try {
+//			Workbook workbook = Workbook.getWorkbook(new File("Typhoon Cost Tracker Jan 2016 v2.xlsm"));
+//		} catch (BiffException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 }
 
 
