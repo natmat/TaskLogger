@@ -49,14 +49,16 @@ public class TaskLogger {
 		long startTime = now.getTimeInMillis();
 		
 		// Set the end of day (17:00)
-		now.set(now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH), 17, 00, 00);
+		final int endHourOfDay = 17;
+		now.set(now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH), 
+				endHourOfDay, 00, 00);
 		long endTime = now.getTimeInMillis();
-		long difference = endTime - startTime;
-		if (difference < 0) {
+		long endTimeDifference = endTime - startTime;
+		if (endTimeDifference < 0) {
 			return;
 		}
 		
-		Timer shutdownTimer = new Timer((int)difference, new ActionListener() {
+		Timer shutdownTimer = new Timer((int)endTimeDifference, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				TLModel.saveTaskTimes();

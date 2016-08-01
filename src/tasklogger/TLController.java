@@ -1,5 +1,6 @@
 package tasklogger;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.IndexedPropertyChangeEvent;
@@ -43,6 +44,7 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	}
 
 	public static void newTask() {
+		Dimension viewSize = TLView.getDimension();
 		final String dialogString = "Enter task name"; 
 		String taskName = JOptionPane.showInputDialog(null,
 				 dialogString,

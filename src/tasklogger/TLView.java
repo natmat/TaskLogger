@@ -2,6 +2,7 @@ package tasklogger;
 
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -76,7 +77,7 @@ public class TLView extends JFrame implements PropertyChangeListener {
 
 		Container container = this.getContentPane();
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
-		setLocation(1200, 600);
+		setLocation(600, 300);
 		setResizable(false);
 		container.add(mainPanel);
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -170,7 +171,7 @@ public class TLView extends JFrame implements PropertyChangeListener {
 		public void actionPerformed(ActionEvent e) {
 			String command = e.getActionCommand();
 			if (command.equals("newTaskButtonPressed")) {
-				System.out.println("newTaskButtonPressed");
+//				System.out.println("newTaskButtonPressed");
 				TLController.newTask();
 			}
 		}
@@ -260,5 +261,10 @@ public class TLView extends JFrame implements PropertyChangeListener {
 				tv.getTimer().setText(TLUtilities.getHMSString(timeInMs));
 			}
 		}
+	}
+
+	public Dimension getDimension() {
+		Dimension dim = new Dimension();		
+		return dim;
 	}
 }
