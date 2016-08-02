@@ -1,13 +1,17 @@
 package tasklogger;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.IndexedPropertyChangeEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 public class TLController implements ActionListener, PropertyChangeListener {
 	private static TLModel model;
@@ -42,14 +46,37 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	public static void taskButtonPressed(int taskID) {
 		model.tasktButtonPressed(taskID);
 	}
+	
+	private class CustomDialog extends JDialog {
+		private JPanel myPanel = null;
+		private JButton yesButton = null;
+		private JButton noButton = null;
+
+		public CustomDialog(JFrame frame, boolean modal, String myMessage) {
+			super(frame, modal);
+			myPanel = new JPanel();
+			getContentPane().add(myPanel);
+			myPanel.add(new JLabel(myMessage));
+			yesButton = new JButton("Yes");
+			myPanel.add(yesButton);
+			noButton = new JButton("No");
+			myPanel.add(noButton);
+			pack();
+			//setLocationRelativeTo(frame);
+			setLocation(10, 10); // <--
+			setVisible(true);
+		}
+	}
 
 	public static void newTask() {
-		Dimension viewSize = TLView.getDimension();
-		final String dialogString = "Enter task name"; 
-		String taskName = JOptionPane.showInputDialog(null,
-				 dialogString,
-				 "Add new task",
-				 JOptionPane.QUESTION_MESSAGE);
+		final String dialogString = "Enter task name";
+		new TLController().new CustomDialog(TLView.getInstance(), false, "Hello");
+//		String taskName = JOptionPane.showInputDialog(
+//				new TLController().new CustomDialog(TLView.getInstance(), false, "Hello"),
+//				 dialogString,
+//				 "Add new task",
+//				 JOptionPane.QUESTION_MESSAGE);
+		String taskName = new String("nathan");
 		if (!TLUtilities.isValidName(taskName, dialogString)) {
 			return;
 		}

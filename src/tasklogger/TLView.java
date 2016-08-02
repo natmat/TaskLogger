@@ -263,7 +263,7 @@ public class TLView extends JFrame implements PropertyChangeListener {
 		}
 	}
 
-	public Dimension getDimension() {
+	public static Dimension getDimension() {
 		Dimension dim = new Dimension();		
 		return dim;
 	}
