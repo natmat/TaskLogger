@@ -27,7 +27,10 @@ import javax.swing.SwingUtilities;
 public class ExcelReader {
 
 //	private static final String FILE_PATH = "/Users/Nathan/github/TaskLogger/src/file.xlsx";
-	private static final String FILE_PATH = "C:/My_Workspaces/MyJava/TaskLogger/src/tasklogger/file.xlsx";
+//	private static final String FILE_PATH = "C:/My_Workspaces/MyJava/TaskLogger/src/tasklogger/file.xlsx";
+//	private static final String FILE_PATH = "//Greenlnk.net/Data/Olympia/MA&I/Team Site Folders/B2004MLA/Private/CAGE/Tracking/Cost Tracking Typhoon/008 Jan 2016/Typhoon Cost Tracker Jan 2016 v2.xlsm";
+	private static final String FILE_PATH = "C:/My_Workspaces/MyJava/TaskLogger/src/tasklogger/typhoon.xlsm";
+//	private static final String FILE_PATH = "typhoon.xlsm";
 
 	public static void main(String args[]) {
 		SwingUtilities.invokeLater(new Runnable() {

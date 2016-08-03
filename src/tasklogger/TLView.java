@@ -191,7 +191,6 @@ public class TLView extends JFrame implements PropertyChangeListener {
 				return;
 			}
 		}
-		System.err.println("setTimer");
 	}
 
 	public static void setTotalTimerInMs(long timeInMs) {
