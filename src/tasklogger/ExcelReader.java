@@ -26,7 +26,8 @@ import javax.swing.SwingUtilities;
  */
 public class ExcelReader {
 
-	private static final String FILE_PATH = "/Users/Nathan/github/TaskLogger/src/file.xlsx";
+//	private static final String FILE_PATH = "/Users/Nathan/github/TaskLogger/src/file.xlsx";
+	private static final String FILE_PATH = "C:/My_Workspaces/MyJava/TaskLogger/src/tasklogger/file.xlsx";
 
 	public static void main(String args[]) {
 		SwingUtilities.invokeLater(new Runnable() {

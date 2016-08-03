@@ -11,9 +11,8 @@ public class TLTask {
 	private long activeTimeInMs;
 	private ActionListener actionListender;
 	private String name;
-	private String description;
 	private Boolean running;
-	private int taskID;
+	private int taskID = 0;
 	private Timer clockTimer;
 	private ClockListener clock;
 	static private long totalRunTimeInMs;

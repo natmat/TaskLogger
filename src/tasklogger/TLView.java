@@ -11,9 +11,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -99,6 +101,9 @@ public class TLView extends JFrame implements PropertyChangeListener {
 				}
 			}
 		});
+		
+		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource("tasklogger/pomodoro.png"));
+		setIconImage(icon.getImage());
 	}
 
 	private void addPomodoroToView() {

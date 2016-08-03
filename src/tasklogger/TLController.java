@@ -1,5 +1,6 @@
 package tasklogger;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.IndexedPropertyChangeEvent;
@@ -12,6 +13,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import com.sun.javafx.scene.paint.GradientUtils.Point;
 
 public class TLController implements ActionListener, PropertyChangeListener {
 	private static TLModel model;
@@ -48,35 +52,58 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	}
 	
 	private class CustomDialog extends JDialog {
-		private JPanel myPanel = null;
-		private JButton yesButton = null;
-		private JButton noButton = null;
+		private JPanel inputPanel = null;
+		private JButton okButton = null;
+		private JTextField inputText = null;
+		private String newTaskName = null;
+		private final JFrame parentFrame; 
 
-		public CustomDialog(JFrame frame, boolean modal, String myMessage) {
-			super(frame, modal);
-			myPanel = new JPanel();
-			getContentPane().add(myPanel);
-			myPanel.add(new JLabel(myMessage));
-			yesButton = new JButton("Yes");
-			myPanel.add(yesButton);
-			noButton = new JButton("No");
-			myPanel.add(noButton);
+		public CustomDialog(JFrame frame) {
+			super(frame, true);
+			parentFrame = frame;
+			setLocationRelativeTo(frame);
+		}		
+		
+		String showDialog() {
+			inputPanel = new JPanel();
+			getContentPane().add(inputPanel);
+			inputPanel.add(new JLabel("Enter new task name"));
+			inputText = new JTextField("[new name]");
+			inputPanel.add(inputText);
+			okButton = new JButton("Ok");
+			inputPanel.add(okButton);
 			pack();
-			//setLocationRelativeTo(frame);
-			setLocation(10, 10); // <--
+			
+			 // Set location relative to frame
+			setLocation(parentFrame.getLocation().x, 
+					parentFrame.getLocation().y + (int)(parentFrame.getSize().getHeight()));
+
+			newTaskName = new String("");
+			okButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					newTaskName = inputText.getText();
+					setVisible(false);
+					dispose();
+				}
+			});
+
 			setVisible(true);
+			return(newTaskName);
 		}
 	}
 
 	public static void newTask() {
 		final String dialogString = "Enter task name";
-		new TLController().new CustomDialog(TLView.getInstance(), false, "Hello");
+		CustomDialog cd = new TLController().new CustomDialog(TLView.getInstance());
+		String taskName = cd.showDialog();
+		
 //		String taskName = JOptionPane.showInputDialog(
 //				new TLController().new CustomDialog(TLView.getInstance(), false, "Hello"),
 //				 dialogString,
 //				 "Add new task",
 //				 JOptionPane.QUESTION_MESSAGE);
-		String taskName = new String("nathan");
+		System.out.println("CustomDialog");
 		if (!TLUtilities.isValidName(taskName, dialogString)) {
 			return;
 		}
