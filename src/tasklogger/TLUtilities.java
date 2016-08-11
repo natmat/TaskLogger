@@ -1,10 +1,17 @@
 package tasklogger;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.Date; 
+
+import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 public class TLUtilities {
 
@@ -42,17 +49,20 @@ public class TLUtilities {
 		TASK_STATE_CHANGE
 	}
 	
-//	public static void importFromExcel() {
-//		try {
-//			Workbook workbook = Workbook.getWorkbook(new File("Typhoon Cost Tracker Jan 2016 v2.xlsm"));
-//		} catch (BiffException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
+	public static void importFromExcel() {
+		try {
+			Workbook workbook = WorkbookFactory.create(new File("resources/typhoon.xlsm"));
+		} catch (EncryptedDocumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
 
 

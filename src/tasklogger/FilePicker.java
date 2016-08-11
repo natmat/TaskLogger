@@ -66,7 +66,7 @@ public class FilePicker extends JPanel {
 
 
 	public static String pickInputFile(boolean show) {
-		setVisible(show);
+//		setVisible(show);
 		return(inputFileName);	
 	}
 }

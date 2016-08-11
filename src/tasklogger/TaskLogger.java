@@ -23,7 +23,7 @@ public class TaskLogger {
 	}
 
 	protected static void createAndShowGUI() {
-//		TLUtilities.importFromExcel();
+		TLUtilities.importFromExcel();
 		
 		model = TLModel.getInstance();
 		controller = TLController.getInstance();

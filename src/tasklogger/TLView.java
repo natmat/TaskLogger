@@ -11,7 +11,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.BoxLayout;
@@ -163,7 +162,7 @@ public class TLView extends JFrame implements PropertyChangeListener {
 
 	private void addNewTaskButtonToControls() {
 		newTaskButton = new JButton("Add New Task");
-//		newTaskButton.setToolTipText("Add a new task to the left column's task list");
+		newTaskButton.setToolTipText("Add a new task to the left column's task list");
 		newTaskButton.setHorizontalAlignment(SwingConstants.LEFT);
 		newTaskButton.addActionListener(new AddNewTaskListener());
 		newTaskButton.setActionCommand("newTaskButtonPressed");
@@ -191,7 +190,6 @@ public class TLView extends JFrame implements PropertyChangeListener {
 				return;
 			}
 		}
-		System.err.println("setTimer");
 	}
 
 	public static void setTotalTimerInMs(long timeInMs) {

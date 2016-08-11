@@ -12,7 +12,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 /**
@@ -62,16 +61,12 @@ public class TLModel {
 		// Find task in arrayTask
 		for (TLTask t : taskArray) {
 			if (t.getName().equals(inName)) {
-				JOptionPane.showMessageDialog(new JFrame(),
-						"Task already exists.", "New task error",
-						JOptionPane.ERROR_MESSAGE);
 				return (null);
 			}
 		}
 
 		TLTask task = new TLTask(inName);
-		pcs.firePropertyChange("taskAction:" + task.getTaskID(), task
-				.getRunning().booleanValue(), 0);
+		pcs.firePropertyChange("taskAction:" + task.getTaskID(), task.getRunning().booleanValue(), 0);
 		taskArray.add(task);
 		return (task);
 	}
