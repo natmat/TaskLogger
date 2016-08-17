@@ -5,6 +5,9 @@ import java.awt.event.ActionListener;
 import java.beans.IndexedPropertyChangeEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -12,9 +15,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class TLController implements ActionListener, PropertyChangeListener {
+public class TLController implements ActionListener, PropertyChangeListener, Runnable {
 	private static TLModel model;
 	private static TLController instance;
+	private static SynchronousQueue<Boolean> queue;
 
 	public static TLController getInstance() {
 		if (instance == null) {
@@ -24,7 +28,8 @@ public class TLController implements ActionListener, PropertyChangeListener {
 	}
 
 	private TLController() {
-		TLModel.addPropertyChangeListener(this);
+		queue = new SynchronousQueue<>();
+		TLModel.addPropertyChangeListener(this);		
 	}
 
 	public void setModel(final TLModel inModel) {
@@ -92,6 +97,13 @@ public class TLController implements ActionListener, PropertyChangeListener {
 
 	public static void newTask() {
 		// Enter new task from Excel
+		new Thread(new ExcelReader()).start();
+		try {
+			queue.take();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		
 		final String dialogString = "[enter task name]";
@@ -104,8 +116,7 @@ public class TLController implements ActionListener, PropertyChangeListener {
 		TLTask task = TLModel.newTask(taskName);
 		if (task == null) {
 			TLView.getInstance().setAlwaysOnTop(false);
-			JOptionPane jop = new JOptionPane();
-			jop.showMessageDialog(new JFrame(),
+			JOptionPane.showMessageDialog(new JFrame(),
 					"Task already exists.", "New task error",
 					JOptionPane.ERROR_MESSAGE);			
 			TLView.getInstance().setAlwaysOnTop(true);
@@ -142,5 +153,11 @@ public class TLController implements ActionListener, PropertyChangeListener {
 
 	public static void deleteTask(int taskID) {
 		TLView.deleteTask(taskID);
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
 	}
 }
