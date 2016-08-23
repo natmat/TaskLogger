@@ -19,7 +19,7 @@ public class TaskLogger {
 				createAndShowGUI();
 				runShutDownTimer();
 			}
-		});
+		});	
 	}
 
 	protected static void createAndShowGUI() {
@@ -32,7 +32,7 @@ public class TaskLogger {
 		controller.setView(view);
 		controller.setModel(model);
 		
-		view.setTitle("Task logger");   
+		view.setTitle("Task logger");
 		view.setVisible(true);
 		
 		try {

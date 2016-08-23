@@ -23,14 +23,14 @@ public class FilePicker extends JPanel {
 
 	public static void main(String args[]) {
 		FilePicker fp = new FilePicker("Open a task list file", "Browse...");
-		JFrame f = new JFrame();
-		f.add(fp);
+		JFrame frame = new JFrame();
+		frame.add(fp);
 
-		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		f.pack();
-		f.setLocationRelativeTo(null);    // Centre on screen
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.pack();
+		frame.setLocationRelativeTo(null);    // Centre on screen
 
-		f.setVisible(true);
+		frame.setVisible(true);
 
 		System.out.println("PFM=" + pickInputFile(true));
 	}
@@ -61,9 +61,9 @@ public class FilePicker extends JPanel {
 			inputFileName = fileChooser.getSelectedFile().getAbsolutePath();
 //			textField.setText(fileChooser.getSelectedFile().getAbsolutePath());		
 			setVisible(false);
+			System.out.println(inputFileName);
 		}
 	}
-
 
 	public static String pickInputFile(boolean show) {
 //		setVisible(show);
