@@ -5,10 +5,8 @@ import java.awt.event.ActionListener;
 import java.beans.IndexedPropertyChangeEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.SynchronousQueue;
 
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -18,7 +16,7 @@ import javax.swing.JTextField;
 public class TLController implements ActionListener, PropertyChangeListener, Runnable {
 	private static TLModel model;
 	private static TLController instance;
-	private static SynchronousQueue<Boolean> queue;
+	private final static Object waiter = new Object();
 
 	public static TLController getInstance() {
 		if (instance == null) {
@@ -28,7 +26,6 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 	}
 
 	private TLController() {
-		queue = new SynchronousQueue<>();
 		TLModel.addPropertyChangeListener(this);		
 	}
 
@@ -44,6 +41,11 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 		String command = e.getActionCommand();
 		if (command.equals("task")) {
 			System.out.println("Action");
+		}
+		else if (command.equals("taskSelectorComboBox")) {
+			JComboBox<?> cb = (JComboBox<?>)e.getSource();
+			String s = (String) cb.getSelectedItem();
+			System.out.println("NewTaskName=" + s);
 		}
 	}
 
@@ -97,21 +99,10 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 
 	public static void newTask() {
 		// Enter new task from Excel
-		new Thread(new ExcelReader()).start();
-		try {
-			queue.take();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		ExcelReader.createAndShowGUI(instance);
 		
-		
-		final String dialogString = "[enter task name]";
-		CustomDialog cd = new TLController().new CustomDialog(TLView.getInstance(), dialogString);
-		String taskName = cd.showDialog();
-		if (!TLUtilities.isValidName(taskName, dialogString)) {
-			return;
-		}
+		String taskName = null;
+//		taskName = showTaskNameDialog();
 
 		TLTask task = TLModel.newTask(taskName);
 		if (task == null) {
@@ -122,8 +113,20 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 			TLView.getInstance().setAlwaysOnTop(true);
 			return;
 		}
-		TLView.addTask(task.getTaskID());
-		TLController.taskButtonPressed(task.getTaskID());
+		
+//		TLView.addTask(task.getTaskID());
+//		TLController.taskButtonPressed(task.getTaskID());
+	}
+
+	private static String showTaskNameDialog() {
+		String taskName = null;
+		final String dialogString = "[enter task name]";
+		CustomDialog cd = new TLController().new CustomDialog(TLView.getInstance(), dialogString);
+		taskName = cd.showDialog();
+		if (!TLUtilities.isValidName(taskName, dialogString)) {
+			taskName = null;
+		}
+		return taskName;
 	}
 
 	@Override
@@ -159,5 +162,10 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 	public void run() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public static Object getWaiter() {
+		// TODO Auto-generated method stub
+		return waiter;
 	}
 }

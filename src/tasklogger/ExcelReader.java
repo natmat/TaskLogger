@@ -6,6 +6,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.awt.Dialog.ModalityType;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileInputStream;
@@ -19,12 +21,13 @@ import java.util.List;
 import java.util.concurrent.SynchronousQueue;
 
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-public class ExcelReader implements Runnable {
+public class ExcelReader implements ActionListener {
 
 	// private static final String FILE_PATH =
 	// "/Users/Nathan/github/TaskLogger/src/file.xlsx";
@@ -35,18 +38,29 @@ public class ExcelReader implements Runnable {
 	//	private static final String FILE_PATH = "C:/My_Workspaces/MyJava/TaskLogger/src/tasklogger/typhoon.xlsm";
 	private static final String FILE_PATH = "resources/typhoon.xlsm";
 	protected SynchronousQueue<Boolean> queue = null;	
+	private static ExcelReader instance;
 	
 	// private static final String FILE_PATH = "typhoon.xlsm";
 
 	public static void main(String args[]) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				createAndShowGUI();
+				createAndShowGUI(instance);
 			}
 		});
 	}
+	
+	public static ExcelReader getIstance() {
+		if (instance == null) {
+			instance = new ExcelReader();
+		}
+		return (instance);
+	}
 
-	public static void createAndShowGUI() {
+	private ExcelReader() {
+	}
+	
+	public static void createAndShowGUI(final ActionListener al) {
 		List<WBSTask> taskList = getTaskNamesFromExcel();
 		sortTaskListAscending(taskList);
 
@@ -56,37 +70,26 @@ public class ExcelReader implements Runnable {
 		}
 
 		JComboBox<String> taskSelectorComboBox = new JComboBox<>(wbc.toArray(new String[wbc.size()]));
-		taskSelectorComboBox.setMaximumRowCount(20);
-
-		JFrame frame = new JFrame("JComboBox");
-		// frame.setSize(500, 500);
-		frame.setVisible(true);
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		JPanel panel = new JPanel();
-		panel.add(taskSelectorComboBox);
-		frame.add(panel);
-		frame.pack();
+		taskSelectorComboBox.setMaximumRowCount(10);
 
 		taskSelectorComboBox.setEditable(true);
 		taskSelectorComboBox.setVisible(true);
 		taskSelectorComboBox.setSelectedIndex(0);
-		taskSelectorComboBox.addActionListener(new ActionListener() {
+		taskSelectorComboBox.setActionCommand("taskSelectorComboBox");
+		taskSelectorComboBox.addActionListener(al);
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JComboBox<?> cb = (JComboBox<?>)e.getSource();
-				String s = (String) cb.getSelectedItem();
-				System.out.println("selected=" + s);
-				// TODO
-				SynchronousQueue<Boolean> queue = new SynchronousQueue<>();
-				try {
-					queue.put(true);
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		});
+		JPanel panel = new JPanel();
+		panel.setLayout(new FlowLayout());
+		panel.add(taskSelectorComboBox);
+
+		JDialog dialog = new JDialog(TLView.getInstance(), "Enter Task Code/Info", ModalityType.APPLICATION_MODAL);
+		dialog.getContentPane().setLayout(new FlowLayout());		
+		dialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);		
+		dialog.add(taskSelectorComboBox);		
+		
+		dialog.add(panel);
+		dialog.pack();
+		dialog.setVisible(true);
 	}
 
 	private static void sortTaskListAscending(List<WBSTask> taskList) {
@@ -104,11 +107,13 @@ public class ExcelReader implements Runnable {
 		FileInputStream fis = null;
 		try {
 			JFileChooser fileChooser = new JFileChooser();
-			fis = new FileInputStream(FILE_PATH);
+			fis = new FileInputStream("JHNM" + FILE_PATH);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return(null);
+			// No file, so pad a taskList
+			for (int i = 0 ; i < 10 ; i++) {
+				taskList.add(new WBSTask("code_"+ Integer.toString(i), "info_" + Integer.toString(i)));
+			}
+			return(taskList);
 		}
 
 		// Using XSSF for xlsx format, for xls use HSSF
@@ -176,25 +181,17 @@ public class ExcelReader implements Runnable {
 		return taskList;
 	}
 
-	@Override
-	public void run() {
-		while(true) {
-			new Thread(new Runnable() {
-
-				@Override
-				public void run() {
-					createAndShowGUI();
-				}
-			});
-		}
-	}
-
 	private static class WBSTask {
 		private String code;
 		private String info;
 
 		public WBSTask() {
 			// TODO
+		}
+
+		public WBSTask(String inCode, String inInfo) {
+			this.code = inCode;
+			this.info = inInfo;
 		}
 
 		public void setCode(String stringCellValue) {
@@ -208,6 +205,12 @@ public class ExcelReader implements Runnable {
 		public String getTaskString() {
 			return(this.code + ": " + this.info);
 		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		System.out.println("AL invoked");
 	}
 }
 
