@@ -6,10 +6,17 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import sun.awt.WindowClosingListener;
+
+import java.awt.Dialog;
 import java.awt.Dialog.ModalityType;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.awt.event.WindowStateListener;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -20,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.SynchronousQueue;
 
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -61,6 +69,11 @@ public class ExcelReader implements ActionListener {
 	}
 	
 	public static void createAndShowGUI(final ActionListener al) {
+		final JDialog dialog = new JDialog(TLView.getInstance(), "Enter Task Code/Info", ModalityType.APPLICATION_MODAL);
+		
+		dialog.getContentPane().setLayout(new FlowLayout());		
+		dialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);	
+
 		List<WBSTask> taskList = getTaskNamesFromExcel();
 		sortTaskListAscending(taskList);
 
@@ -69,27 +82,47 @@ public class ExcelReader implements ActionListener {
 			wbc.add(t.code + ": " + t.info);
 		}
 
-		JComboBox<String> taskSelectorComboBox = new JComboBox<>(wbc.toArray(new String[wbc.size()]));
+		final JComboBox<String> taskSelectorComboBox = new JComboBox<>(wbc.toArray(new String[wbc.size()]));
 		taskSelectorComboBox.setMaximumRowCount(10);
-
 		taskSelectorComboBox.setEditable(true);
 		taskSelectorComboBox.setVisible(true);
 		taskSelectorComboBox.setSelectedIndex(0);
 		taskSelectorComboBox.setActionCommand("taskSelectorComboBox");
-		taskSelectorComboBox.addActionListener(al);
+		dialog.add(taskSelectorComboBox);		
+		
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout());
 		panel.add(taskSelectorComboBox);
-
-		JDialog dialog = new JDialog(TLView.getInstance(), "Enter Task Code/Info", ModalityType.APPLICATION_MODAL);
-		dialog.getContentPane().setLayout(new FlowLayout());		
-		dialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);		
-		dialog.add(taskSelectorComboBox);		
+		
+		JButton b = new JButton("Select");
+		b.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				dialog.dispose();
+				return;
+			}
+		});
+		panel.add(b);
 		
 		dialog.add(panel);
 		dialog.pack();
 		dialog.setVisible(true);
+
+		class myWindowAdaptor extends WindowAdapter {
+			@Override
+			public void windowClosed(WindowEvent we) {
+				System.out.println(we);
+				String selected = taskSelectorComboBox.getSelectedItem().toString();
+				System.out.println(selected);
+				ActionEvent ae = new ActionEvent(we.getSource(), 0, "taskSelectorComboBox");
+				if (null != al) {
+					al.actionPerformed(ae);
+				}
+			}
+		}
+		dialog.addWindowListener(new myWindowAdaptor());
 	}
 
 	private static void sortTaskListAscending(List<WBSTask> taskList) {
