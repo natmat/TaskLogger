@@ -43,12 +43,20 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 			System.out.println("Action");
 		}
 		else if (command.equals("taskSelectorComboBox")) {
-			JComboBox<?> cb = (JComboBox<?>)e.getSource();
-			String s = (String) cb.getSelectedItem();
-			System.out.println("NewTaskName=" + s);
+			String newName = ExcelReader.getNewTaskName();
+			System.out.println("NewTaskName=" + newName);
+			TLTask newTask = validateNewTaskName(newName);
+			if (null != newTask) {
+				TLView.addTask(newTask.getTaskID());
+				TLController.taskButtonPressed(newTask.getTaskID());
+			}
 		}
 	}
 
+	/**
+	 * Notify model on taskButton press
+	 * @param taskID
+	 */
 	public static void taskButtonPressed(int taskID) {
 		model.tasktButtonPressed(taskID);
 	}
@@ -99,47 +107,19 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 
 	public static void newTask() {
 		// Enter new task from Excel
-		ExcelReader.createAndShowGUI(getInstance().new NewTaskActionListener());
-//		taskName = showTaskNameDialog();
+		ExcelReader.createAndShowGUI(instance);		
 	}
 	
-	private class NewTaskActionListener implements ActionListener {
-		private String name;
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			createTaskWithName(name);
-		}
-		
-		public void setName(final String name) {
-			this.name = name;
-		}
-	}
-	
-	private void createTaskWithName(String taskName) {
-		TLTask task = TLModel.newTask(taskName);
+	private TLTask validateNewTaskName(final String name) {
+		TLTask task = TLModel.newTask(name);
 		if (task == null) {
 			TLView.getInstance().setAlwaysOnTop(false);
 			JOptionPane.showMessageDialog(new JFrame(),
 					"Task already exists.", "New task error",
 					JOptionPane.ERROR_MESSAGE);			
 			TLView.getInstance().setAlwaysOnTop(true);
-			return;
 		}
-		
-//		TLView.addTask(task.getTaskID());
-//		TLController.taskButtonPressed(task.getTaskID());
-	}
-
-	private static String showTaskNameDialog() {
-		String taskName = null;
-		final String dialogString = "[enter task name]";
-		CustomDialog cd = new TLController().new CustomDialog(TLView.getInstance(), dialogString);
-		taskName = cd.showDialog();
-		if (!TLUtilities.isValidName(taskName, dialogString)) {
-			taskName = null;
-		}
-		return taskName;
+		return(task);
 	}
 
 	@Override
@@ -180,5 +160,17 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 	public static Object getWaiter() {
 		// TODO Auto-generated method stub
 		return waiter;
+	}
+	
+	@SuppressWarnings("unused")
+	private static String showTaskNameDialog() {
+		String taskName = null;
+		final String dialogString = "[enter task name]";
+		CustomDialog cd = new TLController().new CustomDialog(TLView.getInstance(), dialogString);
+		taskName = cd.showDialog();
+		if (!TLUtilities.isValidName(taskName, dialogString)) {
+			taskName = null;
+		}
+		return taskName;
 	}
 }

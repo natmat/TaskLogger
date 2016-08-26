@@ -1,12 +1,14 @@
 package tasklogger;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 
@@ -42,12 +44,17 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 						}
 					}
 				} else if ((evt.getModifiers() & ActionEvent.ALT_MASK) > 0) {
-					int dialogResult = JOptionPane.showConfirmDialog(null,
+					JFrame frameOnTop = new JFrame();
+					frameOnTop.setLocation(getLocation().x, getLocation().y);
+					frameOnTop.setAlwaysOnTop(true);
+					frameOnTop.setVisible(true);
+					int dialogResult = JOptionPane.showConfirmDialog(frameOnTop,
 							"Delete task " + TaskButton.this.taskName + "?",
-							"Delete?", JOptionPane.YES_NO_OPTION);
+							"Delete?", JOptionPane.YES_NO_OPTION);					
 					if (dialogResult == JOptionPane.YES_OPTION) {
 						TLModel.deleteTask(taskID);
 					}
+					frameOnTop.dispose();
 				} else {
 					TLController.taskButtonPressed(taskID);
 				}

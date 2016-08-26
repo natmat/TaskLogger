@@ -11,8 +11,11 @@ import sun.awt.WindowClosingListener;
 import java.awt.Dialog;
 import java.awt.Dialog.ModalityType;
 import java.awt.FlowLayout;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -47,6 +50,7 @@ public class ExcelReader implements ActionListener {
 	private static final String FILE_PATH = "resources/typhoon.xlsm";
 	protected SynchronousQueue<Boolean> queue = null;	
 	private static ExcelReader instance;
+	private static String newTaskName = null;
 	
 	// private static final String FILE_PATH = "typhoon.xlsm";
 
@@ -72,34 +76,40 @@ public class ExcelReader implements ActionListener {
 		final JDialog dialog = new JDialog(TLView.getInstance(), "Enter Task Code/Info", ModalityType.APPLICATION_MODAL);
 		
 		dialog.getContentPane().setLayout(new FlowLayout());		
-		dialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);	
+		dialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		final JFrame parentFrame = TLView.getInstance();
+		dialog.setLocation(parentFrame.getLocation().x, parentFrame.getLocation().y 
+				+ (int) (parentFrame.getSize().getHeight()));
 
 		List<WBSTask> taskList = getTaskNamesFromExcel();
 		sortTaskListAscending(taskList);
 
 		ArrayList<String> wbc = new ArrayList<>();
+		wbc.add("[Enter new task code/info]");
 		for (WBSTask t : taskList) {
 			wbc.add(t.code + ": " + t.info);
 		}
 
+		// Create a comboBox and select the first item
 		final JComboBox<String> taskSelectorComboBox = new JComboBox<>(wbc.toArray(new String[wbc.size()]));
-		taskSelectorComboBox.setMaximumRowCount(10);
+		taskSelectorComboBox.setMaximumRowCount(20);
 		taskSelectorComboBox.setEditable(true);
 		taskSelectorComboBox.setVisible(true);
 		taskSelectorComboBox.setSelectedIndex(0);
+		taskSelectorComboBox.getEditor().selectAll();
 		taskSelectorComboBox.setActionCommand("taskSelectorComboBox");
 		dialog.add(taskSelectorComboBox);		
 		
-
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout());
 		panel.add(taskSelectorComboBox);
 		
+		// Button invoke close on dialog and rely on its handler to extract the selected string
 		JButton b = new JButton("Select");
-		b.addActionListener(new ActionListener() {
+		b.addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// Button clicked, dispose of the window that reads the comboBox
+				// Select clicke, so close the window
 				dialog.dispose();
 				return;
 			}
@@ -114,12 +124,9 @@ public class ExcelReader implements ActionListener {
 			@Override
 			public void windowClosed(WindowEvent we) {
 				System.out.println(we);
-				String selected = taskSelectorComboBox.getSelectedItem().toString();
-				System.out.println(selected);
-				
+				ExcelReader.newTaskName = taskSelectorComboBox.getSelectedItem().toString();
 				ActionEvent ae = new ActionEvent(we.getSource(), 0, "taskSelectorComboBox");
 				if (null != al) {
-					al.setName(selected);
 					al.actionPerformed(ae);
 				}
 			}
@@ -142,12 +149,10 @@ public class ExcelReader implements ActionListener {
 		FileInputStream fis = null;
 		try {
 			JFileChooser fileChooser = new JFileChooser();
-			fis = new FileInputStream("JHNM" + FILE_PATH);
+			fis = new FileInputStream(FILE_PATH);
 		} catch (FileNotFoundException e) {
 			// No file, so pad a taskList
-			for (int i = 0 ; i < 10 ; i++) {
-				taskList.add(new WBSTask("code_"+ Integer.toString(i), "info_" + Integer.toString(i)));
-			}
+			padTaskListWithExampleTasks(taskList);
 			return(taskList);
 		}
 
@@ -216,6 +221,12 @@ public class ExcelReader implements ActionListener {
 		return taskList;
 	}
 
+	private static void padTaskListWithExampleTasks(List<WBSTask> taskList) {
+		for (int i = 0 ; i < 10 ; i++) {
+			taskList.add(new WBSTask("code_"+ Integer.toString(i), "info_" + Integer.toString(i)));
+		}
+	}
+
 	private static class WBSTask {
 		private String code;
 		private String info;
@@ -240,6 +251,10 @@ public class ExcelReader implements ActionListener {
 		public String getTaskString() {
 			return(this.code + ": " + this.info);
 		}
+	}
+	
+	public static String getNewTaskName() {
+		return(newTaskName);
 	}
 
 	@Override

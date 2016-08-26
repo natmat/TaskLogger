@@ -175,7 +175,7 @@ public class TLView extends JFrame implements PropertyChangeListener {
 		public void actionPerformed(ActionEvent e) {
 			String command = e.getActionCommand();
 			if (command.equals("newTaskButtonPressed")) {
-//				System.out.println("newTaskButtonPressed");
+				System.out.println("newTaskButtonPressed");
 				TLController.newTask();
 			}
 		}

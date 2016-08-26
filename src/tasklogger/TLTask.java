@@ -30,13 +30,17 @@ public class TLTask {
 	}
 	
 	public TLTask() {
-		taskID = System.identityHashCode(this);
+		setTaskID(System.identityHashCode(this));
 		activeTimeInMs = 0;
 		running = new Boolean(false);
 		clock = new ClockListener();
 		clockTimer = new javax.swing.Timer(1000, clock);
 
 		new PropertyChangeSupport(this);
+	}
+
+	private void setTaskID(final int id) {
+		this.taskID = id;
 	}
 
 	public TLTask(String inName) {
