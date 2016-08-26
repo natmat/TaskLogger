@@ -99,11 +99,24 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 
 	public static void newTask() {
 		// Enter new task from Excel
-		ExcelReader.createAndShowGUI(instance);
-		
-		String taskName = null;
+		ExcelReader.createAndShowGUI(getInstance().new NewTaskActionListener());
 //		taskName = showTaskNameDialog();
+	}
+	
+	private class NewTaskActionListener implements ActionListener {
+		private String name;
 
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			createTaskWithName(name);
+		}
+		
+		public void setName(final String name) {
+			this.name = name;
+		}
+	}
+	
+	private void createTaskWithName(String taskName) {
 		TLTask task = TLModel.newTask(taskName);
 		if (task == null) {
 			TLView.getInstance().setAlwaysOnTop(false);

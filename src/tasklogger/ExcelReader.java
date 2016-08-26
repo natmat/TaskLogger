@@ -97,9 +97,9 @@ public class ExcelReader implements ActionListener {
 		
 		JButton b = new JButton("Select");
 		b.addActionListener(new ActionListener() {
-			
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				// Button clicked, dispose of the window that reads the comboBox
 				dialog.dispose();
 				return;
 			}
@@ -116,8 +116,10 @@ public class ExcelReader implements ActionListener {
 				System.out.println(we);
 				String selected = taskSelectorComboBox.getSelectedItem().toString();
 				System.out.println(selected);
+				
 				ActionEvent ae = new ActionEvent(we.getSource(), 0, "taskSelectorComboBox");
 				if (null != al) {
+					al.setName(selected);
 					al.actionPerformed(ae);
 				}
 			}
