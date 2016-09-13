@@ -11,11 +11,15 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -128,11 +132,12 @@ public class TLView extends JFrame implements PropertyChangeListener {
 		JButton saveButton = new JButton("Save times to file");
 		saveButton.setBackground(saveColor);
 		saveButton.setOpaque(true);
+		saveButton.setToolTipText("Save tasks and times to dated file");
 		saveButton.setHorizontalAlignment(SwingConstants.CENTER);
 		saveButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				TLModel.saveTaskTimes();
+				TLModel.writeTaskTimesToFile();
 			}
 		});
 		controlsPanel.add(saveButton);
@@ -150,6 +155,7 @@ public class TLView extends JFrame implements PropertyChangeListener {
 		resetButton.setBackground(resetColor);
 		resetButton.setOpaque(true);
 		resetButton.setHorizontalAlignment(SwingConstants.LEFT);
+		resetButton.setToolTipText("Reset to zero all task times");
 		resetButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -162,22 +168,57 @@ public class TLView extends JFrame implements PropertyChangeListener {
 
 	private void addNewTaskButtonToControls() {
 		newTaskButton = new JButton("Add New Task");
-		newTaskButton.setToolTipText("Add a new task to the left column's task list");
+		newTaskButton.setToolTipText("Add a new task");
 		newTaskButton.setHorizontalAlignment(SwingConstants.LEFT);
-		newTaskButton.addActionListener(new AddNewTaskListener());
+		newTaskButton.addActionListener(new NewTaskButtonListener());
 		newTaskButton.setActionCommand("newTaskButtonPressed");
 		newTaskButton.setBackground(newTaskColor);
 		controlsPanel.add(newTaskButton);
 	}
 
-	private class AddNewTaskListener implements ActionListener {
+	private class NewTaskButtonListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String command = e.getActionCommand();
 			if (command.equals("newTaskButtonPressed")) {
 				System.out.println("newTaskButtonPressed");
-				TLController.newTask();
+				TLController.newTask(createTaskListForSelector());
 			}
+		}
+	}
+	
+	private ArrayList<String> createTaskListForSelector() {
+		// Read task names from 3 sources.
+		ArrayList<String> taskList = ExcelReader.readTaskListFromExcel();
+		if (0 == taskList.size()) {
+			// Read taskList from user prompted file
+			FilePicker fp = new FilePicker("text", "button");
+			fp.setVisible(true);
+			
+//			if (null == taskList) {
+//				// No file, so pad a taskList
+//				padTaskListWithExampleTasks(taskList);
+//			}
+		}
+		return(taskList);
+	}
+	
+	private static void padTaskListWithExampleTasks(final ArrayList<String> inTaskList) {
+		for (int i = 0 ; i < 10 ; i++) {
+			inTaskList.add("code_"+ Integer.toString(i) + "info_" + Integer.toString(i));
+		}
+	}
+
+	private void openTaskFile() {
+		FileInputStream fis = null;
+		try {
+			JFileChooser fileChooser = new JFileChooser();
+			final String FILE_PATH = "resources/typhoon.xlsm";
+			fis = new FileInputStream(FILE_PATH);
+		} catch (FileNotFoundException e) {
+			// No file, so pad a taskList
+			ArrayList<String> taskList = null;
+			padTaskListWithExampleTasks(taskList);
 		}
 	}
 

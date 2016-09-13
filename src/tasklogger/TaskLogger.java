@@ -23,7 +23,7 @@ public class TaskLogger {
 	}
 
 	protected static void createAndShowGUI() {
-		TLUtilities.importFromExcel();
+//		TLUtilities.importFromExcel();
 		
 		model = TLModel.getInstance();
 		controller = TLController.getInstance();
@@ -61,7 +61,7 @@ public class TaskLogger {
 		Timer shutdownTimer = new Timer((int)endTimeDifference, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				TLModel.saveTaskTimes();
+				TLModel.writeTaskTimesToFile();
 				System.exit(0);
 			}
 		});

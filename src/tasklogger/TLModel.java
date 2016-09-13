@@ -106,7 +106,7 @@ public class TLModel {
 		return (getTaskWithID(inTaskID).getName());
 	}
 
-	public static void saveTaskTimes() {
+	public static void writeTaskTimesToFile() {
 		// Print
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Calendar cal = Calendar.getInstance();
@@ -135,9 +135,9 @@ public class TLModel {
 	}
 
 	public static void exportCVSFile() throws IOException {
-		String fileName = ROOT_FILE_NAME + "_" + TLUtilities.getToday()
+		String fileName = "C:/tmp/" + ROOT_FILE_NAME + "_" + TLUtilities.getToday()
 				+ ".csv";
-//		System.out.println(fileName);
+		
 		FileWriter writer;
 		writer = new FileWriter(fileName);
 		long timeValue = TLTask.getTotalRunTimeInMs();

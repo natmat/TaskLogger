@@ -39,12 +39,6 @@ public class TLUtilities {
 		return(dateFormat.format(cal.getTime()));
 	}
 	
-	public static String getOsDirectory() {
-//		String osName = System.getProperty("os.name").toLowerCase();
-//		String cwd = System.getProperty("user.dir");
-		return null;
-	}
-	
 	public enum ePropertyNames {
 		TASK_STATE_CHANGE
 	}
@@ -52,14 +46,8 @@ public class TLUtilities {
 	public static void importFromExcel() {
 		try {
 			Workbook workbook = WorkbookFactory.create(new File("resources/typhoon.xlsm"));
-		} catch (EncryptedDocumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} catch (EncryptedDocumentException | InvalidFormatException | IOException e) {
+		 	System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
 	}

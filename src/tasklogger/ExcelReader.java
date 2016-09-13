@@ -1,27 +1,20 @@
 package tasklogger;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import sun.awt.WindowClosingListener;
-
-import java.awt.Dialog;
 import java.awt.Dialog.ModalityType;
 import java.awt.FlowLayout;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.awt.event.WindowStateListener;
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +26,6 @@ import java.util.concurrent.SynchronousQueue;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -41,27 +33,28 @@ import javax.swing.SwingUtilities;
 public class ExcelReader implements ActionListener {
 
 	// private static final String FILE_PATH =
-	// "/Users/Nathan/github/TaskLogger/src/file.xlsx";
-	// private static final String FILE_PATH =
-	// "C:/My_Workspaces/MyJava/TaskLogger/src/tasklogger/file.xlsx";
-	// private static final String FILE_PATH =
-	// "//Greenlnk.net/Data/Olympia/MA&I/Team Site Folders/B2004MLA/Private/CAGE/Tracking/Cost Tracking Typhoon/008 Jan 2016/Typhoon Cost Tracker Jan 2016 v2.xlsm";
-	//	private static final String FILE_PATH = "C:/My_Workspaces/MyJava/TaskLogger/src/tasklogger/typhoon.xlsm";
 	private static final String FILE_PATH = "resources/typhoon.xlsm";
+	//	private static final String FILE_PATH = "C:/My_Workspaces/MyJava/TaskLogger/resources/typhoon.xlsm";
+
+	private static final int WBS_COLUMN_INDEX = 1;
+
 	protected SynchronousQueue<Boolean> queue = null;	
 	private static ExcelReader instance;
 	private static String newTaskName = null;
-	
+
 	// private static final String FILE_PATH = "typhoon.xlsm";
 
 	public static void main(String args[]) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				createAndShowGUI(instance);
+				ArrayList<String> taskList = readTaskListFromExcel();
+				if (taskList != null) {
+					taskSelectorDialog(instance, taskList);
+				}
 			}
 		});
 	}
-	
+
 	public static ExcelReader getIstance() {
 		if (instance == null) {
 			instance = new ExcelReader();
@@ -71,27 +64,27 @@ public class ExcelReader implements ActionListener {
 
 	private ExcelReader() {
 	}
-	
-	public static void createAndShowGUI(final ActionListener al) {
-		final JDialog dialog = new JDialog(TLView.getInstance(), "Enter Task Code/Info", ModalityType.APPLICATION_MODAL);
+
+	public static ArrayList<String> readTaskListFromExcel() {
+		ArrayList<WBSTask> wbsList = getTaskInfoCodeFromExcel();
 		
+		ArrayList<String> taskList = new ArrayList<>();
+		convertWbsListToTaskList(wbsList, taskList);
+		
+		return(taskList);
+	}
+
+	public static void taskSelectorDialog(final ActionListener al, ArrayList<String> taskList) {
+		final JDialog dialog = new JDialog(TLView.getInstance(), "Enter Task Code/Info", ModalityType.APPLICATION_MODAL);
+
 		dialog.getContentPane().setLayout(new FlowLayout());		
 		dialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		final JFrame parentFrame = TLView.getInstance();
 		dialog.setLocation(parentFrame.getLocation().x, parentFrame.getLocation().y 
 				+ (int) (parentFrame.getSize().getHeight()));
 
-		List<WBSTask> taskList = getTaskNamesFromExcel();
-		sortTaskListAscending(taskList);
-
-		ArrayList<String> wbc = new ArrayList<>();
-		wbc.add("[Enter new task code/info]");
-		for (WBSTask t : taskList) {
-			wbc.add(t.code + ": " + t.info);
-		}
-
 		// Create a comboBox and select the first item
-		final JComboBox<String> taskSelectorComboBox = new JComboBox<>(wbc.toArray(new String[wbc.size()]));
+		final JComboBox<String> taskSelectorComboBox = new JComboBox<>(taskList.toArray(new String[taskList.size()]));
 		taskSelectorComboBox.setMaximumRowCount(20);
 		taskSelectorComboBox.setEditable(true);
 		taskSelectorComboBox.setVisible(true);
@@ -99,23 +92,23 @@ public class ExcelReader implements ActionListener {
 		taskSelectorComboBox.getEditor().selectAll();
 		taskSelectorComboBox.setActionCommand("taskSelectorComboBox");
 		dialog.add(taskSelectorComboBox);		
-		
+
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout());
 		panel.add(taskSelectorComboBox);
-		
+
 		// Button invoke close on dialog and rely on its handler to extract the selected string
 		JButton b = new JButton("Select");
 		b.addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// Select clicke, so close the window
+				// Select button clicked, so close the window
 				dialog.dispose();
 				return;
 			}
 		});
 		panel.add(b);
-		
+
 		dialog.add(panel);
 		dialog.pack();
 		dialog.setVisible(true);
@@ -134,6 +127,16 @@ public class ExcelReader implements ActionListener {
 		dialog.addWindowListener(new myWindowAdaptor());
 	}
 
+	private static void convertWbsListToTaskList(ArrayList<WBSTask> wbsList, ArrayList<String> taskList) {
+		if (null != wbsList) {
+			taskList.add("[Enter new task info/code]"); // Default zero indexed entry
+			sortTaskListAscending(wbsList);
+			for (WBSTask t : wbsList) {
+				taskList.add(t.info + ": " + t.code);
+			}
+		}
+	}
+
 	private static void sortTaskListAscending(List<WBSTask> taskList) {
 		Collections.sort(taskList, new Comparator<WBSTask>() {
 			@Override
@@ -144,87 +147,66 @@ public class ExcelReader implements ActionListener {
 		});
 	}
 
-	private static List<WBSTask> getTaskNamesFromExcel() {
-		List<WBSTask> taskList = new ArrayList<WBSTask>();
-		FileInputStream fis = null;
-		try {
-			JFileChooser fileChooser = new JFileChooser();
-			fis = new FileInputStream(FILE_PATH);
-		} catch (FileNotFoundException e) {
-			// No file, so pad a taskList
-			padTaskListWithExampleTasks(taskList);
-			return(taskList);
-		}
-
+	public static ArrayList<WBSTask> getTaskInfoCodeFromExcel() {
 		// Using XSSF for xlsx format, for xls use HSSF
+		FileInputStream fis;
 		Workbook workbook;
 		try {
+			fis = new FileInputStream(new File(FILE_PATH));
 			workbook = new XSSFWorkbook(fis);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			workbook = new XSSFWorkbook("test.txt");
+		} catch (IOException | IllegalStateException e) {
+			System.out.println(e.getMessage());
 			return(null);
 		}
 
-		int numberOfSheets = workbook.getNumberOfSheets();
+		ArrayList<WBSTask> taskList = new ArrayList<WBSTask>();
 
-		// looping over each workbook sheet
-		for (int i = 0; i < numberOfSheets; i++) {			
-			Sheet sheet = workbook.getSheetAt(i);
-			if (!sheet.getSheetName().equals("WBS")) {
-				continue;				
-			}
+		// iterating over each row
+		Sheet wbsSheet = workbook.getSheet("WBS");
+		Iterator<Row> rowIterator = wbsSheet.iterator();
+		while (rowIterator.hasNext()) {
 
-			// iterating over each row
-			Iterator<Row> rowIterator = sheet.iterator();
-			while (rowIterator.hasNext()) {
+			Row row = rowIterator.next();
+			Iterator<Cell> cellIterator = row.cellIterator();
 
-				Row row = rowIterator.next();
-				Iterator<Cell> cellIterator = row.cellIterator();
+			// Iterating over each cell (column wise) in a particular row.
+			WBSTask task = null;
+			while (cellIterator.hasNext()) {
 
-				// Iterating over each cell (column wise) in a particular row.
-				WBSTask task = null;
-				while (cellIterator.hasNext()) {
+				Cell cell = cellIterator.next();
+				// The Cell Containing String will is name.
+				switch (cell.getColumnIndex()) {
+				case WBS_COLUMN_INDEX:
+					if ((Cell.CELL_TYPE_STRING == cell.getCellType()) 
+							&& (cell.getStringCellValue().length() != 0)
+							&& (cell.getStringCellValue().startsWith("D"))) {
+						// Read task from WBS column 
+						task = new WBSTask();
+						task.setCode(cell.getStringCellValue());
+						// Read info column WBS++
+						cell = cellIterator.next();
+						task.setInfo(cell.getStringCellValue());
+						
+						taskList.add(task);
+					}						
+					break;
 
-					Cell cell = cellIterator.next();
-					// The Cell Containing String will is name.
-					switch (cell.getColumnIndex()) {
-					case 1:
-						if ((Cell.CELL_TYPE_STRING == cell.getCellType()) 
-								&& (cell.getStringCellValue().length() != 0)
-								&& (cell.getStringCellValue().startsWith("D"))) {
-							task = new WBSTask();
-							task.setCode(cell.getStringCellValue());
-							taskList.add(task);
-
-							// Append the 'info' in col3 to the WBS code 
-							cell = cellIterator.next();
-							task.setInfo(cell.getStringCellValue());
-						}						
-						break;
-
-					default:
-						break;
-					}
+				default:
+					break;
 				}
 			}
 		}
 
 		try {
-			fis.close();
 			workbook.close();
+			fis.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		return taskList;
-	}
-
-	private static void padTaskListWithExampleTasks(List<WBSTask> taskList) {
-		for (int i = 0 ; i < 10 ; i++) {
-			taskList.add(new WBSTask("code_"+ Integer.toString(i), "info_" + Integer.toString(i)));
-		}
 	}
 
 	private static class WBSTask {
@@ -252,7 +234,7 @@ public class ExcelReader implements ActionListener {
 			return(this.code + ": " + this.info);
 		}
 	}
-	
+
 	public static String getNewTaskName() {
 		return(newTaskName);
 	}

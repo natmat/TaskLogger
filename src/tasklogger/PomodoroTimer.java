@@ -28,6 +28,7 @@ public class PomodoroTimer {
 		countdown = duration;
 		button = new JButton("Pomodoro");
 //		button.setFont(new Font("monospaced", Font.PLAIN, 16));
+		button.setToolTipText("Start/stop the POMODORO");
 		button.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {

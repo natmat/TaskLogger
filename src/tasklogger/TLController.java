@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.beans.IndexedPropertyChangeEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -105,9 +106,9 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 		}
 	}
 
-	public static void newTask() {
-		// Enter new task from Excel
-		ExcelReader.createAndShowGUI(instance);		
+	public static void newTask(final ArrayList<String> arrayList) {
+		// Enter new task 
+		ExcelReader.taskSelectorDialog(instance, arrayList);		
 	}
 	
 	private TLTask validateNewTaskName(final String name) {
