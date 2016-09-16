@@ -11,15 +11,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -27,7 +23,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
-public class TLView extends JFrame implements PropertyChangeListener {
+public class TLView extends JFrame implements PropertyChangeListener, ActionListener {
 	private static final long serialVersionUID = 1L;
 	private TaskButton startButton;
 	private static JPanel mainPanel;
@@ -60,9 +56,9 @@ public class TLView extends JFrame implements PropertyChangeListener {
 		// Draw frame with top and bottom panels.
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-		
+
 		add(new TLMenu());
-		
+
 		controlsPanel = new JPanel();
 		controlsPanel.setLayout(new GridLayout(0, 2));		
 		addResetButtonToControls();
@@ -104,7 +100,7 @@ public class TLView extends JFrame implements PropertyChangeListener {
 				}
 			}
 		});
-		
+
 		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource("tasklogger/pomodoro.png"));
 		setIconImage(icon.getImage());
 	}
@@ -120,8 +116,8 @@ public class TLView extends JFrame implements PropertyChangeListener {
 		// ex.printStackTrace();
 		// }
 
-//		URL url = getClass().getResource("/pomodoro.png");
-//		System.out.println(url.getPath());
+		//		URL url = getClass().getResource("/pomodoro.png");
+		//		System.out.println(url.getPath());
 
 		pomodoroPanel.add(pomodoroTimer.getButton());
 		pomodoroPanel.add(pomodoroTimer.getProgressBar());
@@ -170,56 +166,10 @@ public class TLView extends JFrame implements PropertyChangeListener {
 		newTaskButton = new JButton("Add New Task");
 		newTaskButton.setToolTipText("Add a new task");
 		newTaskButton.setHorizontalAlignment(SwingConstants.LEFT);
-		newTaskButton.addActionListener(new NewTaskButtonListener());
+		newTaskButton.addActionListener(this);
 		newTaskButton.setActionCommand("newTaskButtonPressed");
 		newTaskButton.setBackground(newTaskColor);
 		controlsPanel.add(newTaskButton);
-	}
-
-	private class NewTaskButtonListener implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			String command = e.getActionCommand();
-			if (command.equals("newTaskButtonPressed")) {
-				System.out.println("newTaskButtonPressed");
-				TLController.newTask(createTaskListForSelector());
-			}
-		}
-	}
-	
-	private ArrayList<String> createTaskListForSelector() {
-		// Read task names from 3 sources.
-		ArrayList<String> taskList = ExcelReader.readTaskListFromExcel();
-		if (0 == taskList.size()) {
-			// Read taskList from user prompted file
-			FilePicker fp = new FilePicker("text", "button");
-			fp.setVisible(true);
-			
-//			if (null == taskList) {
-//				// No file, so pad a taskList
-//				padTaskListWithExampleTasks(taskList);
-//			}
-		}
-		return(taskList);
-	}
-	
-	private static void padTaskListWithExampleTasks(final ArrayList<String> inTaskList) {
-		for (int i = 0 ; i < 10 ; i++) {
-			inTaskList.add("code_"+ Integer.toString(i) + "info_" + Integer.toString(i));
-		}
-	}
-
-	private void openTaskFile() {
-		FileInputStream fis = null;
-		try {
-			JFileChooser fileChooser = new JFileChooser();
-			final String FILE_PATH = "resources/typhoon.xlsm";
-			fis = new FileInputStream(FILE_PATH);
-		} catch (FileNotFoundException e) {
-			// No file, so pad a taskList
-			ArrayList<String> taskList = null;
-			padTaskListWithExampleTasks(taskList);
-		}
 	}
 
 	public static void tickTimers(final TLTask inTask, long taskTimeInMs,
@@ -311,4 +261,40 @@ public class TLView extends JFrame implements PropertyChangeListener {
 		Dimension dim = new Dimension();		
 		return dim;
 	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		String command = e.getActionCommand();
+		if (command.equals("newTaskButtonPressed")) {
+			TLUtilities.taskSelectorDialog(TLView.instance, TaskLoader.getTaskList());
+		} 
+		else if (command.equals("taskSelectorComboBox")) {
+			String name = TLUtilities.getNewTaskName();
+			System.out.println("NewTaskName=" + name);
+
+			TLTask newTask = null;
+			if (null != name) {
+				newTask = TLModel.newTask(name);
+				if (newTask == null) {
+					TLView.getInstance().setAlwaysOnTop(false);
+					JOptionPane.showMessageDialog(new JFrame(),
+							"Task already exists.", "New task error",
+							JOptionPane.ERROR_MESSAGE);			
+					TLView.getInstance().setAlwaysOnTop(true);
+				}
+			}
+
+			if (null != newTask) {
+				addTask(newTask.getTaskID());
+				TLController.newTask(name);
+				TLController.taskButtonPressed(newTask.getTaskID());
+			}
+		}
+		else {
+			System.out.println("ERROR");
+			(new IOException()).printStackTrace();
+		}
+	}
 }
+
+

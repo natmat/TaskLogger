@@ -26,15 +26,16 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 		setText(taskName);
 		setHorizontalAlignment(SwingConstants.LEFT);
 
-		setActionCommand("taskButton");
 		addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evt) {
 				if ((evt.getModifiers() & ActionEvent.CTRL_MASK) > 0) {
+					// Pressed with CTRL: rename
 					final String dialogString = "Enter new task name";
 					Object dialogObj = JOptionPane.showInputDialog(null,
 							"Enter new task name", "Edit task name",
 							JOptionPane.QUESTION_MESSAGE, null, null, getText());
+					
 					if (dialogObj != null) {
 						String taskRenamed = dialogObj.toString();
 						if (TLUtilities.isValidName(taskRenamed, dialogString)) {
@@ -43,10 +44,12 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 						}
 					}
 				} else if ((evt.getModifiers() & ActionEvent.ALT_MASK) > 0) {
+					// Pressed with ALT: delete
 					JFrame frameOnTop = new JFrame();
 					frameOnTop.setLocation(getLocation().x, getLocation().y);
 					frameOnTop.setAlwaysOnTop(true);
 					frameOnTop.setVisible(true);
+					
 					int dialogResult = JOptionPane.showConfirmDialog(frameOnTop,
 							"Delete task " + TaskButton.this.taskName + "?",
 							"Delete?", JOptionPane.YES_NO_OPTION);					

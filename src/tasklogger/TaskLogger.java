@@ -17,14 +17,13 @@ public class TaskLogger {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				createAndShowGUI();
+				new TaskLoader().execute();
 				runShutDownTimer();
 			}
 		});	
 	}
 
 	protected static void createAndShowGUI() {
-//		TLUtilities.importFromExcel();
-		
 		model = TLModel.getInstance();
 		controller = TLController.getInstance();
 		view = TLView.getInstance();

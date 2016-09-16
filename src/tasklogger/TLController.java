@@ -5,12 +5,8 @@ import java.awt.event.ActionListener;
 import java.beans.IndexedPropertyChangeEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -42,15 +38,6 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 		String command = e.getActionCommand();
 		if (command.equals("task")) {
 			System.out.println("Action");
-		}
-		else if (command.equals("taskSelectorComboBox")) {
-			String newName = ExcelReader.getNewTaskName();
-			System.out.println("NewTaskName=" + newName);
-			TLTask newTask = validateNewTaskName(newName);
-			if (null != newTask) {
-				TLView.addTask(newTask.getTaskID());
-				TLController.taskButtonPressed(newTask.getTaskID());
-			}
 		}
 	}
 
@@ -106,23 +93,11 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 		}
 	}
 
-	public static void newTask(final ArrayList<String> arrayList) {
-		// Enter new task 
-		ExcelReader.taskSelectorDialog(instance, arrayList);		
+	public static void newTask(final String newName) {
+		// Add new named task
+		TLModel.newTask(newName);
 	}
 	
-	private TLTask validateNewTaskName(final String name) {
-		TLTask task = TLModel.newTask(name);
-		if (task == null) {
-			TLView.getInstance().setAlwaysOnTop(false);
-			JOptionPane.showMessageDialog(new JFrame(),
-					"Task already exists.", "New task error",
-					JOptionPane.ERROR_MESSAGE);			
-			TLView.getInstance().setAlwaysOnTop(true);
-		}
-		return(task);
-	}
-
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		if (evt instanceof IndexedPropertyChangeEvent) {
@@ -154,12 +129,9 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public static Object getWaiter() {
-		// TODO Auto-generated method stub
 		return waiter;
 	}
 	

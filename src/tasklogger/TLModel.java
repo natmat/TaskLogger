@@ -58,6 +58,11 @@ public class TLModel {
 	}
 
 	public static TLTask newTask(final String inName) {
+		// Exit early 
+		if (null == inName) {
+			return(null);
+		}
+		
 		// Find task in arrayTask
 		for (TLTask t : taskArray) {
 			if (t.getName().equals(inName)) {
@@ -134,17 +139,16 @@ public class TLModel {
 		}
 	}
 
-	public static void exportCVSFile() throws IOException {
-		String fileName = "C:/tmp/" + ROOT_FILE_NAME + "_" + TLUtilities.getToday()
-				+ ".csv";
-		
+	public static void exportCVSFile() throws IOException {		
+		String fileName = getDataLogFile();
+
 		FileWriter writer;
 		writer = new FileWriter(fileName);
 		long timeValue = TLTask.getTotalRunTimeInMs();
 		writer.append("Task,ms,HHmmss\n");
 		writer.append("Total," + timeValue + ","
 				+ TLUtilities.getHMSString(timeValue) + "\n");
-		
+
 		// Pad the name to align the ','
 		int maxNameLength = 0;
 		for (TLTask t : taskArray) {
@@ -153,20 +157,25 @@ public class TLModel {
 			}
 		}
 		String padString = "%0$-" + maxNameLength + "s";
-		
+
 		for (TLTask t : taskArray) {
 			timeValue = t.getActiveTimeInMs();
 			writer.append(String.format(padString, t.getName()) + "," + timeValue + ","
 					+ TLUtilities.getHMSString(timeValue) + "\n");
 		}
-		
+
 		writer.close();
 	}
 
-	public static void importCSVFile() throws FileNotFoundException,
-			IOException {
-		String fileName = ROOT_FILE_NAME + "_" + TLUtilities.getToday()
+	private static String getDataLogFile() {
+		String fileName = "C:/tmp/" + ROOT_FILE_NAME + "_" + TLUtilities.getToday()
 				+ ".csv";
+		return(fileName);
+	}
+
+	public static void importCSVFile() throws FileNotFoundException,
+	IOException {
+		String fileName = getDataLogFile();
 		File f = new File(fileName);
 		if (f.exists() && !f.isDirectory()) {
 			BufferedReader br = new BufferedReader(new FileReader(f));
@@ -175,7 +184,7 @@ public class TLModel {
 			if (null != line) {
 				String[] input = line.split(",");
 				TLTask.setTotalTime(Long.parseLong(input[CsvFormat.TIME_IN_MS
-						.ordinal()]));
+				                                         .ordinal()]));
 				while ((line = br.readLine()) != null) {
 					// Task times
 					input = line.split(",");
