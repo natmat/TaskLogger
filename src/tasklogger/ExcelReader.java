@@ -1,11 +1,5 @@
 package tasklogger;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -20,14 +14,22 @@ import java.util.concurrent.SynchronousQueue;
 
 import javax.swing.SwingUtilities;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 public class ExcelReader implements ActionListener {
 
 	//	private static final String FILE_PATH = "C:/My_Workspaces/MyJava/TaskLogger/resources/typhoon.xlsm";
 	private static final int WBS_COLUMN_INDEX = 1;
 
 	protected SynchronousQueue<Boolean> queue = null;	
-	private static ExcelReader instance;
 	private static String newTaskName = null;
+	
+	private static final Object instanceLock = new Object();
+	private static volatile ExcelReader instance;
 
 	// private static final String FILE_PATH = "typhoon.xlsm";
 
@@ -40,9 +42,11 @@ public class ExcelReader implements ActionListener {
 		});
 	}
 
-	public static ExcelReader getIstance() {
+	public static ExcelReader getInstance() {
 		if (instance == null) {
-			instance = new ExcelReader();
+			synchronized (instanceLock) {
+				instance = new ExcelReader();
+			}
 		}
 		return (instance);
 	}
@@ -69,6 +73,10 @@ public class ExcelReader implements ActionListener {
 		}
 	}
 
+	/** 
+	 * Task a tasklist and sorts it in-situ
+	 * @param taskList
+	 */
 	private static void sortTaskListAscending(List<WBSTask> taskList) {
 		Collections.sort(taskList, new Comparator<WBSTask>() {
 			@Override
@@ -119,7 +127,7 @@ public class ExcelReader implements ActionListener {
 						cell = cellIterator.next();
 						task.setInfo(cell.getStringCellValue());
 
-						taskList.add(task);
+						taskList.add(task); 
 					}						
 					break;
 

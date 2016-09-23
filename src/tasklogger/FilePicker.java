@@ -34,14 +34,14 @@ public class FilePicker extends JPanel {
 	}
 
 	public FilePicker(String textFieldLabel, String buttonLabel) {
-		fileChooser = new JFileChooser();
+		setFileChooser(new JFileChooser());
 		setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 
-		label = new JLabel(textFieldLabel);
-		textField = new JTextField(30);
+		FilePicker.label = new JLabel(textFieldLabel);
+		FilePicker.textField = new JTextField(30);
 
-		button = new JButton(buttonLabel);		
-		button.addActionListener(new ActionListener() {
+		FilePicker.button = new JButton(buttonLabel);		
+		FilePicker.button.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -49,9 +49,13 @@ public class FilePicker extends JPanel {
 			}
 		});
 
-		add(label);
-		add(textField);
-		add(button);
+		add(FilePicker.label);
+		add(FilePicker.textField);
+		add(FilePicker.button);
+	}
+	
+	private static void setFileChooser(final JFileChooser fc) {
+		FilePicker.fileChooser = fc;
 	}
 
 	private void buttonActionPerformed(ActionEvent evt) {

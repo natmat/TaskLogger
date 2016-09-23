@@ -86,6 +86,6 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		// TODO
+		System.out.println(new Object(){}.getClass().getEnclosingMethod().getName());
 	}
 }

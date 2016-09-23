@@ -80,7 +80,7 @@ public class TLModel {
 	 * 
 	 * @param taskID
 	 */
-	public void tasktButtonPressed(int taskID) {
+	public static void tasktButtonPressed(int taskID) {
 		TLTask task = getTaskWithID(taskID);
 
 		// Toggle activeTask

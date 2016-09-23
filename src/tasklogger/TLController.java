@@ -11,8 +11,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 public class TLController implements ActionListener, PropertyChangeListener, Runnable {
-	private static TLModel model;
-	private static TLController instance;
+	
+	private static TLController instance = new TLController();
 	private final static Object waiter = new Object();
 
 	public static TLController getInstance() {
@@ -24,13 +24,6 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 
 	private TLController() {
 		TLModel.addPropertyChangeListener(this);		
-	}
-
-	public void setModel(final TLModel inModel) {
-		model = inModel;
-	}
-
-	public void setView(final TLView inView) {
 	}
 
 	@Override
@@ -46,7 +39,7 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 	 * @param taskID
 	 */
 	public static void taskButtonPressed(int taskID) {
-		model.tasktButtonPressed(taskID);
+		TLModel.tasktButtonPressed(taskID);
 	}
 
 	private class CustomDialog extends JDialog {
@@ -68,7 +61,7 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 			inputPanel = new JPanel();
 			getContentPane().add(inputPanel);
 			inputText = new JTextField(defaultName, 24);
-			
+
 			// Handle user pressing ENTER
 			newTaskName = null;
 			inputText.addActionListener(new ActionListener() {
@@ -97,7 +90,7 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 		// Add new named task
 		TLModel.newTask(newName);
 	}
-	
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		if (evt instanceof IndexedPropertyChangeEvent) {
@@ -134,7 +127,7 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 	public static Object getWaiter() {
 		return waiter;
 	}
-	
+
 	@SuppressWarnings("unused")
 	private static String showTaskNameDialog() {
 		String taskName = null;

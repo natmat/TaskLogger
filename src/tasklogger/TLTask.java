@@ -9,7 +9,6 @@ import javax.swing.Timer;
 public class TLTask {
 	private static TLTask activeTask = null;
 	private long activeTimeInMs;
-	private ActionListener actionListender;
 	private String name;
 	private Boolean running;
 	private int taskID = 0;
@@ -40,7 +39,7 @@ public class TLTask {
 	}
 
 	private void setTaskID(final int id) {
-		this.taskID = id;
+		taskID = id;
 	}
 
 	public TLTask(String inName) {
@@ -92,10 +91,6 @@ public class TLTask {
 
 	public String getName() {
 		return name;
-	}
-
-	public ActionListener getActionListener() {
-		return (actionListender);
 	}
 
 	public int getTaskID() {

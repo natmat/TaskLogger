@@ -9,9 +9,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 public class TaskLogger {
-	private static TLController controller;
 	private static TLView view;
-	private static TLModel model;
 
 	public static void main(String[] args) {    
 		SwingUtilities.invokeLater(new Runnable() {
@@ -24,13 +22,7 @@ public class TaskLogger {
 	}
 
 	protected static void createAndShowGUI() {
-		model = TLModel.getInstance();
-		controller = TLController.getInstance();
 		view = TLView.getInstance();
-		
-		controller.setView(view);
-		controller.setModel(model);
-		
 		view.setTitle("Task logger");
 		view.setVisible(true);
 		
@@ -42,7 +34,7 @@ public class TaskLogger {
 		}
 		TLModel.addModelToView();
 	}
-	
+
 	private static void runShutDownTimer() {		
 		Calendar now = Calendar.getInstance();
 		long startTime = now.getTimeInMillis();

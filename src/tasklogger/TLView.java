@@ -25,7 +25,6 @@ import javax.swing.WindowConstants;
 
 public class TLView extends JFrame implements PropertyChangeListener, ActionListener {
 	private static final long serialVersionUID = 1L;
-	private TaskButton startButton;
 	private static JPanel mainPanel;
 	private JButton newTaskButton;
 	private static JPanel controlsPanel;
@@ -185,14 +184,6 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 
 	public static void setTotalTimerInMs(long timeInMs) {
 		totalTimer.setText(TLUtilities.getHMSString(timeInMs));
-	}
-
-	public void setTaskState(Boolean running) {
-		if (running) {
-			startButton.start();
-		} else {
-			startButton.stop();
-		}
 	}
 
 	public static void addTask(int taskID) {

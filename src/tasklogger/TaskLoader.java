@@ -2,6 +2,8 @@ package tasklogger;
 
 import java.util.ArrayList;
 
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 public class TaskLoader extends SwingWorker<ArrayList<String>, Void> {
@@ -16,7 +18,37 @@ public class TaskLoader extends SwingWorker<ArrayList<String>, Void> {
 	}
 
 	public static ArrayList<String> getTaskList() {
+		showTimedInfoDialog("No tasklist loaded");
+
+		// Add taskList default index zero entry
+		if (null == taskList) {
+			ArrayList<String> tempArray = new ArrayList<>();
+			tempArray.add(defaultTaskName);
+			return(tempArray);
+		}
 		return taskList;
+	}
+
+	private static void showTimedInfoDialog(final String msgString) {
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				// Create 2s popup
+				final int delay2seconds = 2000;
+				JOptionPane pane = new JOptionPane(msgString, JOptionPane.INFORMATION_MESSAGE);
+				JDialog dialog = pane.createDialog("Info");
+				dialog.setVisible(true);
+				System.out.println(">>");
+				try {
+					Thread.sleep(delay2seconds);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				System.out.println("<<");
+				dialog.setVisible(false);
+			}
+		});
+		t.start();
 	}
 
 	public TaskLoader() {
@@ -30,15 +62,16 @@ public class TaskLoader extends SwingWorker<ArrayList<String>, Void> {
 
 	@Override
 	protected ArrayList<String> doInBackground() throws Exception {
+		System.out.println("Task loading...");
+		
 		// 2 sources of input: excel and CSV		
 		taskList = ExcelReader.createTaskListFromExcel(EXCEL_FILE_PATH);
 		if (null == taskList) {
 			// Read task from CSV file
 			taskList = readTaskFromCSVFile();
 		}
-		System.out.println("TaskList loaded");
-		
-		taskList.add(0, defaultTaskName);
+		System.out.println("TaskList loaded");		
+		taskList.add(defaultTaskName);
 		return taskList;
 	}
 
