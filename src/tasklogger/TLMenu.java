@@ -14,33 +14,52 @@ import javax.swing.KeyStroke;
 public class TLMenu extends JMenuBar {
 	private static final long serialVersionUID = 1342845686975967732L;
 	private JMenu fileMenu;
-	private JMenuItem saveMenuItem;
+	private MenuActionListener menuListener;
 	
 	public TLMenu() {
 		super();
+		
+		menuListener = new MenuActionListener();
+		
 		fileMenu = new JMenu("File");
 		fileMenu.setMnemonic(KeyEvent.VK_F);
 		fileMenu.getAccessibleContext().setAccessibleDescription("sAD");
 		add(fileMenu);
 		
 		//a group of JMenuItems
-		saveMenuItem = new JMenuItem("Save to file", KeyEvent.VK_S);
+		JMenuItem saveMenuItem = new JMenuItem("Save to file", KeyEvent.VK_S);
+		saveMenuItem.setActionCommand("Save");
 		saveMenuItem.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_S, ActionEvent.CTRL_MASK));
-		saveMenuItem.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
+		saveMenuItem.addActionListener(menuListener);
+		
+		JMenuItem newTaskMenuItem = new JMenuItem("Add new task", KeyEvent.VK_N);
+		newTaskMenuItem.setActionCommand("New");
+		newTaskMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
+		newTaskMenuItem.addActionListener(menuListener);
+				
+		fileMenu.add(saveMenuItem);
+		fileMenu.add(newTaskMenuItem);
+		
+		add(Box.createHorizontalGlue());
+	}
+	
+	class MenuActionListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			switch(e.getActionCommand()) {
+			case "Save":
 				try {
 					TLModel.exportCVSFile();
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+				break;
+			case "New":
+				TLView.newTaskButtonPressed();
+				break;
 			}
-		});		
-		fileMenu.add(saveMenuItem);
-		
-		add(Box.createHorizontalGlue());
+		}
 	}
-
 }

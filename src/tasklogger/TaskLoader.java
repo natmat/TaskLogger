@@ -18,10 +18,9 @@ public class TaskLoader extends SwingWorker<ArrayList<String>, Void> {
 	}
 
 	public static ArrayList<String> getTaskList() {
-		showTimedInfoDialog("No tasklist loaded");
-
 		// Add taskList default index zero entry
 		if (null == taskList) {
+//			showTimedInfoDialog("No tasklist loaded");
 			ArrayList<String> tempArray = new ArrayList<>();
 			tempArray.add(defaultTaskName);
 			return(tempArray);
@@ -29,6 +28,7 @@ public class TaskLoader extends SwingWorker<ArrayList<String>, Void> {
 		return taskList;
 	}
 
+	@SuppressWarnings("unused")
 	private static void showTimedInfoDialog(final String msgString) {
 		Thread t = new Thread(new Runnable() {
 			@Override
@@ -75,7 +75,7 @@ public class TaskLoader extends SwingWorker<ArrayList<String>, Void> {
 		return taskList;
 	}
 
-	public static Object getDefaultTaskName() {
+	public static String getDefaultTaskName() {
 		return(defaultTaskName);
 	}
 }

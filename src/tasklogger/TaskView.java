@@ -1,6 +1,7 @@
 package tasklogger;
 
 import java.awt.Font;
+import java.util.ArrayList;
 
 import javax.swing.JTextField;
 
@@ -35,4 +36,14 @@ public class TaskView {
 		timer = null;
 		taskID = 0;
 	}
+
+	public static TaskView getTaskViewWithId(final ArrayList<TaskView> al, int taskID) {
+		for (TaskView tv : al) {
+			if (tv.getTaskID() == taskID) {
+				return(tv);
+			}
+		}
+		return(null);
+	}
 }
+

@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.IndexedPropertyChangeEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -36,7 +37,6 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 	final private Color saveColor = new Color(255, 255, 102);
 	final private Color newTaskColor = new Color(255, 153, 51);
 	final private Color resetColor = new Color(204,229,255);
-
 	public static TLView getInstance() {
 		if (instance == null) {
 			instance = new TLView();
@@ -45,6 +45,10 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 	}
 
 	private TLView() {
+		TLController.getInstance();
+
+		TLModel.addPropertyChangeListener(this);
+
 		taskViewList = new ArrayList<TaskView>();
 		setupFrame();
 		setAlwaysOnTop(true);
@@ -154,8 +158,12 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 		resetButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("RESET");
-				TLModel.reset();
+				if (!TLView.taskViewList.isEmpty()) {
+					TLModel.reset();
+				}
+				else {
+					TLModel.setTotalRunTimeInMs(0);
+				}
 			}
 		});
 		controlsPanel.add(resetButton);
@@ -174,11 +182,10 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 	public static void tickTimers(final TLTask inTask, long taskTimeInMs,
 			long totalTimeInMs) {
 		setTotalTimerInMs(totalTimeInMs);
-		for (TaskView tv : taskViewList) {
-			if (tv.getTaskID() == inTask.getTaskID()) {
-				tv.getTimer().setText(TLUtilities.getHMSString(taskTimeInMs));
-				return;
-			}
+
+		TaskView tv = TaskView.getTaskViewWithId(taskViewList, inTask.getTaskID());
+		if (tv != null) {
+			tv.getTimer().setText(TLUtilities.getHMSString(taskTimeInMs));
 		}
 	}
 
@@ -187,27 +194,45 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 	}
 
 	public static void addTask(int taskID) {
-		for (TaskView t : taskViewList) {
-			if (t.getTaskID() == taskID) {
-				System.err.println("Duplicate task");
-				return;
-			}
+		if (null != TaskView.getTaskViewWithId(taskViewList, taskID)) {
+			System.err.println("Duplicate task");
+		} 
+		else {
+			// Add new task
+			TaskView tv = new TaskView(taskID);
+			taskViewList.add(tv);
+			taskPanel.add(tv.getButton());
+			taskPanel.add(tv.getTimer());
+			getInstance().pack();
 		}
-
-		TaskView tv = new TaskView(taskID);
-		taskViewList.add(tv);
-		taskPanel.add(tv.getButton());
-		taskPanel.add(tv.getTimer());
-		getInstance().pack();
 	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		System.out.println("PCE:" + evt);
+		System.out.println("TLView PCE:" + evt);
+		if (evt instanceof IndexedPropertyChangeEvent) {
+			// Process per task pce's
+			taskIndexedPropertyChange((IndexedPropertyChangeEvent) evt);
+		}
+		else {
+			if (evt.getPropertyName().startsWith("totalRunTimeInMs")) {
+				TLView.setTotalTimerInMs(((Number)evt.getNewValue()).longValue());
+			} 
+		}
 	}
 
-	public static void taskEvent(int taskID, Object inNewValue) {
-		Boolean taskRunning = ((Boolean) inNewValue).booleanValue();
+	private void taskIndexedPropertyChange(IndexedPropertyChangeEvent evt) {
+		String name = evt.getPropertyName();
+		int taskID = evt.getIndex();
+		if (name.startsWith("taskStateChange")) {
+			TLView.taskEvent(taskID, ((Boolean)evt.getNewValue()).booleanValue());
+		} 
+		else if (name.startsWith("activeTimeInMs")) {
+			TLView.setActiveTimeInMs(taskID, ((Number)evt.getNewValue()).longValue());
+		} 
+	}
+
+	public static void taskEvent(int taskID, Boolean taskRunning) {
 		for (TaskView tv : taskViewList) {
 			if (tv.getTaskID() == taskID) {
 				if (taskRunning) {
@@ -218,14 +243,14 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 				return;
 			}
 		}
-
 	}
 
 	public static void deleteTask(int taskID) {
 		for (TaskView tv : taskViewList) {
 			if (tv.getTaskID() == taskID) {
-				removeTaskViewFromPanel(tv);
+				removeTaskViewFromPanel(tv);				
 				tv.deleteTask();
+				taskViewList.remove(tv);
 				tv = null;
 				return;
 			}
@@ -239,8 +264,7 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 		getInstance().pack();
 	}
 
-	public static void setActiveTimeInMs(int taskId, Object inObj) {
-		long timeInMs = ((Number) inObj).longValue();
+	public static void setActiveTimeInMs(int taskId, long timeInMs) {
 		for (TaskView tv : taskViewList) {
 			if (tv.getTaskID() == taskId) {
 				tv.getTimer().setText(TLUtilities.getHMSString(timeInMs));
@@ -257,7 +281,7 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 	public void actionPerformed(ActionEvent e) {
 		String command = e.getActionCommand();
 		if (command.equals("newTaskButtonPressed")) {
-			TLUtilities.taskSelectorDialog(TLView.instance, TaskLoader.getTaskList());
+			newTaskButtonPressed();
 		} 
 		else if (command.equals("taskSelectorComboBox")) {
 			String name = TLUtilities.getNewTaskName();
@@ -285,6 +309,10 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 			System.out.println("ERROR");
 			(new IOException()).printStackTrace();
 		}
+	}
+	
+	public static void newTaskButtonPressed() {
+		TLUtilities.taskSelectorDialog(TLView.instance, TaskLoader.getTaskList());
 	}
 }
 

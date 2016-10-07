@@ -10,6 +10,7 @@ import javax.swing.Timer;
 
 public class TaskLogger {
 	private static TLView view;
+	private static TLModel model;
 
 	public static void main(String[] args) {    
 		SwingUtilities.invokeLater(new Runnable() {
@@ -22,12 +23,14 @@ public class TaskLogger {
 	}
 
 	protected static void createAndShowGUI() {
+		model = TLModel.getInstance();
 		view = TLView.getInstance();
+		
 		view.setTitle("Task logger");
 		view.setVisible(true);
 		
 		try {
-			TLModel.importCSVFile();
+			model.importCSVFile();
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(null, "Import error",
 					"Could not import times from file.", JOptionPane.WARNING_MESSAGE);

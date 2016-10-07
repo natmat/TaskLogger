@@ -2,7 +2,6 @@ package tasklogger;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.IndexedPropertyChangeEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.JDialog;
@@ -12,7 +11,7 @@ import javax.swing.JTextField;
 
 public class TLController implements ActionListener, PropertyChangeListener, Runnable {
 	
-	private static TLController instance = new TLController();
+	private static TLController instance = null;
 	private final static Object waiter = new Object();
 
 	public static TLController getInstance() {
@@ -91,33 +90,12 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 		TLModel.newTask(newName);
 	}
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		if (evt instanceof IndexedPropertyChangeEvent) {
-			// Process per task pce's
-			taskIndexedPropertyChange((IndexedPropertyChangeEvent) evt);
-		} else {
-			// Process per class pce's
-			String name = evt.getPropertyName();
-			if (name.startsWith("totalRunTimeInMs")) {
-				TLView.setTotalTimerInMs(((Number) evt.getNewValue())
-						.longValue());
-			}
-		}
-	}
-
-	private void taskIndexedPropertyChange(IndexedPropertyChangeEvent evt) {
-		String name = evt.getPropertyName();
-		int taskID = evt.getIndex();
-		if (name.startsWith("taskStateChange")) {
-			TLView.taskEvent(taskID, evt.getNewValue());
-		} else if (name.startsWith("activeTimeInMs")) {
-			TLView.setActiveTimeInMs(taskID, evt.getNewValue());
-		}
-	}
-
-	public static void deleteTask(int taskID) {
+	public static void deleteTaskFormView(int taskID) {
 		TLView.deleteTask(taskID);
+	}
+
+	public static void deleteTaskFromModel(int taskID) {
+		TLModel.deleteTask(taskID);
 	}
 
 	@Override
@@ -138,5 +116,10 @@ public class TLController implements ActionListener, PropertyChangeListener, Run
 			taskName = null;
 		}
 		return taskName;
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		System.out.println("TLController PCE");
 	}
 }

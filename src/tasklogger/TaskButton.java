@@ -3,15 +3,12 @@ package tasklogger;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 
-public class TaskButton extends JButton implements PropertyChangeListener {
+public class TaskButton extends JButton {
 
 	private static final long serialVersionUID = -9193221835511157635L;
 	private int taskID;
@@ -39,6 +36,7 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 					if (dialogObj != null) {
 						String taskRenamed = dialogObj.toString();
 						if (TLUtilities.isValidName(taskRenamed, dialogString)) {
+							
 							TLModel.setTaskName(taskID, taskRenamed);
 							setText(taskRenamed);
 						}
@@ -54,7 +52,7 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 							"Delete task " + TaskButton.this.taskName + "?",
 							"Delete?", JOptionPane.YES_NO_OPTION);					
 					if (dialogResult == JOptionPane.YES_OPTION) {
-						TLModel.deleteTask(taskID);
+						TLController.deleteTaskFormView(taskID);
 					}
 					frameOnTop.dispose();
 				} else {
@@ -63,9 +61,8 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 			}
 		});
 
-		TLModel.addPropertyChangeListener(this);
+		// Task inactive on new
 		stop();
-
 	}
 
 	public void start() {
@@ -83,9 +80,6 @@ public class TaskButton extends JButton implements PropertyChangeListener {
 		setOpaque(true);
 		setBorderPainted(true);
 	}
-
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		System.out.println(new Object(){}.getClass().getEnclosingMethod().getName());
-	}
 }
+
+

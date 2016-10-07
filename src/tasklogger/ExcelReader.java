@@ -54,15 +54,23 @@ public class ExcelReader implements ActionListener {
 	private ExcelReader() {
 	}
 
+	/**
+	 * Read the WBS tasks from the excel workbook and write to taskList
+	 * 
+	 * @param excelFile
+	 * @return
+	 */
 	public static ArrayList<String> createTaskListFromExcel(final String excelFile) {
 		ArrayList<String> taskList = null;
-
+		
+		// Read from file into the wbsList, then convert to taskList
 		ArrayList<WBSTask> wbsList = readWbsListFromExcel(excelFile);
 		if (wbsList != null) {
 			taskList = new ArrayList<>();
 			convertWbsListToTaskList(wbsList, taskList);
+			taskList.add(0, TaskLoader.getDefaultTaskName());
 		}
-
+		
 		return(taskList);
 	}
 

@@ -1,5 +1,7 @@
 package tasklogger;
 
+import java.beans.IndexedPropertyChangeEvent;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.BufferedReader;
@@ -18,7 +20,7 @@ import javax.swing.JOptionPane;
  * @author Nathan
  * 
  */
-public class TLModel {
+public class TLModel implements PropertyChangeListener {
 
 	private static ArrayList<TLTask> taskArray;
 	private static TLModel instance;
@@ -62,7 +64,7 @@ public class TLModel {
 		if (null == inName) {
 			return(null);
 		}
-		
+
 		// Find task in arrayTask
 		for (TLTask t : taskArray) {
 			if (t.getName().equals(inName)) {
@@ -173,7 +175,13 @@ public class TLModel {
 		return(fileName);
 	}
 
-	public static void importCSVFile() throws FileNotFoundException,
+	/**
+	 * Read in the dated CSV log file for the taskLogger and populate the taskArray
+	 * 
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public void importCSVFile() throws FileNotFoundException,
 	IOException {
 		String fileName = getDataLogFile();
 		File f = new File(fileName);
@@ -199,13 +207,12 @@ public class TLModel {
 	}
 
 	public static void deleteTask(int taskID) {
-		TLController.deleteTask(taskID);
+		TLController.deleteTaskFormView(taskID);
 		TLTask t = getTaskWithID(taskID);
 		TLTask.setTotalTime(TLTask.getTotalRunTimeInMs()
 				- t.getActiveTimeInMs());
 		taskArray.remove(t);
 		t = null;
-
 	}
 
 	public static String getTaskTimeWithID(int taskID) {
@@ -221,25 +228,43 @@ public class TLModel {
 			return;
 		}
 
-		for (TLTask t : taskArray) {
-			setActiveTimeInMs(t.getTaskID(), 0);
-		}
 		setTotalRunTimeInMs(0);
+		for (TLTask t : taskArray) {
+			resetActiveTime(t.getTaskID());
+		}
 	}
 
 	public static void setTotalRunTimeInMs(long timeInMs) {
 		final long before = TLTask.getTotalRunTimeInMs();
 		TLTask.setTotalTime(timeInMs);
-		pcs.firePropertyChange("totalRunTimeInMs", before,
-				TLTask.getTotalRunTimeInMs());
+		// No taskID to index for this change
+		pcs.firePropertyChange("totalRunTimeInMs", before, TLTask.getTotalRunTimeInMs());
 	}
 
-	public static void setActiveTimeInMs(int taskID, long timeInMs) {
+	public static void resetActiveTime(int taskID) {
+		final long resetTime = 0L;
 		TLTask t = getTaskWithID(taskID);
 		final long before = t.getActiveTimeInMs();
-		t.setActiveTimeInMs(timeInMs);
-		pcs.fireIndexedPropertyChange("activeTimeInMs", taskID, before,
-				t.getActiveTimeInMs());
+		t.setActiveTimeInMs(resetTime);
+		// Fire taskID-indexed change
+		pcs.fireIndexedPropertyChange("activeTimeInMs", taskID, before, t.getActiveTimeInMs());
 	}
 
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		if (evt instanceof IndexedPropertyChangeEvent) {
+			IndexedPropertyChangeEvent ipce = (IndexedPropertyChangeEvent)evt;
+			String name = ipce.getPropertyName();
+			if (null != name) {
+				if (name.equals("ChangeTaskName")) {				
+				}
+				setTaskName(ipce.getIndex(), ipce.getNewValue().toString());
+			} 
+		}
+	}	
 }
+
+
+
+
+
