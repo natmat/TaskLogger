@@ -276,7 +276,7 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 		Dimension dim = new Dimension();		
 		return dim;
 	}
-
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String command = e.getActionCommand();

@@ -3,15 +3,24 @@ package tasklogger;
 import java.util.ArrayList;
 
 import javax.swing.JDialog;
-import javax.swing.JOptionPane;
+import javax.swing.JFrame;
 import javax.swing.SwingWorker;
 
-public class TaskLoader extends SwingWorker<ArrayList<String>, Void> {
+public class TaskLoader extends SwingWorker<Void, Void> {
 	static boolean loaded = false;
 	static ArrayList<String> taskList = null;
-	
-	private static final String EXCEL_FILE_PATH = "resources/typhoon.xlsm";
+
+	private static final String EXCEL_FILE_PATH = "C:/My_Workspaces/MyGit/MyJava/TaskLogger/resources/tasks.xlsm";
 	private static final String defaultTaskName = "[Enter new task info/code]";
+
+	public static void main() {
+		TaskLoader loader = new TaskLoader();
+		try {
+			loader.execute();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	public static final String getExcelFilePath() {
 		return(EXCEL_FILE_PATH);
@@ -20,7 +29,6 @@ public class TaskLoader extends SwingWorker<ArrayList<String>, Void> {
 	public static ArrayList<String> getTaskList() {
 		// Add taskList default index zero entry
 		if (null == taskList) {
-//			showTimedInfoDialog("No tasklist loaded");
 			ArrayList<String> tempArray = new ArrayList<>();
 			tempArray.add(defaultTaskName);
 			return(tempArray);
@@ -28,51 +36,56 @@ public class TaskLoader extends SwingWorker<ArrayList<String>, Void> {
 		return taskList;
 	}
 
-	@SuppressWarnings("unused")
 	private static void showTimedInfoDialog(final String msgString) {
+		final JDialog dialog = new JDialog(new JFrame(), msgString, false);
+		dialog.setAlwaysOnTop(true);		
+		dialog.setSize(400, 20);
+		dialog.setLocationRelativeTo(TLView.getInstance());
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				// Create 2s popup
-				final int delay2seconds = 2000;
-				JOptionPane pane = new JOptionPane(msgString, JOptionPane.INFORMATION_MESSAGE);
-				JDialog dialog = pane.createDialog("Info");
-				dialog.setVisible(true);
+				final int delay2seconds = 4000;
 				System.out.println(">>");
 				try {
 					Thread.sleep(delay2seconds);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				System.out.println("<<");
-				dialog.setVisible(false);
+				finally {
+					dialog.setVisible(false);
+					dialog.dispose();
+					System.out.println("<<");
+				}
 			}
 		});
 		t.start();
+		dialog.setVisible(true);
 	}
 
 	public TaskLoader() {
-
+		//		ArrayList<String> l = readTaskFromCSVFile();
 	}
 
 	private static ArrayList<String> readTaskFromCSVFile() {
-		// TODO Auto-generated method stub
+		@SuppressWarnings("unused")
+		FilePicker fp = new FilePicker("Load task file", "Load");
 		return null;
 	}
 
 	@Override
-	protected ArrayList<String> doInBackground() throws Exception {
-		System.out.println("Task loading...");
-		
-		// 2 sources of input: excel and CSV		
+	protected Void doInBackground() throws Exception {
+		System.out.println("Tasks loading...");
+
+		// 2 sources of input: excel, or that fails try CSV		
 		taskList = ExcelReader.createTaskListFromExcel(EXCEL_FILE_PATH);
 		if (null == taskList) {
-			// Read task from CSV file
+			showTimedInfoDialog("ERROR: No excel datafile");
 			taskList = readTaskFromCSVFile();
 		}
-		System.out.println("TaskList loaded");		
-		taskList.add(defaultTaskName);
-		return taskList;
+		taskList.add(0, TaskLoader.getDefaultTaskName());
+
+		System.out.println(((null == taskList) ? "No " : "") + "Tasks Loaded");
+		return null;
 	}
 
 	public static String getDefaultTaskName() {

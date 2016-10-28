@@ -22,6 +22,7 @@ public class FilePicker extends JPanel {
 	public static void main(String args[]) {
 		FilePicker fp = new FilePicker("Open a task list file", "Browse...");
 		JFrame frame = new JFrame();
+		frame.setTitle("Select a file to open");
 		frame.add(fp);
 
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -29,14 +30,11 @@ public class FilePicker extends JPanel {
 		frame.setLocationRelativeTo(null);    // Centre on screen
 
 		frame.setVisible(true);
-
-		System.out.println("PFM=" + pickInputFile(true));
 	}
 
 	public FilePicker(String textFieldLabel, String buttonLabel) {
-		setFileChooser(new JFileChooser());
+		FilePicker.fileChooser = new JFileChooser("C:/My_Workspaces/MyGit/MyJava/TaskLogger");
 		setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-
 		FilePicker.label = new JLabel(textFieldLabel);
 		FilePicker.textField = new JTextField(30);
 
@@ -54,22 +52,13 @@ public class FilePicker extends JPanel {
 		add(FilePicker.button);
 	}
 	
-	private static void setFileChooser(final JFileChooser fc) {
-		FilePicker.fileChooser = fc;
-	}
-
 	private void buttonActionPerformed(ActionEvent evt) {
 		if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			inputFileName = fileChooser.getSelectedFile().getAbsolutePath();
-//			textField.setText(fileChooser.getSelectedFile().getAbsolutePath());		
-			setVisible(false);
-			System.out.println(inputFileName);
+			textField.setText(inputFileName);
+			System.out.println("DONE " + inputFileName);
+			fileChooser.setVisible(false);
 		}
-	}
-
-	public static String pickInputFile(boolean show) {
-//		setVisible(show);
-		return(inputFileName);	
 	}
 }
 

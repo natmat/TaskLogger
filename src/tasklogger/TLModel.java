@@ -24,7 +24,7 @@ public class TLModel implements PropertyChangeListener {
 
 	private static ArrayList<TLTask> taskArray;
 	private static TLModel instance;
-	private static PropertyChangeSupport pcs;
+	private static PropertyChangeSupport pcs = new PropertyChangeSupport(getInstance());
 	private final static String ROOT_FILE_NAME = "tasklogger";
 
 	private enum CsvFormat {

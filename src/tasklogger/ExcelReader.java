@@ -10,9 +10,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
 
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -27,9 +33,11 @@ public class ExcelReader implements ActionListener {
 
 	protected SynchronousQueue<Boolean> queue = null;	
 	private static String newTaskName = null;
-	
+
 	private static final Object instanceLock = new Object();
 	private static volatile ExcelReader instance;
+
+	private static JProgressBar progressBar;
 
 	// private static final String FILE_PATH = "typhoon.xlsm";
 
@@ -37,7 +45,13 @@ public class ExcelReader implements ActionListener {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				// Create a task list (attempting to populate it from a file)
-				createTaskListFromExcel(TaskLoader.getExcelFilePath());
+				ArrayList<String> taskList = createTaskListFromExcel(TaskLoader.getExcelFilePath());
+
+				Boolean tasksFound = (taskList != null);
+				String message = tasksFound ? "ExcelReader complete" : "ExcelReader failed";
+				JOptionPane.showMessageDialog(new JFrame(),
+						message, "ExcelReader",
+						tasksFound ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
 			}
 		});
 	}
@@ -62,22 +76,73 @@ public class ExcelReader implements ActionListener {
 	 */
 	public static ArrayList<String> createTaskListFromExcel(final String excelFile) {
 		ArrayList<String> taskList = null;
-		
-		// Read from file into the wbsList, then convert to taskList
-		ArrayList<WBSTask> wbsList = readWbsListFromExcel(excelFile);
+
+		class ProgressWorker extends SwingWorker<Void, Void> {
+			private JFrame frame;
+			protected Void doInBackground() throws Exception {
+				progressBar = new JProgressBar();
+				frame = new JFrame("Reading from excel");
+
+				frame.add(progressBar);	
+				frame.pack();
+				frame.setVisible(true);	
+				frame.setLocation(400, 400);
+
+				progressBar.setIndeterminate(true);
+				progressBar.setVisible(true);
+				return null;				
+			}
+
+			protected void done() {
+				progressBar.setVisible(false);
+				frame.dispose();
+			}
+		}		
+
+		ProgressWorker progressWorker = new ProgressWorker();
+		progressWorker.execute();	
+
+		class WBSReader extends SwingWorker<ArrayList<WBSTask>, Void> {
+			private ArrayList<WBSTask> anonWBSTaskList;
+			@Override
+			protected ArrayList<WBSTask> doInBackground() throws Exception {
+				for (int i = 5 ; i > 0 ; i--) { 
+					System.out.println(i); 
+					Thread.sleep(1000); 
+				}
+				//				System.out.println("Reading...");
+				//				this.anonWBSTaskList = readWbsListFromExcel(excelFile);
+				//				System.out.println("DONE");
+				return(anonWBSTaskList);
+			}
+		};		
+
+		// Start the reader.
+		WBSReader wbsReader = new WBSReader();
+		wbsReader.execute();
+		ArrayList<WBSTask> wbsList = null;
+		try {
+			wbsList = wbsReader.get();
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			// wbsList is incomplete
+			e.printStackTrace();
+
+		}
+		progressWorker.cancel(true);
+
 		if (wbsList != null) {
 			taskList = new ArrayList<>();
 			convertWbsListToTaskList(wbsList, taskList);
-			taskList.add(0, TaskLoader.getDefaultTaskName());
 		}
-		
+
 		return(taskList);
 	}
 
 	private static void convertWbsListToTaskList(ArrayList<WBSTask> wbsList, ArrayList<String> taskList) {
 		sortTaskListAscending(wbsList);
 		for (WBSTask t : wbsList) {
-			taskList.add(t.info + ": " + t.code);
+			taskList.add(t.getTaskString());
 		}
 	}
 
@@ -103,13 +168,12 @@ public class ExcelReader implements ActionListener {
 		try {
 			fis = new FileInputStream(new File(filePath));
 			workbook = new XSSFWorkbook(fis);
-			//			workbook = new XSSFWorkbook("test.txt");
 		} catch (IOException | IllegalStateException e) {
 			System.out.println(e.getMessage());
 			return(null);
 		}
 
-		// iterating over each row
+		// iterating over each row of WBS sheet
 		Sheet wbsSheet = workbook.getSheet("WBS");
 		Iterator<Row> rowIterator = wbsSheet.iterator();
 		while (rowIterator.hasNext()) {
@@ -162,10 +226,10 @@ public class ExcelReader implements ActionListener {
 		public WBSTask() {
 		}
 
-//		public WBSTask(String inCode, String inInfo) {
-//			this.code = inCode;
-//			this.info = inInfo;
-//		}
+		//		public WBSTask(String inCode, String inInfo) {
+		//			this.code = inCode;
+		//			this.info = inInfo;
+		//		}
 
 		public void setCode(String stringCellValue) {
 			code = stringCellValue;
@@ -176,7 +240,7 @@ public class ExcelReader implements ActionListener {
 		}
 
 		public String getTaskString() {
-			return(this.code + ": " + this.info);
+			return(this.info + " : " + this.code);
 		}
 	}
 
