@@ -1,5 +1,9 @@
 package tasklogger;
 
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -13,10 +17,13 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
 
+import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
@@ -80,22 +87,36 @@ public class ExcelReader implements ActionListener {
 		class ProgressWorker extends SwingWorker<Void, Void> {
 			private JFrame frame;
 			protected Void doInBackground() throws Exception {
-				progressBar = new JProgressBar();
 				frame = new JFrame("Reading from excel");
-
-				frame.add(progressBar);	
-				frame.pack();
-				frame.setVisible(true);	
-				frame.setLocation(400, 400);
-
-				progressBar.setIndeterminate(true);
+				frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				frame.setLayout(new FlowLayout());
+				
+				progressBar = new JProgressBar();
+//				progressBar.setIndeterminate(true);
+				progressBar.setString("Loading...");
+				progressBar.setStringPainted(true);
+				progressBar.setPreferredSize(new Dimension(200, 200));
 				progressBar.setVisible(true);
+
+				JPanel panel = new JPanel();
+				panel.add(progressBar);
+				frame.add(panel, BorderLayout.PAGE_START);
+				
+				panel.setOpaque(true);
+				frame.setContentPane(panel);
+				frame.pack();
+				frame.setVisible(true);
+				
+				for (int i = 10 ; i > 0 ; i--) { 
+					System.out.println(i+100); 
+					Thread.sleep(1000); 
+				}
 				return null;				
 			}
 
 			protected void done() {
 				progressBar.setVisible(false);
-				frame.dispose();
+//				frame.dispose();
 			}
 		}		
 
@@ -106,13 +127,13 @@ public class ExcelReader implements ActionListener {
 			private ArrayList<WBSTask> anonWBSTaskList;
 			@Override
 			protected ArrayList<WBSTask> doInBackground() throws Exception {
-				for (int i = 5 ; i > 0 ; i--) { 
+				for (int i = 10 ; i > 0 ; i--) { 
 					System.out.println(i); 
 					Thread.sleep(1000); 
 				}
-				//				System.out.println("Reading...");
-				//				this.anonWBSTaskList = readWbsListFromExcel(excelFile);
-				//				System.out.println("DONE");
+				System.out.println("Reading...");
+				this.anonWBSTaskList = readWbsListFromExcel(excelFile);
+				System.out.println("DONE");
 				return(anonWBSTaskList);
 			}
 		};		
