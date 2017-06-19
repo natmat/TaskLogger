@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import javax.swing.JTextField;
 
 public class TaskView {
+	private static final int TASK_VIEW_HEIGHT = 8;
+	private static final int TASK_VIEW_LENGTH = 16;
 	private TaskButton button;
 	private JTextField timer;
 	private int taskID;
@@ -14,9 +16,9 @@ public class TaskView {
 		taskID = id;
 		button = new TaskButton(taskID);
 		button.setText(TLModel.getTaskName(taskID));
-		timer = new JTextField(TLModel.getTaskTimeWithID(taskID), 8);
+		timer = new JTextField(TLModel.getTaskTimeWithID(taskID), TASK_VIEW_HEIGHT);
 		timer.setHorizontalAlignment(JTextField.CENTER);
-		timer.setFont(new Font("monospaced", Font.PLAIN, 16));
+		timer.setFont(new Font("monospaced", Font.PLAIN, TASK_VIEW_LENGTH));
 	}
 
 	public TaskButton getButton() {

@@ -24,23 +24,16 @@ public class TLModel implements PropertyChangeListener {
 
 	private static ArrayList<TLTask> taskArray;
 	private static TLModel instance;
-	private static PropertyChangeSupport pcs = new PropertyChangeSupport(getInstance());
+	private static PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(getInstance());
 	private final static String ROOT_FILE_NAME = "tasklogger";
 
 	private enum CsvFormat {
-		TASKNAME, TIME_IN_MS, CSV_TIME_IS_HMS
+		TASKNAME, TIME_IN_MS, TIME_IS_HMS
 	}
 
 	private TLModel() {
 		taskArray = new ArrayList<>();
-		pcs = new PropertyChangeSupport(this);
-	}
-
-	public static void addModelToView() {
-		TLView.setTotalTimerInMs(TLTask.getTotalRunTimeInMs());
-		for (TLTask t : taskArray) {
-			TLView.addTask(t.getTaskID());
-		}
+		propertyChangeSupport = new PropertyChangeSupport(this);
 	}
 
 	public static TLModel getInstance() {
@@ -73,7 +66,7 @@ public class TLModel implements PropertyChangeListener {
 		}
 
 		TLTask task = new TLTask(inName);
-		pcs.firePropertyChange("taskAction:" + task.getTaskID(), task.getRunning().booleanValue(), 0);
+		propertyChangeSupport.firePropertyChange("taskAction:" + task.getTaskID(), task.getRunning().booleanValue(), 0);
 		taskArray.add(task);
 		return (task);
 	}
@@ -91,22 +84,22 @@ public class TLModel implements PropertyChangeListener {
 				&& (TLTask.getActiveTask().getRunning())) {
 			final int activeTaskID = TLTask.getActiveTask().getTaskID();
 			TLTask.getActiveTask().actionTask();
-			pcs.fireIndexedPropertyChange("taskStateChange", activeTaskID,
+			propertyChangeSupport.fireIndexedPropertyChange("taskStateChange", activeTaskID,
 					true, false);
 		}
 
 		Boolean before = task.getRunning();
 		task.actionTask();
-		pcs.fireIndexedPropertyChange("taskStateChange", task.getTaskID(),
+		propertyChangeSupport.fireIndexedPropertyChange("taskStateChange", task.getTaskID(),
 				before, task.getRunning());
 	}
 
 	public static void addPropertyChangeListener(PropertyChangeListener l) {
-		pcs.addPropertyChangeListener(l);
+		propertyChangeSupport.addPropertyChangeListener(l);
 	}
 
 	public static void removePropertyChangeListener(PropertyChangeListener l) {
-		pcs.removePropertyChangeListener(l);
+		propertyChangeSupport.removePropertyChangeListener(l);
 	}
 
 	public static String getTaskName(int inTaskID) {
@@ -129,20 +122,40 @@ public class TLModel implements PropertyChangeListener {
 		try {
 			exportCVSFile();
 		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, "Save times error",
+			JOptionPane.showMessageDialog(null, "Save TaskLogger error",
 					"Could not write to file.", JOptionPane.WARNING_MESSAGE);
 		}
 	}
 
-	public static void setTaskName(int taskID, String taskName) {
-		TLTask t = getTaskWithID(taskID);
-		if (t != null) {
-			t.setTitle(taskName);
+	public static boolean setTaskName(int taskID, String taskName) {
+		TLTask task = getTaskWithID(taskID);
+		boolean canSetTaskName = false;
+		if (null == task) {
+			TLView.writeInfo("TaskID null");
 		}
+		else {
+			if (taskNameUnique(taskName)) {
+				task.setTitle(taskName);
+				canSetTaskName = true;
+			}
+			else {
+				TLView.writeInfo("Task " + taskName + " already exists");
+			}
+		}
+		return(canSetTaskName);
+	}
+
+	private static boolean taskNameUnique(final String name) {
+		for (TLTask t : taskArray) {
+			if (t.getName().equals(name)) {
+				return(false);
+			}
+		}
+		return(true);
 	}
 
 	public static void exportCVSFile() throws IOException {		
-		String fileName = getDataLogFile();
+		String fileName = getModelFileName();
 
 		FileWriter writer;
 		writer = new FileWriter(fileName);
@@ -169,10 +182,15 @@ public class TLModel implements PropertyChangeListener {
 		writer.close();
 	}
 
-	private static String getDataLogFile() {
-		String fileName = "C:/tmp/" + ROOT_FILE_NAME + "_" + TLUtilities.getToday()
-				+ ".csv";
-		return(fileName);
+	private static String getModelFileName() {
+		String fileName;
+		if ("Mac OS X".equals(System.getProperty("os.name"))) {
+			fileName = "/Users/Nathan/tmp/" + ROOT_FILE_NAME + "_" + TLUtilities.getToday(); 
+		}
+		else {
+			fileName = "C:/tmp/" + ROOT_FILE_NAME + "_" + TLUtilities.getToday();
+		}
+		return(fileName + ".csv");
 	}
 
 	/**
@@ -181,24 +199,25 @@ public class TLModel implements PropertyChangeListener {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public void importCSVFile() throws FileNotFoundException,
-	IOException {
-		String fileName = getDataLogFile();
-		File f = new File(fileName);
-		if (f.exists() && !f.isDirectory()) {
-			BufferedReader br = new BufferedReader(new FileReader(f));
-			String line = br.readLine(); // Header
-			line = br.readLine(); // Total times
+	public void importRecentCSVModel() throws FileNotFoundException, IOException {
+		final File f = new File(getModelFileName());
+		if (!f.exists() || f.isDirectory()) {		
+			TLView.writeInfo("No CSV log for today");
+		}
+		else {
+			final BufferedReader br = new BufferedReader(new FileReader(f));
+			String line = br.readLine(); // header line
+			line = br.readLine(); // totalTime
 			if (null != line) {
-				String[] input = line.split(",");
-				TLTask.setTotalTime(Long.parseLong(input[CsvFormat.TIME_IN_MS
-				                                         .ordinal()]));
-				while ((line = br.readLine()) != null) {
+				String[] taskLine = line.split(",");
+				TLTask.setTotalTime(Long.parseLong(taskLine[CsvFormat.TIME_IN_MS.ordinal()]));
+
+				while (null != (line = br.readLine())) {
 					// Task times
-					input = line.split(",");
+					taskLine = line.split(",");
 					TLTask t = new TLTask(
-							input[CsvFormat.TASKNAME.ordinal()],
-							Long.parseLong(input[CsvFormat.TIME_IN_MS.ordinal()]));
+							taskLine[CsvFormat.TASKNAME.ordinal()],
+							Long.parseLong(taskLine[CsvFormat.TIME_IN_MS.ordinal()]));
 					taskArray.add(t);
 				}
 			}
@@ -238,7 +257,7 @@ public class TLModel implements PropertyChangeListener {
 		final long before = TLTask.getTotalRunTimeInMs();
 		TLTask.setTotalTime(timeInMs);
 		// No taskID to index for this change
-		pcs.firePropertyChange("totalRunTimeInMs", before, TLTask.getTotalRunTimeInMs());
+		propertyChangeSupport.firePropertyChange("totalRunTimeInMs", before, TLTask.getTotalRunTimeInMs());
 	}
 
 	public static void resetActiveTime(int taskID) {
@@ -247,7 +266,7 @@ public class TLModel implements PropertyChangeListener {
 		final long before = t.getActiveTimeInMs();
 		t.setActiveTimeInMs(resetTime);
 		// Fire taskID-indexed change
-		pcs.fireIndexedPropertyChange("activeTimeInMs", taskID, before, t.getActiveTimeInMs());
+		propertyChangeSupport.fireIndexedPropertyChange("activeTimeInMs", taskID, before, t.getActiveTimeInMs());
 	}
 
 	@Override
@@ -261,6 +280,10 @@ public class TLModel implements PropertyChangeListener {
 				setTaskName(ipce.getIndex(), ipce.getNewValue().toString());
 			} 
 		}
+	}
+
+	public ArrayList<TLTask> getTaskArray() {
+		return taskArray;
 	}	
 }
 

@@ -35,10 +35,10 @@ public class TaskButton extends JButton {
 					
 					if (dialogObj != null) {
 						String taskRenamed = dialogObj.toString();
-						if (TLUtilities.isValidName(taskRenamed, dialogString)) {
-							
-							TLModel.setTaskName(taskID, taskRenamed);
-							setText(taskRenamed);
+						if (TLUtilities.isValidName(taskRenamed, dialogString)) {							
+							if (TLModel.setTaskName(taskID, taskRenamed)) {
+								setText(taskRenamed);
+							}
 						}
 					}
 				} else if ((evt.getModifiers() & ActionEvent.ALT_MASK) > 0) {

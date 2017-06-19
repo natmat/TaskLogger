@@ -20,7 +20,10 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
@@ -37,6 +40,8 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 	final private Color saveColor = new Color(255, 255, 102);
 	final private Color newTaskColor = new Color(255, 153, 51);
 	final private Color resetColor = new Color(204,229,255);
+	private static JTextArea infoArea;
+
 	public static TLView getInstance() {
 		if (instance == null) {
 			instance = new TLView();
@@ -45,10 +50,7 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 	}
 
 	private TLView() {
-		TLController.getInstance();
-
 		TLModel.addPropertyChangeListener(this);
-
 		taskViewList = new ArrayList<TaskView>();
 		setupFrame();
 		setAlwaysOnTop(true);
@@ -56,11 +58,11 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 	}
 
 	private void setupFrame() {
+		add(new TLMenu());
+
 		// Draw frame with top and bottom panels.
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-
-		add(new TLMenu());
 
 		controlsPanel = new JPanel();
 		controlsPanel.setLayout(new GridLayout(0, 2));		
@@ -78,6 +80,14 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 		pomodoroPanel.setLayout(new GridLayout(1, 2));
 		addPomodoroToView();
 		mainPanel.add(pomodoroPanel);
+		
+		infoArea = new JTextArea();
+		infoArea.setRows(4);
+		JScrollPane infoPane = new JScrollPane(
+				infoArea, 
+				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		mainPanel.add(infoPane);
 
 		Container container = this.getContentPane();
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
@@ -88,26 +98,34 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent event) {
-				int quit = JOptionPane.YES_OPTION;
 				try {
 					TLModel.exportCVSFile();
 				} catch (IOException e) {
 					// e.printStackTrace();
-					quit = JOptionPane.showConfirmDialog(null,
+					if (JOptionPane.showConfirmDialog(
+							null,
 							"Export failed.\nQuit anyway?",
-							"Export CSV logging", JOptionPane.YES_NO_OPTION);
-				}
-				if (JOptionPane.YES_OPTION == quit) {
-					dispose();
-					System.exit(0);
+							"Export CSV logging", 
+							JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+						dispose();
+						System.exit(0);
+					}
 				}
 			}
 		});
-
+		
 		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource("tasklogger/pomodoro.png"));
 		setIconImage(icon.getImage());
 	}
 
+	/**
+	 * Write info string to the infoArea
+	 * @param info string to prefix to infoArea
+	 */
+	public static void writeInfo(final String info) {
+		TLView.infoArea.setForeground(Color.BLUE);
+		TLView.infoArea.append(TLView.infoArea.getLineCount() + ": " + info + "\r\n");
+	}
 	private void addPomodoroToView() {
 		PomodoroTimer pomodoroTimer = PomodoroTimer.getInstance();
 		// try {
@@ -195,7 +213,7 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 
 	public static void addTask(int taskID) {
 		if (null != TaskView.getTaskViewWithId(taskViewList, taskID)) {
-			System.err.println("Duplicate task");
+			TLView.writeInfo("Duplicate task");
 		} 
 		else {
 			// Add new task
@@ -276,7 +294,7 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 		Dimension dim = new Dimension();		
 		return dim;
 	}
-	
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String command = e.getActionCommand();
@@ -292,9 +310,7 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 				newTask = TLModel.newTask(name);
 				if (newTask == null) {
 					TLView.getInstance().setAlwaysOnTop(false);
-					JOptionPane.showMessageDialog(new JFrame(),
-							"Task already exists.", "New task error",
-							JOptionPane.ERROR_MESSAGE);			
+					TLView.writeInfo("Task " + name + " already exists");
 					TLView.getInstance().setAlwaysOnTop(true);
 				}
 			}
@@ -310,9 +326,16 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 			(new IOException()).printStackTrace();
 		}
 	}
-	
+
 	public static void newTaskButtonPressed() {
 		TLUtilities.taskSelectorDialog(TLView.instance, TaskLoader.getTaskList());
+	}
+
+	public static void addModel(TLModel model) {
+		setTotalTimerInMs(TLTask.getTotalRunTimeInMs());
+		for (TLTask t : model.getTaskArray()) {
+			TLView.addTask(t.getTaskID());
+		}
 	}
 }
 

@@ -2,6 +2,7 @@ package tasklogger;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
@@ -12,7 +13,7 @@ import javax.swing.plaf.basic.BasicProgressBarUI;
 public class PomodoroTimer {
 	private static Timer timer;
 	private static JProgressBar progressBar;
-	private static int duration = 25 * 60 * 1000;
+	private static int duration = 1 * 60 * 1000;
 	private static int countdown;
 	private static JButton button;
 	private static PomodoroTimer instance;
@@ -27,7 +28,7 @@ public class PomodoroTimer {
 		progressBar.setStringPainted(false);
 		countdown = duration;
 		button = new JButton("Pomodoro");
-//		button.setFont(new Font("monospaced", Font.PLAIN, 16));
+		button.setFont(new Font("monospaced", Font.PLAIN, 16));
 		button.setToolTipText("Start/stop the POMODORO");
 		button.addActionListener(new ActionListener() {
 			@Override

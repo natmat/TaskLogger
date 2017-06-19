@@ -39,7 +39,8 @@ public class TLMenu extends JMenuBar {
 				
 		fileMenu.add(saveMenuItem);
 		fileMenu.add(newTaskMenuItem);
-		
+	
+		// Left-align File menu
 		add(Box.createHorizontalGlue());
 	}
 	
@@ -52,7 +53,6 @@ public class TLMenu extends JMenuBar {
 				try {
 					TLModel.exportCVSFile();
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				break;

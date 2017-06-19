@@ -10,7 +10,7 @@ public class TaskLoader extends SwingWorker<Void, Void> {
 	static boolean loaded = false;
 	static ArrayList<String> taskList = null;
 
-	private static final String EXCEL_FILE_PATH = "C:/My_Workspaces/MyGit/MyJava/TaskLogger/resources/tasks.xlsm";
+	private static String excelFilePath;
 	private static final String defaultTaskName = "[Enter new task info/code]";
 
 	public static void main() {
@@ -22,8 +22,18 @@ public class TaskLoader extends SwingWorker<Void, Void> {
 		}
 	}
 
+	/**
+	 * Get os-specific excel file path 
+	 * @return Path of excel code file
+	 */
 	public static final String getExcelFilePath() {
-		return(EXCEL_FILE_PATH);
+		if ("Mac OS X".equals(System.getProperty("os.name"))) {
+			excelFilePath = "/Users/Nathan/github/TaskLogger/resources/typhoon.xlsm";
+		}
+		else {
+			excelFilePath = "C:/My_Workspaces/MyGit/MyJava/TaskLogger/resources/tasks.xlsm";
+		}
+		return(excelFilePath);
 	}
 
 	public static ArrayList<String> getTaskList() {
@@ -77,7 +87,7 @@ public class TaskLoader extends SwingWorker<Void, Void> {
 		System.out.println("Tasks loading...");
 
 		// 2 sources of input: excel, or that fails try CSV		
-		taskList = ExcelReader.createTaskListFromExcel(EXCEL_FILE_PATH);
+		taskList = ExcelReader.createTaskListFromExcel(excelFilePath);
 		if (null == taskList) {
 			showTimedInfoDialog("ERROR: No excel datafile");
 			taskList = readTaskFromCSVFile();

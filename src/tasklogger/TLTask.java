@@ -20,7 +20,7 @@ public class TLTask {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// Increment times
-			if (activeTask != null) {
+			if (null != activeTask) {
 				activeTimeInMs += 1000;
 			}
 			totalRunTimeInMs += 1000;
@@ -59,7 +59,6 @@ public class TLTask {
 			try {
 				start();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
