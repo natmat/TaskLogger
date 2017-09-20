@@ -31,10 +31,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelReader implements ActionListener {
 
-	//	private static final String FILE_PATH = "C:/My_Workspaces/MyJava/TaskLogger/resources/typhoon.xlsm";
+	// private static final String FILE_PATH =
+	// "C:/My_Workspaces/MyJava/TaskLogger/resources/typhoon.xlsm";
 	private static final int WBS_COLUMN_INDEX = 1;
 
-	protected SynchronousQueue<Boolean> queue = null;	
+	protected SynchronousQueue<Boolean> queue = null;
 	private static String newTaskName = null;
 
 	private static final Object instanceLock = new Object();
@@ -46,14 +47,15 @@ public class ExcelReader implements ActionListener {
 
 	public static void main(String args[]) {
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				// Create a task list (attempting to populate it from a file)
 				ArrayList<String> taskList = createTaskListFromExcel(TaskLoader.getExcelFilePath());
-				System.out.println("TL="+taskList);
+				System.out.println("TL=" + taskList);
+
 				Boolean tasksFound = (taskList != null);
 				String message = tasksFound ? "ExcelReader complete" : "ExcelReader failed";
-				JOptionPane.showMessageDialog(new JFrame(),
-						message, "ExcelReader",
+				JOptionPane.showMessageDialog(new JFrame(), message, "ExcelReader",
 						tasksFound ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
 			}
 		});
@@ -82,12 +84,14 @@ public class ExcelReader implements ActionListener {
 
 		class ProgressWorker extends SwingWorker<Void, Void> {
 			private JFrame frame;
+
+			@Override
 			protected Void doInBackground() throws Exception {
 				frame = new JFrame("Reading from excel");
 				frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				frame.setLayout(new FlowLayout());
-				
-				progressBar = new JProgressBar(0,10);
+
+				progressBar = new JProgressBar(0, 10);
 				progressBar.setIndeterminate(false);
 				progressBar.setString("Loading...");
 				progressBar.setStringPainted(true);
@@ -97,38 +101,41 @@ public class ExcelReader implements ActionListener {
 				JPanel panel = new JPanel();
 				panel.add(progressBar);
 				frame.add(panel, BorderLayout.PAGE_START);
-				
+
 				panel.setOpaque(true);
 				frame.setContentPane(panel);
 				frame.pack();
 				frame.setVisible(true);
-				
-				for (int i = 0 ; i <= 10 ; i++) {
+
+				for (int i = 0; i <= 10; i++) {
 					progressBar.setValue(i);
-					Thread.sleep(100); 
+					Thread.sleep(1000);
 				}
-				return null;				
+				return null;
 			}
 
+			@Override
 			protected void done() {
 				progressBar.setVisible(false);
 				frame.dispose();
 			}
-		}		
+		}
 
 		ProgressWorker progressWorker = new ProgressWorker();
-		progressWorker.execute();	
+		progressWorker.execute();
 
 		class WBSReader extends SwingWorker<ArrayList<WBSTask>, Void> {
-			private ArrayList<WBSTask> anonWBSTaskList;
+			private ArrayList<WBSTask> wbsTaskList;
+
 			@Override
 			protected ArrayList<WBSTask> doInBackground() throws Exception {
 				System.out.println("Reading...");
-				this.anonWBSTaskList = readWbsListFromExcel(excelFile);
+				this.wbsTaskList = readWbsListFromExcel(excelFile);
 				System.out.println("DONE");
-				return(anonWBSTaskList);
+				return (wbsTaskList);
 			}
-		};		
+		}
+		;
 
 		// Start the reader.
 		WBSReader wbsReader = new WBSReader();
@@ -139,6 +146,7 @@ public class ExcelReader implements ActionListener {
 		} catch (InterruptedException | ExecutionException e) {
 			// TODO Auto-generated catch block
 			// wbsList is incomplete
+			System.out.println("wbsReader.get()");
 			e.printStackTrace();
 
 		}
@@ -149,7 +157,7 @@ public class ExcelReader implements ActionListener {
 			convertWbsListToTaskList(wbsList, taskList);
 		}
 
-		return(taskList);
+		return (taskList);
 	}
 
 	private static void convertWbsListToTaskList(ArrayList<WBSTask> wbsList, ArrayList<String> taskList) {
@@ -159,23 +167,23 @@ public class ExcelReader implements ActionListener {
 		}
 	}
 
-	/** 
+	/**
 	 * Task a tasklist and sorts it in-situ
+	 * 
 	 * @param taskList
 	 */
 	private static void sortTaskListAscending(List<WBSTask> taskList) {
 		Collections.sort(taskList, new Comparator<WBSTask>() {
 			@Override
-			public int compare(WBSTask task1, WBSTask task2)
-			{
-				return  task1.getTaskString().compareTo(task2.getTaskString());
+			public int compare(WBSTask task1, WBSTask task2) {
+				return task1.getTaskString().compareTo(task2.getTaskString());
 			}
 		});
 	}
 
 	public static ArrayList<WBSTask> readWbsListFromExcel(final String filePath) {
 		// Using XSSF for xlsx format, for xls use HSSF
-		ArrayList<WBSTask> taskList = new ArrayList<WBSTask>();
+		ArrayList<WBSTask> taskList = new ArrayList<>();
 		FileInputStream fis;
 		Workbook workbook;
 		try {
@@ -183,7 +191,7 @@ public class ExcelReader implements ActionListener {
 			workbook = new XSSFWorkbook(fis);
 		} catch (IOException | IllegalStateException e) {
 			System.out.println(e.getMessage());
-			return(null);
+			return (null);
 		}
 
 		// iterating over each row of WBS sheet
@@ -202,18 +210,17 @@ public class ExcelReader implements ActionListener {
 				// The Cell Containing String will is name.
 				switch (cell.getColumnIndex()) {
 				case WBS_COLUMN_INDEX:
-					if ((Cell.CELL_TYPE_STRING == cell.getCellType()) 
-							&& (cell.getStringCellValue().length() != 0)
+					if ((Cell.CELL_TYPE_STRING == cell.getCellType()) && (cell.getStringCellValue().length() != 0)
 							&& (cell.getStringCellValue().startsWith("D"))) {
-						// Read task from WBS column 
+						// Read task from WBS column
 						task = new WBSTask();
 						task.setCode(cell.getStringCellValue());
 						// Read info column WBS++
 						cell = cellIterator.next();
 						task.setInfo(cell.getStringCellValue());
 
-						taskList.add(task); 
-					}						
+						taskList.add(task);
+					}
 					break;
 
 				default:
@@ -239,10 +246,10 @@ public class ExcelReader implements ActionListener {
 		public WBSTask() {
 		}
 
-		//		public WBSTask(String inCode, String inInfo) {
-		//			this.code = inCode;
-		//			this.info = inInfo;
-		//		}
+		// public WBSTask(String inCode, String inInfo) {
+		// this.code = inCode;
+		// this.info = inInfo;
+		// }
 
 		public void setCode(String stringCellValue) {
 			code = stringCellValue;
@@ -253,12 +260,12 @@ public class ExcelReader implements ActionListener {
 		}
 
 		public String getTaskString() {
-			return(this.info + " : " + this.code);
+			return (this.info + " : " + this.code);
 		}
 	}
 
 	public static String getNewTaskName() {
-		return(newTaskName);
+		return (newTaskName);
 	}
 
 	@Override
@@ -266,5 +273,3 @@ public class ExcelReader implements ActionListener {
 		System.out.println("AL invoked");
 	}
 }
-
-
