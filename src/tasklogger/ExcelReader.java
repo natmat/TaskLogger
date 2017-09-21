@@ -29,6 +29,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import javafx.scene.control.ProgressBar;
+
 public class ExcelReader implements ActionListener {
 
 	//	private static final String FILE_PATH = "C:/My_Workspaces/MyJava/TaskLogger/resources/typhoon.xlsm";
@@ -50,11 +52,13 @@ public class ExcelReader implements ActionListener {
 				// Create a task list (attempting to populate it from a file)
 				ArrayList<String> taskList = createTaskListFromExcel(TaskLoader.getExcelFilePath());
 				System.out.println("TL="+taskList);
+
 				Boolean tasksFound = (taskList != null);
 				String message = tasksFound ? "ExcelReader complete" : "ExcelReader failed";
 				JOptionPane.showMessageDialog(new JFrame(),
 						message, "ExcelReader",
 						tasksFound ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
+				System.out.println("<main()");
 			}
 		});
 	}
@@ -80,47 +84,77 @@ public class ExcelReader implements ActionListener {
 	public static ArrayList<String> createTaskListFromExcel(final String excelFile) {
 		ArrayList<String> taskList = null;
 
-		class ProgressWorker extends SwingWorker<Void, Void> {
-			private JFrame frame;
-			protected Void doInBackground() throws Exception {
-				frame = new JFrame("Reading from excel");
-				frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-				frame.setLayout(new FlowLayout());
-				
-				progressBar = new JProgressBar(0,10);
-				progressBar.setIndeterminate(false);
-				progressBar.setString("Loading...");
-				progressBar.setStringPainted(true);
-				progressBar.setPreferredSize(new Dimension(200, 200));
-				progressBar.setVisible(true);
+		JFrame frame = new JFrame("Reading from excel");
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frame.setLayout(new FlowLayout());
 
-				JPanel panel = new JPanel();
-				panel.add(progressBar);
-				frame.add(panel, BorderLayout.PAGE_START);
-				
-				panel.setOpaque(true);
-				frame.setContentPane(panel);
-				frame.pack();
-				frame.setVisible(true);
-				
+		progressBar = new JProgressBar(0,10);
+		progressBar.setIndeterminate(false);
+		progressBar.setString("Loading...");
+		progressBar.setStringPainted(true);
+		progressBar.setPreferredSize(new Dimension(200, 50));
+		progressBar.setVisible(true);
+
+		JPanel panel = new JPanel();
+		panel.add(progressBar);
+		frame.add(panel, BorderLayout.PAGE_START);
+
+		panel.setOpaque(true);
+		frame.setContentPane(panel);
+		frame.pack();
+		frame.setVisible(true);
+
+		class ProgressWorker extends SwingWorker<Void, Integer> {
+			private JProgressBar jpb;
+
+			public ProgressWorker(JProgressBar progressBar) {
+				this.jpb = progressBar;
+			}
+
+			@Override
+			protected Void doInBackground() throws Exception {
 				for (int i = 0 ; i <= 10 ; i++) {
-					progressBar.setValue(i);
-					Thread.sleep(100); 
+					System.out.println("pw dIB=" + i);
+					publish(Integer.valueOf(i));
+					Thread.sleep(200);
 				}
 				return null;				
 			}
 
 			protected void done() {
-				progressBar.setVisible(false);
+				this.jpb.setVisible(false);
 				frame.dispose();
+				System.out.println("done()");
+			}
+
+			/* (non-Javadoc)
+			 * @see javax.swing.SwingWorker#process(java.util.List)
+			 */
+			@Override
+			protected void process(List<Integer> chunks) {
+				for (Integer i : chunks) {
+					System.out.println("process=" + i);
+					jpb.setValue(i);
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
 		}		
 
-		ProgressWorker progressWorker = new ProgressWorker();
-		progressWorker.execute();	
+		ProgressWorker progressWorker = new ProgressWorker(progressBar);
+		progressWorker.execute();
+		if (1 != 2) {
+			System.out.println("RETURN");
+			return(null);
+		}
 
 		class WBSReader extends SwingWorker<ArrayList<WBSTask>, Void> {
 			private ArrayList<WBSTask> anonWBSTaskList;
+
 			@Override
 			protected ArrayList<WBSTask> doInBackground() throws Exception {
 				System.out.println("Reading...");
@@ -131,23 +165,26 @@ public class ExcelReader implements ActionListener {
 		};		
 
 		// Start the reader.
-		WBSReader wbsReader = new WBSReader();
-		wbsReader.execute();
 		ArrayList<WBSTask> wbsList = null;
+		WBSReader wbsReader = new WBSReader();
+//		wbsReader.execute();
 		try {
+			System.out.println("Looping...");
+			while (!wbsReader.isDone()) {
+				Thread.sleep(10);
+			} 
 			wbsList = wbsReader.get();
 		} catch (InterruptedException | ExecutionException e) {
 			// TODO Auto-generated catch block
-			// wbsList is incomplete
 			e.printStackTrace();
-
 		}
-		progressWorker.cancel(true);
-
+		
 		if (wbsList != null) {
 			taskList = new ArrayList<>();
 			convertWbsListToTaskList(wbsList, taskList);
 		}
+
+		//		progressWorker.cancel(true);
 
 		return(taskList);
 	}
