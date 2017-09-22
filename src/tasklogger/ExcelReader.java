@@ -48,6 +48,7 @@ public class ExcelReader implements ActionListener {
 	// private static final String FILE_PATH = "typhoon.xlsm";
 
 	public static void main(String args[]) {
+
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -104,6 +105,25 @@ public class ExcelReader implements ActionListener {
 		frame.setContentPane(panel);
 		frame.pack();
 		frame.setVisible(true);
+
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (progressBar.getValue() < progressBar.getMaximum()) {
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					int value = progressBar.getValue()+1;
+					System.out.println("value=" + value);
+					progressBar.setValue(value);
+				}
+				System.exit(0);
+			}
+		}).run();
+		if (progressBar.getMaximum() > 0) return(null);
 
 		class ProgressWorker extends SwingWorker<Void, Integer> {
 			private JProgressBar jpb;
@@ -166,7 +186,7 @@ public class ExcelReader implements ActionListener {
 		// Start the reader.
 		ArrayList<WBSTask> wbsList = null;
 		WBSReader wbsReader = new WBSReader();
-//		wbsReader.execute();
+		//		wbsReader.execute();
 		try {
 			System.out.println("Looping...");
 			while (!wbsReader.isDone()) {
@@ -179,7 +199,7 @@ public class ExcelReader implements ActionListener {
 			System.out.println("wbsReader.get()");
 			e.printStackTrace();
 		}
-		
+
 		if (wbsList != null) {
 			taskList = new ArrayList<>();
 			convertWbsListToTaskList(wbsList, taskList);
