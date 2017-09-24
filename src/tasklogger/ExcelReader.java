@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,8 +30,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import javafx.scene.control.ProgressBar;
-
 public class ExcelReader implements ActionListener {
 
 	// private static final String FILE_PATH =
@@ -46,23 +45,86 @@ public class ExcelReader implements ActionListener {
 	private static JProgressBar progressBar;
 
 	// private static final String FILE_PATH = "typhoon.xlsm";
+	
+	private ExcelReader() {
+	}
 
 	public static void main(String args[]) {
 
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				// Create a task list (attempting to populate it from a file)
-				ArrayList<String> taskList = createTaskListFromExcel(TaskLoader.getExcelFilePath());
-				System.out.println("TL=" + taskList);
-
-				Boolean tasksFound = (taskList != null);
-				String message = tasksFound ? "ExcelReader complete" : "ExcelReader failed";
-				JOptionPane.showMessageDialog(new JFrame(), message, "ExcelReader",
-						tasksFound ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
-				System.out.println("<main()");
+				testProgressBar();
+				
+				//				// Create a task list (attempting to populate it from a file)
+				//				ArrayList<String> taskList = createTaskListFromExcel(TaskLoader.getExcelFilePath());
+				//				System.out.println("TL=" + taskList);
+				//
+				//				Boolean tasksFound = (taskList != null);
+				//				String message = tasksFound ? "ExcelReader complete" : "ExcelReader failed";
+				//				JOptionPane.showMessageDialog(new JFrame(), message, "ExcelReader",
+				//						tasksFound ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
+				//				System.out.println("<main()");
 			}
 		});
+	}
+	
+	private class ProgBar extends SwingWorker<Boolean, Void> {
+		private JProgressBar jpb;
+		private JFrame frame;
+		
+		public ProgBar() {
+			JProgressBar jpb = new JProgressBar(0, 20);
+			jpb.setStringPainted(true);
+			jpb.setVisible(true);
+
+			frame = new JFrame();
+			frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			JPanel panel = new JPanel();
+			panel.add(jpb);
+
+			frame.add(panel, BorderLayout.NORTH);
+			frame.pack();		
+			frame.setVisible(true);
+		}
+		
+		/* (non-Javadoc)
+		 * @see javax.swing.SwingWorker#doInBackground()
+		 */
+		@Override
+		protected Boolean doInBackground() throws Exception {
+			int i = jpb.getMinimum();
+			while (i <= jpb.getMaximum()) {
+				jpb.setValue(i);
+				frame.repaint();
+				System.out.println("setValue+" + jpb.getValue());
+				i++;
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			publish();
+			return(Boolean.TRUE);
+		}
+
+		/* (non-Javadoc)
+		 * @see javax.swing.SwingWorker#process(java.util.List)
+		 */
+		@Override
+		protected void process(List<Void> chunks) {
+			super.process(chunks);
+			frame.dispose();
+			System.out.println("dispose");
+		}
+	}
+	
+	private static void testProgressBar() {
+		ExcelReader er = new ExcelReader();
+		ProgBar pb = er.new ProgBar();
+		pb.execute();
 	}
 
 	public static ExcelReader getInstance() {
@@ -72,9 +134,6 @@ public class ExcelReader implements ActionListener {
 			}
 		}
 		return (instance);
-	}
-
-	private ExcelReader() {
 	}
 
 	/**
