@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
@@ -40,7 +41,8 @@ public class ExcelReader implements ActionListener {
 	private static final Object instanceLock = new Object();
 	private static volatile ExcelReader instance;
 
-	private static JProgressBar progressBar;
+	private static JFrame frame2;
+	private static JProgressBar progressBar2;
 
 	// private static final String FILE_PATH = "typhoon.xlsm";
 	
@@ -54,32 +56,42 @@ public class ExcelReader implements ActionListener {
 			public void run() {
 				testProgressBar();
 				
-				//				// Create a task list (attempting to populate it from a file)
-				//				ArrayList<String> taskList = createTaskListFromExcel(TaskLoader.getExcelFilePath());
-				//				System.out.println("TL=" + taskList);
-				//
-				//				Boolean tasksFound = (taskList != null);
-				//				String message = tasksFound ? "ExcelReader complete" : "ExcelReader failed";
-				//				JOptionPane.showMessageDialog(new JFrame(), message, "ExcelReader",
-				//						tasksFound ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
-				//				System.out.println("<main()");
+				// Create a task list (attempting to populate it from a file)
+				if (false) {
+				ArrayList<String> taskList = createTaskListFromExcel(TaskLoader.getExcelFilePath());
+				System.out.println("TL=" + taskList);
+
+				Boolean tasksFound = (taskList != null);
+				String message = tasksFound ? "ExcelReader complete" : "ExcelReader failed";
+				JOptionPane.showMessageDialog(new JFrame(), message, "ExcelReader",
+						tasksFound ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
+				System.out.println("<main()");
+				}
 			}
 		});
 	}
 	
+	static void test(Integer i) {
+		i = new Integer(1);
+	}
+	
 	private class ProgBar extends SwingWorker<Void, Integer> {
-		private JProgressBar jpb;
+		private JProgressBar progressBar;
 		private JFrame pbFrame;
 		
-		public ProgBar(final JProgressBar inJpb) {
-			jpb = inJpb;
-			jpb.setStringPainted(true);
-			jpb.setVisible(true);
+		public ProgBar() {
+			progressBar = new JProgressBar();
+			progressBar.setMinimum(0);
+			progressBar.setMaximum(20);
+			progressBar.setValue(0);
 
-			pbFrame = new JFrame();
+			progressBar.setStringPainted(true);
+			progressBar.setVisible(true);
+
+			pbFrame = new JFrame("ProgBar");
 			pbFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			JPanel panel = new JPanel();
-			panel.add(jpb);
+			panel.add(progressBar);
 
 			pbFrame.add(panel, BorderLayout.NORTH);
 			pbFrame.pack();		
@@ -91,8 +103,8 @@ public class ExcelReader implements ActionListener {
 		 */
 		@Override
 		protected Void doInBackground() throws Exception {
-			int progress = jpb.getMinimum();
-			while (progress <= jpb.getMaximum()) {
+			int progress = progressBar.getMinimum();
+			while (progress <= progressBar.getMaximum()) {
 				progress++;
 				try {
 					Thread.sleep(100);
@@ -111,8 +123,9 @@ public class ExcelReader implements ActionListener {
 		 */
 		@Override
 		protected void process(List<Integer> chunks) {
+			System.out.println("process " + chunks.get(chunks.size() - 1));
 			super.process(chunks);
-			jpb.setValue(chunks.get(chunks.size() - 1));
+			progressBar.setValue(chunks.get(chunks.size() - 1));
 		}
 
 		/* (non-Javadoc)
@@ -127,12 +140,7 @@ public class ExcelReader implements ActionListener {
 	}
 	
 	private static void testProgressBar() {
-		JProgressBar jpb= new JProgressBar();
-		jpb.setMinimum(0);
-		jpb.setMaximum(20);
-		jpb.setValue(0);
-		ExcelReader er = new ExcelReader();
-		ProgBar pb = er.new ProgBar(jpb);
+		final ProgBar pb = (new ExcelReader()).new ProgBar();
 		pb.execute();
 	}
 
@@ -144,7 +152,49 @@ public class ExcelReader implements ActionListener {
 		}
 		return (instance);
 	}
+	
 
+	public class ProgressWorker extends SwingWorker<Void, Integer> {
+		private JProgressBar progressBar;
+		private JFrame pbFrame;
+
+		public ProgressWorker(final JFrame frame, final JProgressBar progressBar) {
+			this.pbFrame = frame;
+			this.progressBar = progressBar;
+		}
+
+		@Override
+		protected Void doInBackground() throws Exception {
+			System.out.println("pw dIB");
+			while (progressBar.getValue() < progressBar.getMaximum()) {
+				Thread.sleep(1000);
+
+				progressBar.setValue(progressBar.getValue() + 1);
+				publish(Integer.valueOf(progressBar.getValue()));
+				System.out.println("pw dIB=" + progressBar.getValue());
+				System.out.println(Thread.currentThread());
+			}
+			return null;
+		}
+
+		@Override
+		protected void done() {
+			// TODO Auto-generated method stub
+			super.done();
+			this.progressBar.setVisible(false);
+			pbFrame.dispose();
+			System.out.println("done()");
+		}
+
+		@Override
+		protected void process(List<Integer> chunks) {
+			for (Integer i : chunks) {
+				System.out.println("process=" + i);
+				progressBar.setValue(i);
+			}
+		}
+	}
+	
 	/**
 	 * Read the WBS tasks from the excel workbook and write to taskList
 	 * 
@@ -152,90 +202,14 @@ public class ExcelReader implements ActionListener {
 	 * @return
 	 */
 	public static ArrayList<String> createTaskListFromExcel(final String excelFile) {
+		System.out.println("createTaskListFromExcel " + Thread.currentThread());
+
 		ArrayList<String> taskList = null;
-
-		JFrame frame = new JFrame("Reading from excel");
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		frame.setLayout(new FlowLayout());
-
-		progressBar = new JProgressBar(0,10);
-		progressBar.setIndeterminate(false);
-		progressBar.setString("Loading...");
-		progressBar.setStringPainted(true);
-		progressBar.setPreferredSize(new Dimension(200, 50));
-		progressBar.setVisible(true);
-
-		JPanel panel = new JPanel();
-		panel.add(progressBar);
-		frame.add(panel, BorderLayout.PAGE_START);
-
-		panel.setOpaque(true);
-		frame.setContentPane(panel);
-		frame.pack();
-		frame.setVisible(true);
-
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (progressBar.getValue() < progressBar.getMaximum()) {
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					int value = progressBar.getValue()+1;
-					System.out.println("value=" + value);
-					progressBar.setValue(value);
-				}
-				System.exit(0);
-			}
-		}).run();
-		if (progressBar.getMaximum() > 0) return(null);
-
-		class ProgressWorker extends SwingWorker<Void, Integer> {
-			private JProgressBar jpb;
-
-			public ProgressWorker(JProgressBar progressBar) {
-				this.jpb = progressBar;
-			}
-
-			@Override
-			protected Void doInBackground() throws Exception {
-				for (int i = 0 ; i <= 10 ; i++) {
-					System.out.println("pw dIB=" + i);
-					publish(Integer.valueOf(i));
-					Thread.sleep(1000);
-				}
-				return null;
-			}
-
-			@Override
-			protected void done() {
-				this.jpb.setVisible(false);
-				frame.dispose();
-				System.out.println("done()");
-			}
-
-			/* (non-Javadoc)
-			 * @see javax.swing.SwingWorker#process(java.util.List)
-			 */
-			@Override
-			protected void process(List<Integer> chunks) {
-				for (Integer i : chunks) {
-					System.out.println("process=" + i);
-					jpb.setValue(i);
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-
-		ProgressWorker progressWorker = new ProgressWorker(progressBar);
+		
+		frame2 = new JFrame();
+		progressBar2 = new JProgressBar();
+		createProgressBarFrame(frame2, progressBar2);
+		ProgressWorker progressWorker = (new ExcelReader()).new ProgressWorker(frame2, progressBar2);
 		progressWorker.execute();
 
 		class WBSReader extends SwingWorker<ArrayList<WBSTask>, Void> {
@@ -249,7 +223,6 @@ public class ExcelReader implements ActionListener {
 				return (wbsTaskList);
 			}
 		}
-		;
 
 		// Start the reader.
 		ArrayList<WBSTask> wbsList = null;
@@ -276,6 +249,32 @@ public class ExcelReader implements ActionListener {
 		//		progressWorker.cancel(true);
 
 		return(taskList);
+	}
+
+	private static void createProgressBarFrame(final JFrame frame2, final JProgressBar progressBar) {
+		frame2.setTitle("Reading from excel");
+		frame2.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frame2.setLocation(400, 400);
+		frame2.setLayout(new FlowLayout());
+		JPanel panel = new JPanel();
+		panel.setOpaque(true);
+
+		frame2.add(panel, BorderLayout.PAGE_START);
+		frame2.setContentPane(panel);
+
+		progressBar.setMinimum(0);
+		progressBar.setMaximum(4);
+		progressBar.setIndeterminate(false);
+		progressBar.setString("Loading...");
+		progressBar.setStringPainted(true);
+		progressBar.setLocation(500, 500);
+		progressBar.setPreferredSize(new Dimension(200, 50));
+		progressBar.setVisible(true);
+	
+		panel.add(progressBar);
+
+		frame2.pack();
+		frame2.setVisible(true);		
 	}
 
 	private static void convertWbsListToTaskList(ArrayList<WBSTask> wbsList, ArrayList<String> taskList) {
