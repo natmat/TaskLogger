@@ -8,7 +8,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -18,7 +17,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
@@ -69,61 +67,72 @@ public class ExcelReader implements ActionListener {
 		});
 	}
 	
-	private class ProgBar extends SwingWorker<Boolean, Void> {
+	private class ProgBar extends SwingWorker<Void, Integer> {
 		private JProgressBar jpb;
-		private JFrame frame;
+		private JFrame pbFrame;
 		
-		public ProgBar() {
-			JProgressBar jpb = new JProgressBar(0, 20);
+		public ProgBar(final JProgressBar inJpb) {
+			jpb = inJpb;
 			jpb.setStringPainted(true);
 			jpb.setVisible(true);
 
-			frame = new JFrame();
-			frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			pbFrame = new JFrame();
+			pbFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			JPanel panel = new JPanel();
 			panel.add(jpb);
 
-			frame.add(panel, BorderLayout.NORTH);
-			frame.pack();		
-			frame.setVisible(true);
+			pbFrame.add(panel, BorderLayout.NORTH);
+			pbFrame.pack();		
+			pbFrame.setVisible(true);
 		}
 		
 		/* (non-Javadoc)
 		 * @see javax.swing.SwingWorker#doInBackground()
 		 */
 		@Override
-		protected Boolean doInBackground() throws Exception {
-			int i = jpb.getMinimum();
-			while (i <= jpb.getMaximum()) {
-				jpb.setValue(i);
-				frame.repaint();
-				System.out.println("setValue+" + jpb.getValue());
-				i++;
+		protected Void doInBackground() throws Exception {
+			int progress = jpb.getMinimum();
+			while (progress <= jpb.getMaximum()) {
+				progress++;
 				try {
 					Thread.sleep(100);
+					publish(progress);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 			publish();
-			return(Boolean.TRUE);
+			return null;
 		}
 
 		/* (non-Javadoc)
 		 * @see javax.swing.SwingWorker#process(java.util.List)
 		 */
 		@Override
-		protected void process(List<Void> chunks) {
+		protected void process(List<Integer> chunks) {
 			super.process(chunks);
-			frame.dispose();
-			System.out.println("dispose");
+			jpb.setValue(chunks.get(chunks.size() - 1));
+		}
+
+		/* (non-Javadoc)
+		 * @see javax.swing.SwingWorker#done()
+		 */
+		@Override
+		protected void done() {
+			// TODO Auto-generated method stub
+			super.done();
+			pbFrame.dispose();
 		}
 	}
 	
 	private static void testProgressBar() {
+		JProgressBar jpb= new JProgressBar();
+		jpb.setMinimum(0);
+		jpb.setMaximum(20);
+		jpb.setValue(0);
 		ExcelReader er = new ExcelReader();
-		ProgBar pb = er.new ProgBar();
+		ProgBar pb = er.new ProgBar(jpb);
 		pb.execute();
 	}
 
@@ -196,7 +205,7 @@ public class ExcelReader implements ActionListener {
 				for (int i = 0 ; i <= 10 ; i++) {
 					System.out.println("pw dIB=" + i);
 					publish(Integer.valueOf(i));
-					Thread.sleep(200);
+					Thread.sleep(1000);
 				}
 				return null;
 			}
