@@ -142,7 +142,8 @@ public class ExcelReader implements ActionListener {
 			@Override
 			protected ArrayList<WBSTask> doInBackground() throws Exception {
 				System.out.println("Reading...");
-				this.wbsTaskList = readWbsListFromExcel(excelFile);
+				wbsTaskList = readWbsListFromExcel(excelFile);
+				printWBSTaskList(wbsTaskList);
 				System.out.println("DONE");
 				return (wbsTaskList);
 			}
@@ -157,6 +158,10 @@ public class ExcelReader implements ActionListener {
 			protected void done() {
 				super.done();
 				Boolean tasksFound = (wbsTaskList != null);
+				if (tasksFound) {
+					ArrayList<String> taskList = new ArrayList<>();
+					convertWbsListToTaskList(wbsTaskList, taskList);
+				}
 				String message = tasksFound ? "ExcelReader complete" : "ExcelReader failed";
 				JOptionPane.showMessageDialog(new JFrame(), message, "ExcelReader",
 						tasksFound ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
@@ -164,23 +169,23 @@ public class ExcelReader implements ActionListener {
 		}
 
 		// Start the reader.
-		ArrayList<WBSTask> wbsList = null;
-		ExcelReaderWorker excelReader = new ExcelReaderWorker();
-		excelReader.execute();
-		
-		if (wbsList != null) {
-			taskList = new ArrayList<>();
-			convertWbsListToTaskList(wbsList, taskList);
-		}
+		ExcelReaderWorker excelReaderWorker = new ExcelReaderWorker();
+		excelReaderWorker.execute();
 
-		//		progressWorker.cancel(true);
+//		excelReaderWorker.cancel(true);
 		return(taskList);
+	}
+
+	public static void printWBSTaskList(ArrayList<WBSTask> wbsTaskList) {
+		for (WBSTask task : wbsTaskList) {
+			System.out.println(task.getTask());
+		}
 	}
 
 	private static void convertWbsListToTaskList(ArrayList<WBSTask> wbsList, ArrayList<String> taskList) {
 		sortTaskListAscending(wbsList);
 		for (WBSTask t : wbsList) {
-			taskList.add(t.getTaskString());
+			taskList.add(t.getTask());
 		}
 	}
 
@@ -193,7 +198,7 @@ public class ExcelReader implements ActionListener {
 		Collections.sort(taskList, new Comparator<WBSTask>() {
 			@Override
 			public int compare(WBSTask task1, WBSTask task2) {
-				return task1.getTaskString().compareTo(task2.getTaskString());
+				return task1.getTask().compareTo(task2.getTask());
 			}
 		});
 	}
@@ -263,11 +268,6 @@ public class ExcelReader implements ActionListener {
 		public WBSTask() {
 		}
 
-		// public WBSTask(String inCode, String inInfo) {
-		// this.code = inCode;
-		// this.info = inInfo;
-		// }
-
 		public void setCode(String stringCellValue) {
 			code = stringCellValue;
 		}
@@ -276,8 +276,8 @@ public class ExcelReader implements ActionListener {
 			info = stringCellValue;
 		}
 
-		public String getTaskString() {
-			return (this.info + " : " + this.code);
+		public String getTask() {
+			return (this.code + ":" + this.info);
 		}
 	}
 
