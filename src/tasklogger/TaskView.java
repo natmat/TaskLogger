@@ -39,8 +39,8 @@ public class TaskView {
 		taskID = 0;
 	}
 
-	public static TaskView getTaskViewWithId(final ArrayList<TaskView> al, int taskID) {
-		for (TaskView tv : al) {
+	public static TaskView getTaskViewWithId(final ArrayList<TaskView> taskViews, int taskID) {
+		for (TaskView tv : taskViews) {
 			if (tv.getTaskID() == taskID) {
 				return(tv);
 			}

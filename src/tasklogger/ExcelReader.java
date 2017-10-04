@@ -141,10 +141,9 @@ public class ExcelReader implements ActionListener {
 
 			@Override
 			protected ArrayList<WBSTask> doInBackground() throws Exception {
-				System.out.println("Reading...");
+				System.out.println("Reading from Excel file...");
 				wbsTaskList = readWbsListFromExcel(excelFile);
 				printWBSTaskList(wbsTaskList);
-				System.out.println("DONE");
 				return (wbsTaskList);
 			}
 
@@ -162,6 +161,7 @@ public class ExcelReader implements ActionListener {
 					ArrayList<String> taskList = new ArrayList<>();
 					convertWbsListToTaskList(wbsTaskList, taskList);
 				}
+				progressBarWorker.cancel(true);
 				String message = tasksFound ? "ExcelReader complete" : "ExcelReader failed";
 				JOptionPane.showMessageDialog(new JFrame(), message, "ExcelReader",
 						tasksFound ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
@@ -171,8 +171,6 @@ public class ExcelReader implements ActionListener {
 		// Start the reader.
 		ExcelReaderWorker excelReaderWorker = new ExcelReaderWorker();
 		excelReaderWorker.execute();
-
-//		excelReaderWorker.cancel(true);
 		return(taskList);
 	}
 

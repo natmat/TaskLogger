@@ -24,25 +24,22 @@ public class TaskLogger {
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				System.out.println("Run()");
-				loadRecentModel();
+				loadTodaysModel();
 				createAndShowGUI();
 				runShutDownTimer();
-				new TaskLoader().execute();
+//				new TaskLoader().execute();
 			}
 		});
 	}
 
 
-	private static void loadRecentModel() {
+	private static void loadTodaysModel() {
+		System.out.println("loadTodaysBackup()");
 		try {
-			model.importRecentCSVModel();
+			model.importTodaysCSVModel();
 		} catch (IOException e) {
 			TLView.writeInfo("Error loading model");
-			JOptionPane.showMessageDialog(
-					null, 
-					"Import error", 
-					"Could not import times from file.", 
+			JOptionPane.showMessageDialog(null, "Import error", "Could not import times from file.", 
 					JOptionPane.WARNING_MESSAGE);
 		}
 	}
@@ -56,17 +53,15 @@ public class TaskLogger {
 	private static void runShutDownTimer() {		
 		final long timeNow = Calendar.getInstance().getTimeInMillis();
 
-		// Set the end of day (17:00)
-		final int fivePM = 22;
 		final Calendar endOfDay = Calendar.getInstance();
 		endOfDay.set(
 				endOfDay.get(Calendar.YEAR), 
 				endOfDay.get(Calendar.MONTH), 
 				endOfDay.get(Calendar.DAY_OF_MONTH), 
-				fivePM, 00, 00);
+				17, 30, 00); // 17.30 timer fires
 
 		final long timeToEndOfDay = endOfDay.getTimeInMillis()  - timeNow;
-		Timer shutdownTimer = new Timer((int)timeToEndOfDay, new ActionListener() {
+		new Timer((int)timeToEndOfDay, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				TLModel.writeTaskTimesToFile();
@@ -79,9 +74,7 @@ public class TaskLogger {
 				}
 				System.exit(0);
 			}
-		});
-
-		shutdownTimer.start();
+		}).start();
 	}
 }
 

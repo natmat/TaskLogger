@@ -73,11 +73,10 @@ public class TaskLoader extends SwingWorker<Void, Void> {
 	}
 
 	public TaskLoader() {
-		//		ArrayList<String> l = readTaskFromCSVFile();
+		ArrayList<String> l = readTaskFromCSVFile();
 	}
 
 	private static ArrayList<String> readTaskFromCSVFile() {
-		@SuppressWarnings("unused")
 		FilePicker fp = new FilePicker("Load task file", "Load");
 		return null;
 	}

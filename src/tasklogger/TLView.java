@@ -123,9 +123,11 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 	 * @param info string to prefix to infoArea
 	 */
 	public static void writeInfo(final String info) {
+		System.out.println("TLView:" + info);
 		TLView.infoArea.setForeground(Color.BLUE);
 		TLView.infoArea.append(TLView.infoArea.getLineCount() + ": " + info + "\r\n");
 	}
+	
 	private void addPomodoroToView() {
 		PomodoroTimer pomodoroTimer = PomodoroTimer.getInstance();
 		// try {
@@ -332,6 +334,7 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 	}
 
 	public static void addModel(TLModel model) {
+		// Add existing model to the view
 		setTotalTimerInMs(TLTask.getTotalRunTimeInMs());
 		for (TLTask t : model.getTaskArray()) {
 			TLView.addTask(t.getTaskID());

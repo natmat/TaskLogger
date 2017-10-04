@@ -61,7 +61,8 @@ public class TLUtilities {
 				+ (int) (parentFrame.getSize().getHeight()));
 
 		// Create a comboBox and select the first item
-		final JComboBox<String> taskSelectorComboBox = new JComboBox<>(taskList.toArray(new String[taskList.size()]));
+		final JComboBox<String> taskSelectorComboBox = 
+				new JComboBox<>(taskList.toArray(new String[taskList.size()]));
 		taskSelectorComboBox.setMaximumRowCount(20);
 		taskSelectorComboBox.setEditable(true);
 		taskSelectorComboBox.setVisible(true);
