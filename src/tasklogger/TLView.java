@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -53,7 +54,7 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 		TLModel.addPropertyChangeListener(this);
 		taskViewList = new ArrayList<TaskView>();
 		setupFrame();
-		setAlwaysOnTop(true);
+		//		setAlwaysOnTop(true);
 		pack();
 	}
 
@@ -80,7 +81,7 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 		pomodoroPanel.setLayout(new GridLayout(1, 2));
 		addPomodoroToView();
 		mainPanel.add(pomodoroPanel);
-		
+
 		infoArea = new JTextArea();
 		infoArea.setRows(4);
 		JScrollPane infoPane = new JScrollPane(
@@ -91,8 +92,11 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 
 		Container container = this.getContentPane();
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
-		setLocation(600, 300);
+		
+		final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		setLocation(screenSize.width*3/4, screenSize.height/4);		
 		setResizable(false);
+		
 		container.add(mainPanel);
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
@@ -113,7 +117,7 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 				}
 			}
 		});
-		
+
 		ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource("tasklogger/pomodoro.png"));
 		setIconImage(icon.getImage());
 	}
@@ -127,7 +131,7 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 		TLView.infoArea.setForeground(Color.BLUE);
 		TLView.infoArea.append(TLView.infoArea.getLineCount() + ": " + info + "\r\n");
 	}
-	
+
 	private void addPomodoroToView() {
 		PomodoroTimer pomodoroTimer = PomodoroTimer.getInstance();
 		// try {
@@ -310,17 +314,17 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 			TLTask newTask = null;
 			if (null != name) {
 				newTask = TLModel.newTask(name);
-				if (newTask == null) {
-					TLView.getInstance().setAlwaysOnTop(false);
-					TLView.writeInfo("Task " + name + " already exists");
-					TLView.getInstance().setAlwaysOnTop(true);
+				if (null != newTask) {
+					TLView.writeInfo("Adding task " + name);
+					addTask(newTask.getTaskID());
+					TLController.newTask(name);
+					TLController.taskButtonPressed(newTask.getTaskID());
 				}
-			}
-
-			if (null != newTask) {
-				addTask(newTask.getTaskID());
-				TLController.newTask(name);
-				TLController.taskButtonPressed(newTask.getTaskID());
+				else {
+//					TLView.getInstance().setAlwaysOnTop(false);
+					TLView.writeInfo("Task " + name + " already exists");
+//					TLView.getInstance().setAlwaysOnTop(true);
+				}
 			}
 		}
 		else {

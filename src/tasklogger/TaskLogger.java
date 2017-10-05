@@ -26,8 +26,8 @@ public class TaskLogger {
 			public void run() {
 				loadTodaysModel();
 				createAndShowGUI();
-				runShutDownTimer();
-//				new TaskLoader().execute();
+//				runShutDownTimer();
+				new TaskLoader().execute();
 			}
 		});
 	}
@@ -38,7 +38,7 @@ public class TaskLogger {
 		try {
 			model.importTodaysCSVModel();
 		} catch (IOException e) {
-			TLView.writeInfo("Error loading model");
+			TLView.writeInfo("Error today's model");
 			JOptionPane.showMessageDialog(null, "Import error", "Could not import times from file.", 
 					JOptionPane.WARNING_MESSAGE);
 		}

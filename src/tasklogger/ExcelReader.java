@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
 
 import javax.swing.JFrame;
@@ -37,6 +38,7 @@ public class ExcelReader implements ActionListener {
 
 	private static final Object instanceLock = new Object();
 	private static volatile ExcelReader instance;
+	private static ArrayList<WBSTask> wbsTaskList;
 
 	// private static final String FILE_PATH = "typhoon.xlsm";
 
@@ -48,8 +50,9 @@ public class ExcelReader implements ActionListener {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				// Create a task list (attempting to populate it from a file)
-				ArrayList<String> taskList = createTaskListFromExcel(TaskLoader.getExcelFilePath());
+				// Create a taskList (attempting to populate it from a file)
+				TLView.getInstance();
+				createTaskListFromExcel(TaskLoader.getExcelFilePath());
 			}
 		});
 	}
@@ -130,48 +133,63 @@ public class ExcelReader implements ActionListener {
 	 * @return
 	 */
 	public static ArrayList<String> createTaskListFromExcel(final String excelFile) {
-		ArrayList<String> taskList = null;
-
 		// Create and start a progressBar for this operation
 		ProgressBarWorker progressBarWorker = getInstance().new ProgressBarWorker();
 		progressBarWorker.execute();
 
-		class ExcelReaderWorker extends SwingWorker<ArrayList<WBSTask>, Void> {
-			private ArrayList<WBSTask> wbsTaskList;
+		// Start the reader.
+		ExcelReaderWorker excelReaderWorker = getInstance().new ExcelReaderWorker(progressBarWorker, excelFile);
+		excelReaderWorker.execute();
+		
+		ArrayList<String> taskList = new ArrayList<>();
+		try {
+			wbsTaskList = excelReaderWorker.get();
+			convertWbsListToTaskList(wbsTaskList, taskList);
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+		return(taskList);
+	}
 
-			@Override
-			protected ArrayList<WBSTask> doInBackground() throws Exception {
-				System.out.println("Reading from Excel file...");
-				wbsTaskList = readWbsListFromExcel(excelFile);
-				printWBSTaskList(wbsTaskList);
-				return (wbsTaskList);
-			}
 
-			@Override
-			protected void process(List<Void> chunks) {
-				// TODO Auto-generated method stub
-				super.process(chunks);
-			}
+	class ExcelReaderWorker extends SwingWorker<ArrayList<WBSTask>, Void> {
+		ProgressBarWorker progressBarWorker;
+		String excelFile;
 
-			@Override
-			protected void done() {
-				super.done();
-				Boolean tasksFound = (wbsTaskList != null);
-				if (tasksFound) {
-					ArrayList<String> taskList = new ArrayList<>();
-					convertWbsListToTaskList(wbsTaskList, taskList);
-				}
-				progressBarWorker.cancel(true);
-				String message = tasksFound ? "ExcelReader complete" : "ExcelReader failed";
-				JOptionPane.showMessageDialog(new JFrame(), message, "ExcelReader",
-						tasksFound ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
-			}
+		public ExcelReaderWorker(final ProgressBarWorker inProgressBarWorker, final String inExcelFile) {
+			progressBarWorker = inProgressBarWorker;
+			excelFile = inExcelFile;
 		}
 
-		// Start the reader.
-		ExcelReaderWorker excelReaderWorker = new ExcelReaderWorker();
-		excelReaderWorker.execute();
-		return(taskList);
+		@Override
+		protected ArrayList<WBSTask> doInBackground() throws Exception {
+			System.out.println("Reading from Excel file...");
+			wbsTaskList = readWbsListFromExcel(excelFile);
+			printWBSTaskList(wbsTaskList);
+			return (wbsTaskList);
+		}
+
+		@Override
+		protected void process(List<Void> chunks) {
+			// TODO Auto-generated method stub
+			super.process(chunks);
+		}
+
+		@Override
+		protected void done() {
+			super.done();
+			Boolean tasksFound = (wbsTaskList != null);
+			if (tasksFound) {
+				TLView.writeInfo("Excel tasks loaded");
+				ArrayList<String> taskList = new ArrayList<>();
+				convertWbsListToTaskList(wbsTaskList, taskList);
+			}
+			progressBarWorker.cancel(true);
+			String message = tasksFound ? "ExcelReader complete" : "ExcelReader failed";
+			JOptionPane.showMessageDialog(new JFrame(), message, "ExcelReader",
+					tasksFound ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
+			progressBarWorker.cancel(true);
+		}
 	}
 
 	public static void printWBSTaskList(ArrayList<WBSTask> wbsTaskList) {

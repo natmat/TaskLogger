@@ -1,10 +1,10 @@
 package tasklogger;
 
 import java.util.ArrayList;
-
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.SwingWorker;
+
 
 public class TaskLoader extends SwingWorker<Void, Void> {
 	static boolean loaded = false;
@@ -13,7 +13,7 @@ public class TaskLoader extends SwingWorker<Void, Void> {
 	private static String excelFilePath;
 	private static final String defaultTaskName = "[Enter new task info/code]";
 
-	public static void main() {
+	public static void main(String[] args) {
 		TaskLoader loader = new TaskLoader();
 		try {
 			loader.execute();
@@ -51,11 +51,11 @@ public class TaskLoader extends SwingWorker<Void, Void> {
 		dialog.setAlwaysOnTop(true);		
 		dialog.setSize(400, 20);
 		dialog.setLocationRelativeTo(TLView.getInstance());
+		
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				final int delay2seconds = 4000;
-				System.out.println(">>");
+				final int delay2seconds = 2000;
 				try {
 					Thread.sleep(delay2seconds);
 				} catch (InterruptedException e) {
@@ -64,7 +64,6 @@ public class TaskLoader extends SwingWorker<Void, Void> {
 				finally {
 					dialog.setVisible(false);
 					dialog.dispose();
-					System.out.println("<<");
 				}
 			}
 		});
@@ -73,7 +72,7 @@ public class TaskLoader extends SwingWorker<Void, Void> {
 	}
 
 	public TaskLoader() {
-		ArrayList<String> l = readTaskFromCSVFile();
+		ArrayList<String> csvTaskList = readTaskFromCSVFile();
 	}
 
 	private static ArrayList<String> readTaskFromCSVFile() {
@@ -83,10 +82,10 @@ public class TaskLoader extends SwingWorker<Void, Void> {
 
 	@Override
 	protected Void doInBackground() throws Exception {
+		// 2 sources of input: excel, or if that fails try CSV	
 		System.out.println("Tasks loading...");
-
-		// 2 sources of input: excel, or that fails try CSV		
-		taskList = ExcelReader.createTaskListFromExcel(excelFilePath);
+		
+		taskList = ExcelReader.createTaskListFromExcel(getExcelFilePath());
 		if (null == taskList) {
 			showTimedInfoDialog("ERROR: No excel datafile");
 			taskList = readTaskFromCSVFile();
@@ -97,8 +96,16 @@ public class TaskLoader extends SwingWorker<Void, Void> {
 		return null;
 	}
 
+	@Override
+	protected void done() {
+		// TODO Auto-generated method stub
+		System.out.println("DONE");
+		super.done();
+	}
+
 	public static String getDefaultTaskName() {
 		return(defaultTaskName);
 	}
+
 }
 
