@@ -172,6 +172,7 @@ public class TLModel implements PropertyChangeListener {
 		}
 
 		writer.close();
+		TLView.writeInfo("CSV export complete");
 	}
 
 	private static String getTodaysCVSFileName() {
@@ -190,7 +191,7 @@ public class TLModel implements PropertyChangeListener {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public void importTodaysCSVModel() throws FileNotFoundException, IOException {
+	public void importTodaysCSVBackup() throws FileNotFoundException, IOException {
 		final File f = new File(getTodaysCVSFileName());
 		if (!f.exists() || f.isDirectory()) {
 			TLView.writeInfo("No CSV model file for today");
@@ -212,15 +213,18 @@ public class TLModel implements PropertyChangeListener {
 				taskArray.add(t);
 			}
 		}
-		System.out.println("importRecentCSVModel:" + taskArray);
+		System.out.println("importTodaysCSVBackup:" + taskArray);
 		br.close();
 	}
 
 	public static void deleteTask(int taskID) {
 		TLController.deleteTaskFormView(taskID);
 		TLTask t = getTaskWithID(taskID);
-		TLTask.setTotalTime(TLTask.getTotalRunTimeInMs() - t.getActiveTimeInMs());
-		taskArray.remove(t);
+		if (null != t) {
+			TLTask.setTotalTime(TLTask.getTotalRunTimeInMs() - t.getActiveTimeInMs());
+			taskArray.remove(t);
+			TLView.writeInfo("Delete task " + t.getName());
+		}
 		t = null;
 	}
 

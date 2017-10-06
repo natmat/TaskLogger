@@ -36,9 +36,15 @@ public class TLMenu extends JMenuBar {
 		newTaskMenuItem.setActionCommand("New");
 		newTaskMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
 		newTaskMenuItem.addActionListener(menuListener);
-				
+
+		JMenuItem loadTaskCodesMenuItem = new JMenuItem("Load new TaskCodes file", KeyEvent.VK_L);
+		loadTaskCodesMenuItem.setActionCommand("Load");
+		loadTaskCodesMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.CTRL_MASK));
+		loadTaskCodesMenuItem.addActionListener(menuListener);
+		
 		fileMenu.add(saveMenuItem);
 		fileMenu.add(newTaskMenuItem);
+		fileMenu.add(loadTaskCodesMenuItem);
 	
 		// Left-align File menu
 		add(Box.createHorizontalGlue());
@@ -58,6 +64,8 @@ public class TLMenu extends JMenuBar {
 				break;
 			case "New":
 				TLView.newTaskButtonPressed();
+				break;
+			case "Load":
 				break;
 			}
 		}

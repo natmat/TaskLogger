@@ -52,7 +52,7 @@ public class ExcelReader implements ActionListener {
 			public void run() {
 				// Create a taskList (attempting to populate it from a file)
 				TLView.getInstance();
-				createTaskListFromExcel(TaskLoader.getExcelFilePath());
+				readTaskListFromExcelFile(TaskLoader.getExcelFile());
 			}
 		});
 	}
@@ -129,16 +129,16 @@ public class ExcelReader implements ActionListener {
 	/**
 	 * Read the WBS tasks from the excel workbook and write to taskList
 	 * 
-	 * @param excelFile
+	 * @param inputFile
 	 * @return
 	 */
-	public static ArrayList<String> createTaskListFromExcel(final String excelFile) {
+	public static ArrayList<String> readTaskListFromExcelFile(final File inputFile) {
 		// Create and start a progressBar for this operation
 		ProgressBarWorker progressBarWorker = getInstance().new ProgressBarWorker();
 		progressBarWorker.execute();
 
 		// Start the reader.
-		ExcelReaderWorker excelReaderWorker = getInstance().new ExcelReaderWorker(progressBarWorker, excelFile);
+		ExcelReaderWorker excelReaderWorker = getInstance().new ExcelReaderWorker(progressBarWorker, inputFile.getAbsolutePath());
 		excelReaderWorker.execute();
 		
 		ArrayList<String> taskList = new ArrayList<>();

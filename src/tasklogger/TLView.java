@@ -104,6 +104,9 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 			public void windowClosing(WindowEvent event) {
 				try {
 					TLModel.exportCVSFile();
+					System.out.println("exportCVSFile()");
+					dispose();
+					System.exit(0);
 				} catch (IOException e) {
 					// e.printStackTrace();
 					if (JOptionPane.showConfirmDialog(
@@ -128,8 +131,10 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 	 */
 	public static void writeInfo(final String info) {
 		System.out.println("TLView:" + info);
-		TLView.infoArea.setForeground(Color.BLUE);
-		TLView.infoArea.append(TLView.infoArea.getLineCount() + ": " + info + "\r\n");
+		if (null != TLView.infoArea) { 	
+			TLView.infoArea.setForeground(Color.BLUE);
+			TLView.infoArea.append(TLView.infoArea.getLineCount() + ": " + info + "\r\n");
+		}
 	}
 
 	private void addPomodoroToView() {

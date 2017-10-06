@@ -1,39 +1,45 @@
 package tasklogger;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
-
 public class TaskLoader extends SwingWorker<Void, Void> {
-	static boolean loaded = false;
 	static ArrayList<String> taskList = null;
-
-	private static String excelFilePath;
 	private static final String defaultTaskName = "[Enter new task info/code]";
+	private static final String inputFileRegex = "^.*\\.(csv|xlsm?)$";
 
 	public static void main(String[] args) {
-		TaskLoader loader = new TaskLoader();
-		try {
-			loader.execute();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				TaskLoader taskLoader = new TaskLoader();
+				try {
+					taskLoader.execute();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				JOptionPane.showConfirmDialog(null, "Stop the EDT?", "Keeping the EDT alive", JOptionPane.DEFAULT_OPTION);
+			}
+		});
 	}
 
 	/**
 	 * Get os-specific excel file path 
 	 * @return Path of excel code file
 	 */
-	public static final String getExcelFilePath() {
-		if ("Mac OS X".equals(System.getProperty("os.name"))) {
-			excelFilePath = "/Users/Nathan/github/TaskLogger/resources/typhoon.xlsm";
-		}
-		else {
-			excelFilePath = "C:/My_Workspaces/MyGit/MyJava/TaskLogger/resources/tasks.xlsm";
-		}
-		return(excelFilePath);
+	public static final File getExcelFile() {
+		FileChooser fileChooser = new FileChooser("Excel file *.xls[m]", ".*\\.xlsm?^");
+		return(fileChooser.createFileChooser());
 	}
 
 	public static ArrayList<String> getTaskList() {
@@ -51,7 +57,7 @@ public class TaskLoader extends SwingWorker<Void, Void> {
 		dialog.setAlwaysOnTop(true);		
 		dialog.setSize(400, 20);
 		dialog.setLocationRelativeTo(TLView.getInstance());
-		
+
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -71,41 +77,67 @@ public class TaskLoader extends SwingWorker<Void, Void> {
 		dialog.setVisible(true);
 	}
 
-	public TaskLoader() {
-		ArrayList<String> csvTaskList = readTaskFromCSVFile();
+	private static ArrayList<String> readTaskCodeFile() {
+		System.out.println("readTaskCodeFile");
+		ArrayList<String> taskList = new ArrayList<>();
+		FileChooser fileChooser = new FileChooser("CSV or Excel", inputFileRegex);
+
+		// Call the appropriate handler for the input file format
+		fileChooser.createFileChooser();
+		final File inputFile = fileChooser.getSelectedFile();
+		if (inputFile.getAbsolutePath().toLowerCase().matches("^.*\\.csv$")) {
+			taskList = readTaskListFromCSV(inputFile);
+		}
+		else {
+			ExcelReader.readTaskListFromExcelFile(inputFile);
+		}
+		return(taskList);
 	}
 
-	private static ArrayList<String> readTaskFromCSVFile() {
-		FileChooser fileChooser = new FileChooser("CSV", "*.csv");
+	private static ArrayList<String> readTaskListFromCSV(File inputFile) {
+		ArrayList<String> taskLists = new ArrayList<>();
+		System.out.println("canRead CSV: " + inputFile.getAbsolutePath());
+		BufferedReader br = null;
+		String line = "";
+		final String csvDelimiter = ",";
+		try {
+			br = new BufferedReader(new FileReader(inputFile));
+			while ((line = br.readLine()) != null) {
+				String[] taskInfo = line.split(csvDelimiter);
+				System.out.println(taskInfo[0] + ":" + taskInfo[1]);
+				taskLists.add(line);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return null;
 	}
 
 	@Override
 	protected Void doInBackground() throws Exception {
-		// 2 sources of input: excel, or if that fails try CSV	
-		System.out.println("Tasks loading...");
-		
-		taskList = ExcelReader.createTaskListFromExcel(getExcelFilePath());
+		System.out.println("TaskLoad dIB...");
+
+		taskList = readTaskCodeFile();
 		if (null == taskList) {
-			showTimedInfoDialog("ERROR: No excel datafile");
-			taskList = readTaskFromCSVFile();
+			showTimedInfoDialog("ERROR: No task code data");
+			taskList.add(0, TaskLoader.getDefaultTaskName());
 		}
-		taskList.add(0, TaskLoader.getDefaultTaskName());
 
 		System.out.println(((null == taskList) ? "No " : "") + "Tasks Loaded");
 		return null;
 	}
 
-	@Override
-	protected void done() {
-		// TODO Auto-generated method stub
-		System.out.println("DONE");
-		super.done();
-	}
+
 
 	public static String getDefaultTaskName() {
 		return(defaultTaskName);
 	}
 
+	@Override
+	protected void process(List<Void> chunks) {
+		// TODO Auto-generated method stub
+		super.process(chunks);
+	}
 }
 

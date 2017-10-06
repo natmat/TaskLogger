@@ -8,17 +8,24 @@ import javax.swing.filechooser.FileFilter;
 
 public class FileChooser extends JPanel {
 	private static final long serialVersionUID = -6729743289945525689L;
+	private File selectedFile;
+	private String chooserDescription;
+	private String chooserRegex;
 
 	public static void main(String args[]) {
-		createFileChooser();
+		FileChooser fc = new FileChooser("*.xls[m]", "^.*\\.(csv|xlsm?)$");
+		System.out.println("fileChooser: " + fc.createFileChooser());
 	}
 	
-	public FileChooser(String note, String extension) {
-		
+	public FileChooser(final String inDescription, final String inRegex) {
+		this.chooserDescription = inDescription;
+		this.chooserRegex = inRegex;
+		this.selectedFile = null;
 	}
 
-	public static File createFileChooser() {
-		JFileChooser fileChooser = new JFileChooser("/Users/Nathan/github/TaskLogger");
+	public File createFileChooser() {
+		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setCurrentDirectory(selectedFile);
 		fileChooser.setDialogTitle("Open code file");
 
 		// Permit only Excel files to be chosen
@@ -26,7 +33,7 @@ public class FileChooser extends JPanel {
 			
 			@Override
 			public String getDescription() {
-				return "Excel files (*.xls[m])";
+				return(chooserDescription); // "Excel files (*.xls[m])";
 			}
 
 			@Override
@@ -35,17 +42,20 @@ public class FileChooser extends JPanel {
 					return true;
 				} else {
 					String filename = f.getName().toLowerCase();
-					return filename.endsWith(".xls") || filename.endsWith(".xlsm") ;
+					return filename.matches(chooserRegex);
 				}
 			}
 		});
 
-		File selectedFile = null;
+		selectedFile = null;
 		final int returnValue = fileChooser.showOpenDialog(null);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
 			selectedFile = fileChooser.getSelectedFile().getAbsoluteFile();
-			System.out.println(selectedFile);
 		}
+		return(selectedFile);
+	}
+
+	public File getSelectedFile() {
 		return(selectedFile);
 	}
 }

@@ -24,19 +24,19 @@ public class TaskLogger {
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				loadTodaysModel();
+				loadTodaysBackup();
 				createAndShowGUI();
-//				runShutDownTimer();
+				runShutDownTimer();
 				new TaskLoader().execute();
 			}
 		});
 	}
 
 
-	private static void loadTodaysModel() {
+	private static void loadTodaysBackup() {
 		System.out.println("loadTodaysBackup()");
 		try {
-			model.importTodaysCSVModel();
+			model.importTodaysCSVBackup();
 		} catch (IOException e) {
 			TLView.writeInfo("Error today's model");
 			JOptionPane.showMessageDialog(null, "Import error", "Could not import times from file.", 
