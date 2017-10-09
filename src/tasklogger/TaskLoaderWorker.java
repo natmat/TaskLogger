@@ -2,7 +2,6 @@ package tasklogger;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,27 +9,30 @@ import java.util.List;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
-public class TaskLoader extends SwingWorker<Void, Void> {
+public class TaskLoaderWorker extends SwingWorker<Void, ArrayList<String>> {
 	static ArrayList<String> taskList = null;
 	private static final String defaultTaskName = "[Enter new task info/code]";
 	private static final String inputFileRegex = "^.*\\.(csv|xlsm?)$";
 
-	public static void main(String[] args) {
-		SwingUtilities.invokeLater(new Runnable() {
+	public static void main(String[] args) throws Exception {
+		SwingUtilities.invokeAndWait(new Runnable() {
+			@Override
 			public void run() {
-				TaskLoader taskLoader = new TaskLoader();
+				System.out.println("1 " + SwingUtilities.isEventDispatchThread());
 				try {
-					taskLoader.execute();
+					TaskLoaderWorker tlw = new TaskLoaderWorker();
+					tlw.execute();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				JOptionPane.showConfirmDialog(null, "Stop the EDT?", "Keeping the EDT alive", JOptionPane.DEFAULT_OPTION);
 			}
 		});
+		System.out.println("HERE");
+		Thread.sleep(5000);
+//		System.exit(0);
 	}
 
 	/**
@@ -53,12 +55,14 @@ public class TaskLoader extends SwingWorker<Void, Void> {
 	}
 
 	private static void showTimedInfoDialog(final String msgString) {
+		System.out.println("showTimedInfoDialog");
 		final JDialog dialog = new JDialog(new JFrame(), msgString, false);
 		dialog.setAlwaysOnTop(true);		
 		dialog.setSize(400, 20);
 		dialog.setLocationRelativeTo(TLView.getInstance());
-
-		Thread t = new Thread(new Runnable() {
+		dialog.setVisible(true);
+		
+		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				final int delay2seconds = 2000;
@@ -72,16 +76,14 @@ public class TaskLoader extends SwingWorker<Void, Void> {
 					dialog.dispose();
 				}
 			}
-		});
-		t.start();
-		dialog.setVisible(true);
+		}).start();
 	}
 
-	private static ArrayList<String> readTaskCodeFile() {
+	private static ArrayList<String> readTaskFile() {
 		System.out.println("readTaskCodeFile");
 		ArrayList<String> taskList = new ArrayList<>();
 		FileChooser fileChooser = new FileChooser("CSV or Excel", inputFileRegex);
-
+		
 		// Call the appropriate handler for the input file format
 		fileChooser.createFileChooser();
 		final File inputFile = fileChooser.getSelectedFile();
@@ -117,27 +119,35 @@ public class TaskLoader extends SwingWorker<Void, Void> {
 	@Override
 	protected Void doInBackground() throws Exception {
 		System.out.println("TaskLoad dIB...");
+		System.out.println(SwingUtilities.isEventDispatchThread());
+		System.out.println(Thread.currentThread());
+		ArrayList<String> al = new ArrayList<>();
+		publish(al);
 
-		taskList = readTaskCodeFile();
+		taskList = readTaskFile();
 		if (null == taskList) {
 			showTimedInfoDialog("ERROR: No task code data");
-			taskList.add(0, TaskLoader.getDefaultTaskName());
+			taskList.add(0, TaskLoaderWorker.defaultTaskName);
 		}
 
 		System.out.println(((null == taskList) ? "No " : "") + "Tasks Loaded");
+		publish(taskList);
 		return null;
 	}
 
-
+	@Override
+	protected void process(List<ArrayList<String>> chunks) {
+		System.out.println("process=" + SwingUtilities.isEventDispatchThread());
+		super.process(chunks);
+		for (ArrayList<String> task : chunks) {
+			System.out.println(task);
+		}
+	}
 
 	public static String getDefaultTaskName() {
 		return(defaultTaskName);
 	}
-
-	@Override
-	protected void process(List<Void> chunks) {
-		// TODO Auto-generated method stub
-		super.process(chunks);
-	}
+	
+	
 }
 

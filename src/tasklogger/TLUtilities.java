@@ -105,7 +105,7 @@ public class TLUtilities {
 	}
 
 	public static String getNewTaskName() {
-		if (newTaskName.equals(TaskLoader.getDefaultTaskName())) {
+		if (newTaskName.equals(TaskLoaderWorker.getDefaultTaskName())) {
 			return(null);
 		}
 		else {

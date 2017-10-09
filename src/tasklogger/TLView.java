@@ -339,7 +339,7 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 	}
 
 	public static void newTaskButtonPressed() {
-		TLUtilities.taskSelectorDialog(TLView.instance, TaskLoader.getTaskList());
+		TLUtilities.taskSelectorDialog(TLView.instance, TaskLoaderWorker.getTaskList());
 	}
 
 	public static void addModel(TLModel model) {

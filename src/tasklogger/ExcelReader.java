@@ -52,7 +52,7 @@ public class ExcelReader implements ActionListener {
 			public void run() {
 				// Create a taskList (attempting to populate it from a file)
 				TLView.getInstance();
-				readTaskListFromExcelFile(TaskLoader.getExcelFile());
+				readTaskListFromExcelFile(TaskLoaderWorker.getExcelFile());
 			}
 		});
 	}
