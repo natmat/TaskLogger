@@ -18,21 +18,25 @@ public class TaskLoaderWorker extends SwingWorker<Void, ArrayList<String>> {
 	private static final String inputFileRegex = "^.*\\.(csv|xlsm?)$";
 
 	public static void main(String[] args) throws Exception {
+		final TaskLoaderWorker tlw = new TaskLoaderWorker();
 		SwingUtilities.invokeAndWait(new Runnable() {
 			@Override
 			public void run() {
 				System.out.println("1 " + SwingUtilities.isEventDispatchThread());
 				try {
-					TaskLoaderWorker tlw = new TaskLoaderWorker();
 					tlw.execute();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
-		System.out.println("HERE");
-		Thread.sleep(5000);
-//		System.exit(0);
+		while (!tlw.isDone()) {
+			Thread.sleep(50);
+		}
+		tlw.cancel(false);	
+		System.out.println("tLW 4 " + SwingUtilities.isEventDispatchThread());
+
+		//		System.exit(0);
 	}
 
 	/**
@@ -41,7 +45,7 @@ public class TaskLoaderWorker extends SwingWorker<Void, ArrayList<String>> {
 	 */
 	public static final File getExcelFile() {
 		FileChooser fileChooser = new FileChooser("Excel file *.xls[m]", ".*\\.xlsm?^");
-		return(fileChooser.createFileChooser());
+		return(fileChooser.showFileChooser());
 	}
 
 	public static ArrayList<String> getTaskList() {
@@ -61,7 +65,7 @@ public class TaskLoaderWorker extends SwingWorker<Void, ArrayList<String>> {
 		dialog.setSize(400, 20);
 		dialog.setLocationRelativeTo(TLView.getInstance());
 		dialog.setVisible(true);
-		
+
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -79,19 +83,22 @@ public class TaskLoaderWorker extends SwingWorker<Void, ArrayList<String>> {
 		}).start();
 	}
 
-	private static ArrayList<String> readTaskFile() {
-		System.out.println("readTaskCodeFile");
+	private static ArrayList<String> inputTaskCodesFromFile() {
+		System.out.println("inputTaskCodesFromFile");
 		ArrayList<String> taskList = new ArrayList<>();
 		FileChooser fileChooser = new FileChooser("CSV or Excel", inputFileRegex);
-		
+
 		// Call the appropriate handler for the input file format
-		fileChooser.createFileChooser();
+		fileChooser.showFileChooser();
 		final File inputFile = fileChooser.getSelectedFile();
-		if (inputFile.getAbsolutePath().toLowerCase().matches("^.*\\.csv$")) {
-			taskList = readTaskListFromCSV(inputFile);
-		}
-		else {
-			ExcelReader.readTaskListFromExcelFile(inputFile);
+		
+		if (null != inputFile) {
+			if (inputFile.getAbsolutePath().toLowerCase().matches("^.*\\.csv$")) {
+				taskList = readTaskListFromCSV(inputFile);
+			}
+			else {
+				ExcelReader.readTaskListFromExcelFile(inputFile);
+			}
 		}
 		return(taskList);
 	}
@@ -118,36 +125,39 @@ public class TaskLoaderWorker extends SwingWorker<Void, ArrayList<String>> {
 
 	@Override
 	protected Void doInBackground() throws Exception {
-		System.out.println("TaskLoad dIB...");
-		System.out.println(SwingUtilities.isEventDispatchThread());
-		System.out.println(Thread.currentThread());
-		ArrayList<String> al = new ArrayList<>();
-		publish(al);
+		System.out.println("tLW 2 " + SwingUtilities.isEventDispatchThread());
 
-		taskList = readTaskFile();
-		if (null == taskList) {
+		taskList = inputTaskCodesFromFile();
+		System.out.println("taskList=" + taskList);
+		System.out.println(((taskList.size() == 0) ? "No " : "") + "Tasks Loaded");
+		if (taskList.size() == 0) {
 			showTimedInfoDialog("ERROR: No task code data");
 			taskList.add(0, TaskLoaderWorker.defaultTaskName);
 		}
 
-		System.out.println(((null == taskList) ? "No " : "") + "Tasks Loaded");
 		publish(taskList);
+		System.out.println("dIB return");
 		return null;
 	}
 
 	@Override
 	protected void process(List<ArrayList<String>> chunks) {
-		System.out.println("process=" + SwingUtilities.isEventDispatchThread());
 		super.process(chunks);
 		for (ArrayList<String> task : chunks) {
-			System.out.println(task);
+			System.out.println("process=" + task);
 		}
 	}
 
 	public static String getDefaultTaskName() {
 		return(defaultTaskName);
 	}
-	
-	
+
+	@Override
+	protected void done() {
+		super.done();
+		System.out.println("tLW 3 " + SwingUtilities.isEventDispatchThread());
+	}
+
+
 }
 
