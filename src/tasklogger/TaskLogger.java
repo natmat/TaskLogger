@@ -27,7 +27,7 @@ public class TaskLogger {
 				loadTodaysBackup();
 				createAndShowGUI();
 				runShutDownTimer();
-				new TaskLoader().execute();
+				TaskLoader.load();
 			}
 		});
 	}

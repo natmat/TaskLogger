@@ -5,42 +5,28 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 
-public class TaskLoader extends SwingWorker<Void, Void> {
+public class TaskLoader {
 	static ArrayList<String> taskList = null;
 	private static final String defaultTaskName = "[Enter new task info/code]";
 	private static final String inputFileRegex = "^.*\\.(csv|xlsm?)$";
 
 	public static void main(String[] args) {
-		final TaskLoader taskLoader = new TaskLoader(); 
-		
+		new TaskLoader(); 
+		TaskLoader.load();
+	}
+
+	static void load() {
 		TLUtilities.printlnMethodName();
-		
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					System.out.println(SwingUtilities.isEventDispatchThread());
-					taskLoader.execute();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-		
-		try {
-			taskLoader.get();
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
+		taskList = readTaskCodeFile();
+		if (taskList.size() == 0) {
+			showTimedInfoDialog("ERROR: No task code data");
+			taskList.add(0, TaskLoader.getDefaultTaskName());
+			TLView.writeInfo("Default task: " + taskList.get(0));
 		}
-		taskLoader.cancel(false);
-		System.exit(0);
+		System.out.println("Tasks Loaded: " + taskList.size());
 	}
 
 	/**
@@ -125,31 +111,7 @@ public class TaskLoader extends SwingWorker<Void, Void> {
 		return null;
 	}
 
-	@Override
-	protected Void doInBackground() throws Exception {
-		System.out.println("TaskLoad dIB...");
-
-		taskList = readTaskCodeFile();
-		if (taskList.size() == 0) {
-			showTimedInfoDialog("ERROR: No task code data");
-			taskList.add(0, TaskLoader.getDefaultTaskName());
-			TLView.writeInfo("Default task: " + taskList.get(0));
-		}
-
-		System.out.println("Tasks Loaded: " + taskList.size());
-		return null;
-	}
-
-
-
 	public static String getDefaultTaskName() {
 		return(defaultTaskName);
 	}
-
-	@Override
-	protected void process(List<Void> chunks) {
-		// TODO Auto-generated method stub
-		super.process(chunks);
-	}
 }
-
