@@ -56,12 +56,17 @@ public class TaskLogger {
 	private static void runShutDownTimer() {		
 		final long timeNow = Calendar.getInstance().getTimeInMillis();
 
+		int hour = 17;
+		if ("Mac OS X".equals(System.getProperty("os.name"))) {
+			hour = 23;
+		}
+
 		final Calendar endOfDay = Calendar.getInstance();
 		endOfDay.set(
 				endOfDay.get(Calendar.YEAR), 
 				endOfDay.get(Calendar.MONTH), 
 				endOfDay.get(Calendar.DAY_OF_MONTH), 
-				17, 30, 00); // 17.30 timer fires
+				hour, 30, 00); // 17.30 timer fires
 
 		final long timeToEndOfDay = endOfDay.getTimeInMillis()  - timeNow;
 		new Timer((int)timeToEndOfDay, new ActionListener() {
