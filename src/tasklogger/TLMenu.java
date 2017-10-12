@@ -66,6 +66,7 @@ public class TLMenu extends JMenuBar {
 				TLView.newTaskButtonPressed();
 				break;
 			case "Load":
+				TaskLoader.load();
 				break;
 			}
 		}

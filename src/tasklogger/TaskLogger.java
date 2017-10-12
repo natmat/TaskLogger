@@ -18,6 +18,9 @@ public class TaskLogger {
 	private static TLView view;
 	private static TLModel model;
 
+	/**
+	 * @param args
+	 */
 	public static void main(String[] args) { 
 		model = TLModel.getInstance();
 		view = TLView.getInstance();

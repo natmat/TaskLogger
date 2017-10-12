@@ -95,7 +95,7 @@ public class ExcelReader implements ActionListener {
 
 		public ProgressBarWorker() {
 			frame = new JFrame("ProgressWorker");
-			frame.setLocation(400, 400);
+			frame.setLocationRelativeTo(null);
 			progressBar = new JProgressBar();
 
 			initProgressBarGui(this.frame, this.progressBar);

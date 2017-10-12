@@ -2,14 +2,18 @@ package tasklogger;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
+
+import tasklogger.TLUtilities.TimedMessagePopupWorker;
 
 public class TaskLoader {
-	static ArrayList<String> taskList = null;
+	static Set<String> setOfTasks = null;
 	private static final String defaultTaskName = "[Enter new task info/code]";
 	private static final String inputFileRegex = "^.*\\.(csv|xlsm?)$";
 
@@ -20,13 +24,14 @@ public class TaskLoader {
 
 	static void load() {
 		TLUtilities.printlnMethodName();
-		taskList = readTaskCodeFile();
-		if (taskList.size() == 0) {
-			showTimedInfoDialog("ERROR: No task code data");
-			taskList.add(0, TaskLoader.getDefaultTaskName());
-			TLView.writeInfo("Default task: " + taskList.get(0));
+		readTaskCodeFile();
+		if (setOfTasks.size() == 0) {
+			TimedMessagePopupWorker messageWorker = (new TLUtilities()).new TimedMessagePopupWorker("ERROR: No task code data");
+			messageWorker.execute();
+			setOfTasks.add(TaskLoader.getDefaultTaskName());
+			TLView.writeInfo("Default task: " + TaskLoader.getDefaultTaskName());
 		}
-		System.out.println("Tasks Loaded: " + taskList.size());
+		System.out.println("Tasks Loaded: " + setOfTasks.size());
 	}
 
 	/**
@@ -40,55 +45,39 @@ public class TaskLoader {
 
 	public static ArrayList<String> getTaskList() {
 		// Add taskList default index zero entry
-		if (null == taskList) {
-			ArrayList<String> tempArray = new ArrayList<>();
-			tempArray.add(defaultTaskName);
-			return(tempArray);
+		if (null == setOfTasks) {
+			Set<String> tempSet = new HashSet<String>();
+			tempSet.add(defaultTaskName);
+			return(new ArrayList<String>(tempSet));
 		}
-		return taskList;
+		return (new ArrayList<String>(new TreeSet<String>(setOfTasks)));
 	}
 
-	private static void showTimedInfoDialog(final String msgString) {
-		final JDialog dialog = new JDialog(new JFrame(), msgString, false);
-		dialog.setAlwaysOnTop(true);		
-		dialog.setSize(400, 20);
-		dialog.setLocationRelativeTo(TLView.getInstance());
-
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				final int delay2seconds = 2000;
-				try {
-					Thread.sleep(delay2seconds);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				finally {
-					dialog.setVisible(false);
-					dialog.dispose();
-				}
-			}
-		});
-		t.start();
-		dialog.setVisible(true);
-	}
-
-	private static ArrayList<String> readTaskCodeFile() {
+	private static void readTaskCodeFile() {
 		System.out.println("readTaskCodeFile");
-		ArrayList<String> taskList = new ArrayList<>();
-		FileChooser fileChooser = new FileChooser("CSV or Excel", inputFileRegex);
+		
+		if (null == setOfTasks) {
+			setOfTasks = new HashSet<String>();
+		}		
 
 		// Call the appropriate handler for the input file format
+		FileChooser fileChooser = new FileChooser("CSV or Excel", inputFileRegex);
 		final File chosenFile = fileChooser.chooseFile();
-		if (null != chosenFile) {
-			if (chosenFile.getAbsolutePath().toLowerCase().matches("^.*\\.csv$")) {
-				taskList = readTaskListFromCSV(chosenFile);
-			}
-			else {
-				ExcelReader.readTaskListFromExcelFile(chosenFile);
-			}
+		if (!TLUtilities.fileExists(chosenFile)) {
+			return;
 		}
-		return(taskList);
+
+		switch(TLUtilities.getFileType(chosenFile)) {
+		case FILE_TYPE_CSV:
+			setOfTasks.addAll(readTaskListFromCSV(chosenFile));
+			break;
+		case FILE_TYPE_EXCEL:
+			setOfTasks.addAll(ExcelReader.readTaskListFromExcelFile(chosenFile));
+			break;
+		default:
+			// Unknown type
+			break;
+		}
 	}
 
 	private static ArrayList<String> readTaskListFromCSV(File inputFile) {
@@ -104,11 +93,13 @@ public class TaskLoader {
 				System.out.println(taskInfo[0] + ":" + taskInfo[1]);
 				taskLists.add(line);
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} catch (FileNotFoundException e) {			
+			TLView.writeInfo("Input file " + inputFile + " not found.");
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return taskLists;
 	}
 
 	public static String getDefaultTaskName() {

@@ -30,7 +30,7 @@ public class FileChooser extends JPanel {
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setCurrentDirectory(chosenFile);
 		
-		fileChooser.setDialogTitle("Open code file");
+		fileChooser.setDialogTitle("Open task code file");
 
 		// Permit only Excel files to be chosen
 		fileChooser.setFileFilter(new FileFilter() {

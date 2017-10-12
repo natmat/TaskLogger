@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -20,11 +21,12 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 
 public class TLUtilities {
-	
+
 	private static String newTaskName;
-	
+
 	public static String getHMSString(long totalTime) {
 		TimeZone tz = TimeZone.getTimeZone("UTC");
 		SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
@@ -53,7 +55,7 @@ public class TLUtilities {
 		TASK_STATE_CHANGE
 	}
 
-	public static void taskSelectorDialog(final ActionListener al, final ArrayList<String> taskList) {
+	public static void taskSelectorDialog(final ActionListener al, final ArrayList<String> arrayList) {
 		final JDialog dialog = new JDialog(TLView.getInstance(), "Enter Task Code/Info", ModalityType.APPLICATION_MODAL);
 
 		dialog.getContentPane().setLayout(new FlowLayout());		
@@ -63,8 +65,7 @@ public class TLUtilities {
 				+ (int) (parentFrame.getSize().getHeight()));
 
 		// Create a comboBox and select the first item
-		final JComboBox<String> taskSelectorComboBox = 
-				new JComboBox<>(taskList.toArray(new String[taskList.size()]));
+		final JComboBox<String> taskSelectorComboBox =  new JComboBox<>(arrayList.toArray(new String[arrayList.size()]));
 		taskSelectorComboBox.setMaximumRowCount(20);
 		taskSelectorComboBox.setEditable(true);
 		taskSelectorComboBox.setVisible(true);
@@ -107,14 +108,14 @@ public class TLUtilities {
 	}
 
 	public static String getNewTaskName() {
-		if (newTaskName.equals(TaskLoaderWorker.getDefaultTaskName())) {
+		if (newTaskName.equals(TaskLoader.getDefaultTaskName())) {
 			return(null);
 		}
 		else {
 			return (newTaskName);
 		}
 	}
-	
+
 	public static void printlnMethodName() {
 		StringBuilder sb = new StringBuilder();
 		for (StackTraceElement elem : Thread.currentThread().getStackTrace()) {
@@ -126,6 +127,63 @@ public class TLUtilities {
 		}
 		System.out.println(sb);
 	}
+
+	public static boolean fileExists(File fileToTest) {
+		if (null == fileToTest) {
+			return(false);
+		}
+
+		final String filePathString = fileToTest.getAbsolutePath();
+		final File f = new File(filePathString);
+		return ((f.exists() && !f.isDirectory())); 
+	}
+
+	class TimedMessagePopupWorker extends SwingWorker<Void, Void> {
+		private String message;
+
+		public TimedMessagePopupWorker(final String inInfo) {
+			this.message = inInfo;
+		}
+
+		@Override
+		protected Void doInBackground() throws Exception {
+			final JDialog dialog = new JDialog(new JFrame(), message, false);
+			dialog.setAlwaysOnTop(true);		
+			dialog.setSize(400, 20);
+			dialog.setLocationRelativeTo(TLView.getInstance());
+			dialog.setVisible(true);
+
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			finally {
+				dialog.setVisible(false);
+				dialog.dispose();
+			}
+			return(null);
+		}
+	}
+
+	public enum eFileType {
+		FILE_TYPE_UNKNOWN,
+		FILE_TYPE_CSV,
+		FILE_TYPE_EXCEL
+	}
+
+	public static eFileType getFileType(File chosenFile) {
+		eFileType fileType = eFileType.FILE_TYPE_UNKNOWN;
+
+		if (chosenFile.getAbsolutePath().toLowerCase().matches("^.*\\.csv$")) {
+			fileType = eFileType.FILE_TYPE_CSV;
+		}
+		else if (chosenFile.getAbsolutePath().toLowerCase().matches("^.*\\.xlsm?$")) {
+			fileType = eFileType.FILE_TYPE_EXCEL;
+		}
+		return(fileType);
+	}
 }
+
 
 
