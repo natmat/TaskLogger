@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.Date; 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -111,6 +113,18 @@ public class TLUtilities {
 		else {
 			return (newTaskName);
 		}
+	}
+	
+	public static void printlnMethodName() {
+		StringBuilder sb = new StringBuilder();
+		for (StackTraceElement elem : Thread.currentThread().getStackTrace()) {
+			Pattern pattern = Pattern.compile("([^\\.]*)(\\()");
+			Matcher matcher = pattern.matcher(elem.toString());
+			if (matcher.find()) {
+				sb.append(matcher.group(1) + " > ");
+			}
+		}
+		System.out.println(sb);
 	}
 }
 

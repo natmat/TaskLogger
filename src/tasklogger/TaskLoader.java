@@ -6,36 +6,40 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
-public class TaskLoaderWorker extends SwingWorker<Void, ArrayList<String>> {
+public class TaskLoader extends SwingWorker<Void, Void> {
 	static ArrayList<String> taskList = null;
 	private static final String defaultTaskName = "[Enter new task info/code]";
 	private static final String inputFileRegex = "^.*\\.(csv|xlsm?)$";
 
-	public static void main(String[] args) throws Exception {
-		final TaskLoaderWorker tlw = new TaskLoaderWorker();
-
-		SwingUtilities.invokeAndWait(new Runnable() {
-			@Override
+	public static void main(String[] args) {
+		final TaskLoader taskLoader = new TaskLoader(); 
+		
+		TLUtilities.printlnMethodName();
+		
+		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					tlw.execute();
+					System.out.println(SwingUtilities.isEventDispatchThread());
+					taskLoader.execute();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
-		while (!tlw.isDone()) {
-			Thread.sleep(50);
+		
+		try {
+			taskLoader.get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
 		}
-		System.out.println("isDone");
-		tlw.cancel(false);	
-		Thread.sleep(5000);
+		taskLoader.cancel(false);
 		System.exit(0);
 	}
 
@@ -59,14 +63,12 @@ public class TaskLoaderWorker extends SwingWorker<Void, ArrayList<String>> {
 	}
 
 	private static void showTimedInfoDialog(final String msgString) {
-		System.out.println("showTimedInfoDialog");
 		final JDialog dialog = new JDialog(new JFrame(), msgString, false);
 		dialog.setAlwaysOnTop(true);		
 		dialog.setSize(400, 20);
 		dialog.setLocationRelativeTo(TLView.getInstance());
-		dialog.setVisible(true);
 
-		new Thread(new Runnable() {
+		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				final int delay2seconds = 2000;
@@ -80,24 +82,24 @@ public class TaskLoaderWorker extends SwingWorker<Void, ArrayList<String>> {
 					dialog.dispose();
 				}
 			}
-		}).start();
+		});
+		t.start();
+		dialog.setVisible(true);
 	}
 
-	private static ArrayList<String> inputTaskCodesFromFile() {
-		System.out.println("inputTaskCodesFromFile");
+	private static ArrayList<String> readTaskCodeFile() {
+		System.out.println("readTaskCodeFile");
 		ArrayList<String> taskList = new ArrayList<>();
 		FileChooser fileChooser = new FileChooser("CSV or Excel", inputFileRegex);
 
 		// Call the appropriate handler for the input file format
-		fileChooser.chooseFile();
-		final File inputFile = fileChooser.getSelectedFile();
-		
-		if (null != inputFile) {
-			if (inputFile.getAbsolutePath().toLowerCase().matches("^.*\\.csv$")) {
-				taskList = readTaskListFromCSV(inputFile);
+		final File chosenFile = fileChooser.chooseFile();
+		if (null != chosenFile) {
+			if (chosenFile.getAbsolutePath().toLowerCase().matches("^.*\\.csv$")) {
+				taskList = readTaskListFromCSV(chosenFile);
 			}
 			else {
-				ExcelReader.readTaskListFromExcelFile(inputFile);
+				ExcelReader.readTaskListFromExcelFile(chosenFile);
 			}
 		}
 		return(taskList);
@@ -125,29 +127,29 @@ public class TaskLoaderWorker extends SwingWorker<Void, ArrayList<String>> {
 
 	@Override
 	protected Void doInBackground() throws Exception {
-		taskList = inputTaskCodesFromFile();
-		System.out.println("taskList=" + taskList);
-		System.out.println(((taskList.size() == 0) ? "No " : "") + "Tasks Loaded");
+		System.out.println("TaskLoad dIB...");
+
+		taskList = readTaskCodeFile();
 		if (taskList.size() == 0) {
 			showTimedInfoDialog("ERROR: No task code data");
-			taskList.add(0, TaskLoaderWorker.defaultTaskName);
+			taskList.add(0, TaskLoader.getDefaultTaskName());
+			TLView.writeInfo("Default task: " + taskList.get(0));
 		}
 
-		publish(taskList);
+		System.out.println("Tasks Loaded: " + taskList.size());
 		return null;
 	}
 
-	@Override
-	protected void process(List<ArrayList<String>> chunks) {
-		super.process(chunks);
-		System.out.println("chunks="+ chunks);
-		for (ArrayList<String> task : chunks) {
-			System.out.println("process=" + task);
-		}
-	}
+
 
 	public static String getDefaultTaskName() {
 		return(defaultTaskName);
+	}
+
+	@Override
+	protected void process(List<Void> chunks) {
+		// TODO Auto-generated method stub
+		super.process(chunks);
 	}
 }
 

@@ -8,36 +8,36 @@ import javax.swing.filechooser.FileFilter;
 
 public class FileChooser extends JPanel {
 	private static final long serialVersionUID = -6729743289945525689L;
-	private File selectedFile;
-	private String chooserFileDescription;
+	private File chosenFile;
+	private String chooserDescription;
 	private String chooserRegex;
 
 	public static void main(String args[]) {
 		FileChooser fc = new FileChooser("CSV & Excel", "^.*\\.(csv|xlsm?)$");
-		System.out.println("fileChooser: " + fc.showFileChooser());
+		System.out.println("fileChooser: " + fc.chooseFile());
 		System.exit(0);
 	}
 	
 	public FileChooser(final String inDescription, final String inRegex) {
-		this.chooserFileDescription = inDescription;
+		this.chooserDescription = inDescription;
 		this.chooserRegex = inRegex;
-		this.selectedFile = null;
+		this.chosenFile = null;
 	}
 
-	public File showFileChooser() {
-		System.out.println("showFileChooser()");
-
+	public File chooseFile() {
+		TLUtilities.printlnMethodName();
+		
 		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setCurrentDirectory(selectedFile);
-
-		fileChooser.setDialogTitle("Open task code file");
+		fileChooser.setCurrentDirectory(chosenFile);
+		
+		fileChooser.setDialogTitle("Open code file");
 
 		// Permit only Excel files to be chosen
 		fileChooser.setFileFilter(new FileFilter() {
 			
 			@Override
 			public String getDescription() {
-				return(chooserFileDescription);
+				return(chooserDescription); // "Excel files (*.xls[m])";
 			}
 
 			@Override
@@ -45,27 +45,22 @@ public class FileChooser extends JPanel {
 				if (f.isDirectory()) {
 					return true;
 				} else {
-					return f.getName().toLowerCase().matches(chooserRegex);
+					String filename = f.getName().toLowerCase();
+					return filename.matches(chooserRegex);
 				}
 			}
 		});
 
-		selectedFile = null;
-		final int returnValue = fileChooser.showOpenDialog(new JFrame());
-
-		switch(returnValue) {
-		case JFileChooser.APPROVE_OPTION:
-			selectedFile = fileChooser.getSelectedFile().getAbsoluteFile();
-		break;
-		case JFileChooser.CANCEL_OPTION: 
-		    System.out.println("Cancel was selected");
-		    break;
+		chosenFile = null;
+		final int returnState = fileChooser.showOpenDialog(new JFrame());
+		if (returnState == JFileChooser.APPROVE_OPTION) {
+			chosenFile = fileChooser.getSelectedFile().getAbsoluteFile();
 		}
-		return(selectedFile);
+		return(chosenFile);
 	}
 
 	public File getSelectedFile() {
-		return(selectedFile);
+		return(chosenFile);
 	}
 }
 

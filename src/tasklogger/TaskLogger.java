@@ -27,7 +27,7 @@ public class TaskLogger {
 				loadTodaysBackup();
 				createAndShowGUI();
 				runShutDownTimer();
-				new TaskLoaderWorker().execute();
+				new TaskLoader().execute();
 			}
 		});
 	}
@@ -54,12 +54,11 @@ public class TaskLogger {
 		final long timeNow = Calendar.getInstance().getTimeInMillis();
 
 		final Calendar endOfDay = Calendar.getInstance();
-		int hour = 17;
 		endOfDay.set(
 				endOfDay.get(Calendar.YEAR), 
 				endOfDay.get(Calendar.MONTH), 
 				endOfDay.get(Calendar.DAY_OF_MONTH), 
-				hour, 30, 00); // 17.30 timer fires
+				17, 30, 00); // 17.30 timer fires
 
 		final long timeToEndOfDay = endOfDay.getTimeInMillis()  - timeNow;
 		new Timer((int)timeToEndOfDay, new ActionListener() {
