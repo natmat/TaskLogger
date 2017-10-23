@@ -25,8 +25,7 @@ public class FileChooser extends JPanel {
 	}
 
 	public File chooseFile() {
-		TLUtilities.printlnMethodName();
-		
+		System.out.println("chooseFile:" + Thread.currentThread());
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setCurrentDirectory(chosenFile);
 		
@@ -37,7 +36,7 @@ public class FileChooser extends JPanel {
 			
 			@Override
 			public String getDescription() {
-				return(chooserDescription); // "Excel files (*.xls[m])";
+				return(chooserDescription);
 			}
 
 			@Override
@@ -52,7 +51,7 @@ public class FileChooser extends JPanel {
 		});
 
 		chosenFile = null;
-		final int returnState = fileChooser.showOpenDialog(new JFrame());
+		final int returnState = fileChooser.showOpenDialog(null);
 		if (returnState == JFileChooser.APPROVE_OPTION) {
 			chosenFile = fileChooser.getSelectedFile().getAbsoluteFile();
 		}

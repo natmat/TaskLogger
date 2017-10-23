@@ -23,7 +23,7 @@ public class TaskLoader {
 	}
 
 	static void load() {
-		TLUtilities.printlnMethodName();
+//		TLUtilities.printlnMethodName();
 		readTaskCodeFile();
 		if (setOfTasks.size() == 0) {
 			TimedMessagePopupWorker messageWorker = (new TLUtilities()).new TimedMessagePopupWorker("ERROR: No task code data");
@@ -39,7 +39,7 @@ public class TaskLoader {
 	 * @return Path of excel code file
 	 */
 	public static final File getExcelFile() {
-		FileChooser fileChooser = new FileChooser("Excel file *.xls[m]", ".*\\.xlsm?^");
+		FileChooser fileChooser = new FileChooser("Excel files (*.xlsm?)", "^.*\\.xlsm?$");
 		return(fileChooser.chooseFile());
 	}
 
@@ -69,7 +69,7 @@ public class TaskLoader {
 
 		switch(TLUtilities.getFileType(chosenFile)) {
 		case FILE_TYPE_CSV:
-			setOfTasks.addAll(readTaskListFromCSV(chosenFile));
+			setOfTasks.addAll(readTaskHashSetFromCSV(chosenFile));
 			break;
 		case FILE_TYPE_EXCEL:
 			setOfTasks.addAll(ExcelReader.readTaskListFromExcelFile(chosenFile));
@@ -80,18 +80,20 @@ public class TaskLoader {
 		}
 	}
 
-	private static ArrayList<String> readTaskListFromCSV(File inputFile) {
-		ArrayList<String> taskLists = new ArrayList<>();
-		System.out.println("canRead CSV: " + inputFile.getAbsolutePath());
+	private static Set<String> readTaskHashSetFromCSV(File inputFile) {
+		Set<String> csvTaskHashSet = new HashSet<String>();
 		BufferedReader br = null;
 		String line = "";
-		final String csvDelimiter = ",";
 		try {
 			br = new BufferedReader(new FileReader(inputFile));
 			while ((line = br.readLine()) != null) {
-				String[] taskInfo = line.split(csvDelimiter);
-				System.out.println(taskInfo[0] + ":" + taskInfo[1]);
-				taskLists.add(line);
+				System.out.println("line="+ line);
+				if (line.length() == 0) {
+					continue;
+				}
+				String[] taskInfo = line.split(",");
+//				System.out.println(taskInfo[0] + ":" + taskInfo[1]);
+				csvTaskHashSet.add(taskInfo[0] + "," + taskInfo[1]);
 			}
 		} catch (FileNotFoundException e) {			
 			TLView.writeInfo("Input file " + inputFile + " not found.");
@@ -99,7 +101,7 @@ public class TaskLoader {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
-		return taskLists;
+		return csvTaskHashSet;
 	}
 
 	public static String getDefaultTaskName() {
