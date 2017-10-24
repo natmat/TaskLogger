@@ -50,10 +50,9 @@ public class ExcelReader implements ActionListener {
 	}
 
 	public static void main(String args[]) {
-		ExcelReader er = new ExcelReader();
 		TLView.getInstance();
 		final File excelFile = TaskLoader.getExcelFile();
-		readTaskListFromExcelFile(excelFile);
+//		readTaskListFromExcelFile(excelFile);
 	}
 
 	static void test(Integer i) {
