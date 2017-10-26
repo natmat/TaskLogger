@@ -1,6 +1,7 @@
 package tasklogger;
 
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -18,7 +19,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -39,7 +39,7 @@ public class ExcelReader implements ActionListener {
 	private static final Object instanceLock = new Object();
 	private static volatile ExcelReader instance;
 	private static ArrayList<WBSTask> wbsTaskList;
-	
+
 	static private ProgressBarWorker progressBarWorker;
 
 	// private static final String FILE_PATH = "typhoon.xlsm";
@@ -50,9 +50,10 @@ public class ExcelReader implements ActionListener {
 	}
 
 	public static void main(String args[]) {
-		TLView.getInstance();
+		new ExcelReader();
+		//		TLView.getInstance();
 		final File excelFile = TaskLoader.getExcelFile();
-//		readTaskListFromExcelFile(excelFile);
+		readTaskListFromExcelFile(excelFile);
 	}
 
 	static void test(Integer i) {
@@ -80,7 +81,7 @@ public class ExcelReader implements ActionListener {
 
 			initProgressBarGui(this.frame, this.progressBar);
 		}
-		
+
 		private void initProgressBarGui(final JFrame inFrame, JProgressBar inProgressBar) {
 			inFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			JPanel pbPanel = new JPanel();
@@ -95,9 +96,7 @@ public class ExcelReader implements ActionListener {
 			inProgressBar.setVisible(true);
 
 			pbPanel.add(inProgressBar);
-
 			inFrame.pack();		
-			inFrame.setVisible(true);
 		}
 
 		@Override
@@ -115,7 +114,6 @@ public class ExcelReader implements ActionListener {
 
 		@Override
 		protected void process(List<Integer> chunks) {
-			System.out.println(">process");
 			super.process(chunks);
 			Integer chunk = chunks.get(chunks.size() - 1);
 			progressBar.setValue(chunk);
@@ -126,6 +124,10 @@ public class ExcelReader implements ActionListener {
 			super.done();
 			progressBar.setVisible(false);
 			frame.dispose();
+		}
+
+		void setVisible(final boolean visible) {
+			this.frame.setVisible(visible);
 		}
 	}
 
@@ -138,26 +140,33 @@ public class ExcelReader implements ActionListener {
 	public static ArrayList<String> readTaskListFromExcelFile(final File inputFile) {
 		// Create and start a progressBar for this operation
 		System.out.println("readTaskListFromExcelFile:" + Thread.currentThread());
-		progressBarWorker.execute();
-		try {
-			Thread.sleep(10000);
+		if (null == inputFile) {
 			return(null);
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
 		}
+
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				progressBarWorker.setVisible(true);
+				progressBarWorker.execute();
+			}
+		});
 
 		// Start the reader.
 		ExcelReaderWorker excelReaderWorker = getInstance().new ExcelReaderWorker(progressBarWorker, inputFile.getAbsolutePath());
 		excelReaderWorker.execute();
 
 		ArrayList<String> taskList = new ArrayList<>();
-		try {
-			wbsTaskList = excelReaderWorker.get();
-			convertWbsListToTaskList(wbsTaskList, taskList);
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
+		while (!excelReaderWorker.isDone()) {
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+
+		convertWbsListToTaskList(wbsTaskList, taskList);
 		return(taskList);
 	}
 
@@ -177,7 +186,6 @@ public class ExcelReader implements ActionListener {
 			Thread t = new Thread(new Runnable() {
 				@Override
 				public void run() {
-					System.out.println("Runnable...");
 					wbsTaskList = readWbsListFromExcel(excelFile);
 				}
 			});

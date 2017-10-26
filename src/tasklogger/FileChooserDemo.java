@@ -36,7 +36,6 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.SwingUtilities;
-import javax.swing.filechooser.*;
 
 /*
  * FileChooserDemo.java uses these files:
@@ -45,7 +44,11 @@ import javax.swing.filechooser.*;
  */
 public class FileChooserDemo extends JPanel
                              implements ActionListener {
-    static private final String newline = "\n";
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	static private final String newline = "\n";
     JButton openButton, saveButton;
     JTextArea log;
     JFileChooser fc;
@@ -76,13 +79,13 @@ public class FileChooserDemo extends JPanel
         //Create the open button.  We use the image from the JLF
         //Graphics Repository (but we extracted it from the jar).
         openButton = new JButton("Open a File...",
-                                 createImageIcon("images/Open16.gif"));
+                                 createImageIcon("Open16.gif"));
         openButton.addActionListener(this);
 
         //Create the save button.  We use the image from the JLF
         //Graphics Repository (but we extracted it from the jar).
         saveButton = new JButton("Save a File...",
-                                 createImageIcon("images/Save16.gif"));
+                                 createImageIcon("Save16.gif"));
         saveButton.addActionListener(this);
 
         //For layout purposes, put the buttons in a separate panel

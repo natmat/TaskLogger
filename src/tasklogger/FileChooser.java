@@ -1,8 +1,10 @@
 package tasklogger;
 
+import java.awt.EventQueue;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 
@@ -11,14 +13,15 @@ public class FileChooser extends JPanel {
 	private File chosenFile;
 	private String chooserDescription;
 	private String chooserRegex;
+	private static JFileChooser fileChooser;
 
 	public static void main(String args[]) {
 		FileChooser fc = new FileChooser("CSV & Excel", "^.*\\.(csv|xlsm?)$");
 		System.out.println("fileChooser: " + fc.chooseFile());
-		System.exit(0);
 	}
-	
+
 	public FileChooser(final String inDescription, final String inRegex) {
+		fileChooser = new JFileChooser();
 		this.chooserDescription = inDescription;
 		this.chooserRegex = inRegex;
 		this.chosenFile = null;
@@ -26,14 +29,11 @@ public class FileChooser extends JPanel {
 
 	public File chooseFile() {
 		System.out.println("chooseFile:" + Thread.currentThread());
-		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setCurrentDirectory(chosenFile);
-		
+		fileChooser.setCurrentDirectory(chosenFile);		
 		fileChooser.setDialogTitle("Open task code file");
 
-		// Permit only Excel files to be chosen
+		// Limit file type selection
 		fileChooser.setFileFilter(new FileFilter() {
-			
 			@Override
 			public String getDescription() {
 				return(chooserDescription);
@@ -50,10 +50,25 @@ public class FileChooser extends JPanel {
 			}
 		});
 
-		chosenFile = null;
-		final int returnState = fileChooser.showOpenDialog(null);
-		if (returnState == JFileChooser.APPROVE_OPTION) {
-			chosenFile = fileChooser.getSelectedFile().getAbsoluteFile();
+		// Run fileChooser on EDT
+		try {
+			EventQueue.invokeAndWait(new Runnable() {
+
+				@Override
+				public void run() {
+					chosenFile = null;
+					final int returnState = fileChooser.showOpenDialog(null);
+					if (returnState == JFileChooser.APPROVE_OPTION) {
+						chosenFile = fileChooser.getSelectedFile().getAbsoluteFile();
+					}
+				}
+			});
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return(chosenFile);
 	}
