@@ -141,7 +141,6 @@ public class ExcelReader implements ActionListener {
 	 */
 	public static ArrayList<String> readTaskListFromExcelFile(final File inputFile) {
 		// Create and start a progressBar for this operation
-		System.out.println("readTaskListFromExcelFile:" + Thread.currentThread());
 		if (null == inputFile) {
 			return(null);
 		}

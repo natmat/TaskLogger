@@ -28,7 +28,6 @@ public class FileChooser extends JPanel {
 	}
 
 	public File chooseFile() {
-		System.out.println("chooseFile:" + Thread.currentThread());
 		fileChooser.setCurrentDirectory(chosenFile);		
 		fileChooser.setDialogTitle("Open task code file");
 
