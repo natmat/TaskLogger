@@ -29,10 +29,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelReader implements ActionListener {
 
-	// private static final String FILE_PATH =
-	// "C:/My_Workspaces/MyJava/TaskLogger/resources/typhoon.xlsm";
-	private static final int WBS_COLUMN_INDEX = 1;
-
 	protected SynchronousQueue<Boolean> queue = null;
 	private static String newTaskName = null;
 
@@ -41,19 +37,23 @@ public class ExcelReader implements ActionListener {
 	private static ArrayList<WBSTask> wbsTaskList;
 
 	static private ProgressBarWorker progressBarWorker;
+	static private ExcelReaderWorker excelReaderWorker;
 
 	// private static final String FILE_PATH = "typhoon.xlsm";
 
 	private ExcelReader() {
 		progressBarWorker = new ProgressBarWorker();
+		excelReaderWorker = new ExcelReaderWorker();
 	}
 
 	public static void main(String args[]) {
 		new ExcelReader();
-		//		TLView.getInstance();
+		
 		final File excelFile = TaskLoader.getExcelFile();
+		excelReaderWorker.setExcelFile(excelFile.getAbsolutePath());
+
 		readTaskListFromExcelFile(excelFile);
-//		System.exit(0);
+		
 	}
 
 	static void test(Integer i) {
@@ -153,20 +153,18 @@ public class ExcelReader implements ActionListener {
 			}
 		});
 
-		// Start the reader.
-		ExcelReaderWorker excelReaderWorker = 
-				getInstance().new ExcelReaderWorker(inputFile.getAbsolutePath());
+		// Start the reader
 		excelReaderWorker.execute();
 
-		try {
-			wbsTaskList = excelReaderWorker.get();
-		} catch (InterruptedException | ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			wbsTaskList = excelReaderWorker.get();
+//		} catch (InterruptedException | ExecutionException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
 		ArrayList<String> taskList = new ArrayList<>();
-		if (!wbsTaskList.isEmpty())
+		if ((null != wbsTaskList) && !wbsTaskList.isEmpty())
 		{
 			TLView.writeInfo("Excel tasks loaded: #" + wbsTaskList.size());
 			convertWbsListToTaskList(wbsTaskList, taskList);
@@ -178,7 +176,7 @@ public class ExcelReader implements ActionListener {
 	class ExcelReaderWorker extends SwingWorker<ArrayList<WBSTask>, Void> {
 		String excelFile;
 
-		public ExcelReaderWorker(final String inExcelFile) {
+		public void setExcelFile(final String inExcelFile) {
 			excelFile = inExcelFile;
 		}
 
@@ -186,7 +184,6 @@ public class ExcelReader implements ActionListener {
 		protected ArrayList<WBSTask> doInBackground() throws Exception {
 			System.out.println("Reading from Excel file...");
 			wbsTaskList = readWbsListFromExcel(excelFile);
-			System.out.println("start");
 			printWBSTaskList(wbsTaskList);
 			return (wbsTaskList);
 		}
@@ -263,9 +260,9 @@ public class ExcelReader implements ActionListener {
 			while (cellIterator.hasNext()) {
 
 				Cell cell = cellIterator.next();
+				final int WBS_COLUMN_INDEX = 1; // Column containing WBS code in this sheet
 				// The Cell Containing String will is name.
-				switch (cell.getColumnIndex()) {
-				case WBS_COLUMN_INDEX:
+				if (cell.getColumnIndex() == WBS_COLUMN_INDEX ) {
 					if ((Cell.CELL_TYPE_STRING == cell.getCellType()) && (cell.getStringCellValue().length() != 0)
 							&& (cell.getStringCellValue().startsWith("D"))) {
 						// Read task from WBS column
@@ -277,10 +274,6 @@ public class ExcelReader implements ActionListener {
 
 						taskList.add(task);
 					}
-					break;
-
-				default:
-					break;
 				}
 			}
 		}
