@@ -43,6 +43,11 @@ public class TLView extends JFrame implements PropertyChangeListener, ActionList
 	final private Color resetColor = new Color(204,229,255);
 	private static JTextArea infoArea;
 
+	public static void main(String[] args) {
+		TLView view = TLView.getInstance();
+		view.setVisible(true);	
+	}
+	
 	public static TLView getInstance() {
 		if (instance == null) {
 			instance = new TLView();

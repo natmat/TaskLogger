@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
 
 import javax.swing.JFrame;
@@ -38,22 +37,54 @@ public class ExcelReader implements ActionListener {
 
 	static private ProgressBarWorker progressBarWorker;
 	static private ExcelReaderWorker excelReaderWorker;
+	
+	static private SW sw;
 
 	// private static final String FILE_PATH = "typhoon.xlsm";
+	
+	private class SW extends SwingWorker<Void, Void> {
+
+		@Override
+		protected Void doInBackground() throws Exception {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+	}
 
 	private ExcelReader() {
-		progressBarWorker = new ProgressBarWorker();
-		excelReaderWorker = new ExcelReaderWorker();
+		System.out.println("CTOR");
+//		progressBarWorker = new ProgressBarWorker();
+//		excelReaderWorker = new ExcelReaderWorker();
+//		sw = new SW();
+//		sw.cancel(true);
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				System.out.println("before");
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("after");
+			}
+		}).start();
 	}
 
 	public static void main(String args[]) {
 		new ExcelReader();
+//		
+//		final File excelFile = TaskLoader.getExcelFile();
+//		excelReaderWorker.setExcelFile(excelFile.getAbsolutePath());
+//
+//		readTaskListFromExcelFile(excelFile);
 		
-		final File excelFile = TaskLoader.getExcelFile();
-		excelReaderWorker.setExcelFile(excelFile.getAbsolutePath());
+//		sw.execute();
 
-		readTaskListFromExcelFile(excelFile);
-		
+		System.out.println("END");
 	}
 
 	static void test(Integer i) {
@@ -199,6 +230,7 @@ public class ExcelReader implements ActionListener {
 			System.out.println("ERW done(): " + Thread.currentThread());
 			super.done();
 			Boolean tasksFound = (wbsTaskList != null);
+			
 			progressBarWorker.cancel(true);
 			String message = tasksFound ? "ExcelReader complete" : "ExcelReader failed";
 			JOptionPane.showMessageDialog(new JFrame(), message, "ExcelReader",
