@@ -24,6 +24,7 @@ public class TaskLoader {
 
 	static void load() {
 //		TLUtilities.printlnMethodName();
+		System.out.println("Load");
 		readTaskCodeFile();
 		if (setOfTasks.size() == 0) {
 			TimedMessagePopupWorker messageWorker = (new TLUtilities()).new TimedMessagePopupWorker("ERROR: No task code data");

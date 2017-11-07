@@ -1,11 +1,9 @@
 package tasklogger;
 
-import java.awt.EventQueue;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 
 public class FileChooser extends JPanel {
@@ -16,8 +14,14 @@ public class FileChooser extends JPanel {
 	private static JFileChooser fileChooser;
 
 	public static void main(String args[]) {
-		FileChooser fc = new FileChooser("CSV & Excel", "^.*\\.(csv|xlsm?)$");
-		System.out.println("fileChooser: " + fc.chooseFile());
+		final FileChooser fc = new FileChooser("CSV & Excel", "^.*\\.(csv|xlsm?)$");
+
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				System.out.println("fileChooser: " + fc.chooseFile());
+			}
+		});
 	}
 
 	public FileChooser(final String inDescription, final String inRegex) {
@@ -49,25 +53,10 @@ public class FileChooser extends JPanel {
 			}
 		});
 
-		// Run fileChooser on EDT
-		try {
-			EventQueue.invokeAndWait(new Runnable() {
-
-				@Override
-				public void run() {
-					chosenFile = null;
-					final int returnState = fileChooser.showOpenDialog(null);
-					if (returnState == JFileChooser.APPROVE_OPTION) {
-						chosenFile = fileChooser.getSelectedFile().getAbsoluteFile();
-					}
-				}
-			});
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		chosenFile = null;
+		final int returnState = fileChooser.showOpenDialog(null);
+		if (returnState == JFileChooser.APPROVE_OPTION) {
+			chosenFile = fileChooser.getSelectedFile().getAbsoluteFile();
 		}
 		return(chosenFile);
 	}

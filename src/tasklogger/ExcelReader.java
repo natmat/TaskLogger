@@ -38,53 +38,18 @@ public class ExcelReader implements ActionListener {
 	static private ProgressBarWorker progressBarWorker;
 	static private ExcelReaderWorker excelReaderWorker;
 	
-	static private SW sw;
-
-	// private static final String FILE_PATH = "typhoon.xlsm";
-	
-	private class SW extends SwingWorker<Void, Void> {
-
-		@Override
-		protected Void doInBackground() throws Exception {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		
-	}
-
 	private ExcelReader() {
 		System.out.println("CTOR");
-//		progressBarWorker = new ProgressBarWorker();
-//		excelReaderWorker = new ExcelReaderWorker();
-//		sw = new SW();
-//		sw.cancel(true);
-		new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				System.out.println("before");
-				try {
-					Thread.sleep(5000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				System.out.println("after");
-			}
-		}).start();
+		progressBarWorker = new ProgressBarWorker();
+		excelReaderWorker = new ExcelReaderWorker();
 	}
 
 	public static void main(String args[]) {
 		new ExcelReader();
-//		
-//		final File excelFile = TaskLoader.getExcelFile();
-//		excelReaderWorker.setExcelFile(excelFile.getAbsolutePath());
-//
-//		readTaskListFromExcelFile(excelFile);
 		
-//		sw.execute();
-
-		System.out.println("END");
+		final File excelFile = TaskLoader.getExcelFile();
+		excelReaderWorker.setExcelFile(excelFile.getAbsolutePath());
+		readTaskListFromExcelFile(excelFile);	
 	}
 
 	static void test(Integer i) {
