@@ -48,8 +48,13 @@ public class ExcelReader implements ActionListener {
 		new ExcelReader();
 		
 		final File excelFile = TaskLoader.getExcelFile();
-		excelReaderWorker.setExcelFile(excelFile.getAbsolutePath());
-		readTaskListFromExcelFile(excelFile);	
+		if (null == excelFile) {
+			System.out.println("No file chosen");
+		}
+		else {
+			excelReaderWorker.setExcelFile(excelFile.getAbsolutePath());
+			readTaskListFromExcelFile(excelFile);
+		}
 	}
 
 	static void test(Integer i) {

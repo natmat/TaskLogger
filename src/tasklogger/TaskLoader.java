@@ -40,6 +40,7 @@ public class TaskLoader {
 	 * @return Path of excel code file
 	 */
 	public static final File getExcelFile() {
+		System.out.println("getExcelFile()");
 		FileChooser fileChooser = new FileChooser("Excel files (*.xlsm?)", "^.*\\.xlsm?$");
 		return(fileChooser.chooseFile());
 	}

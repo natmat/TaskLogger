@@ -32,6 +32,7 @@ public class FileChooser extends JPanel {
 	}
 
 	public File chooseFile() {
+		System.out.println(">chooseFile()");
 		fileChooser.setCurrentDirectory(chosenFile);		
 		fileChooser.setDialogTitle("Open task code file");
 
@@ -52,12 +53,14 @@ public class FileChooser extends JPanel {
 				}
 			}
 		});
-
+		
+		System.out.println(" chooseFile()");
 		chosenFile = null;
-		final int returnState = fileChooser.showOpenDialog(null);
+		final int returnState = fileChooser.showOpenDialog(getParent());
 		if (returnState == JFileChooser.APPROVE_OPTION) {
 			chosenFile = fileChooser.getSelectedFile().getAbsoluteFile();
 		}
+		System.out.println("<chooseFile()");
 		return(chosenFile);
 	}
 
