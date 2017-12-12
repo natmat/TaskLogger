@@ -1,7 +1,12 @@
 package tasklogger;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
+
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
@@ -32,6 +37,28 @@ public class FileChooser extends JPanel {
 	}
 
 	public File chooseFile() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				JFrame frame = new JFrame("TEST");
+				frame.setSize(200, 200);
+				JPanel panel = new JPanel();
+				JButton button = new JButton("Press Me");
+				button.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						frame.setVisible(false);
+						// TODO Auto-generated method stub
+						
+					}
+				});
+				panel.add(button);
+				frame.add(panel);
+				frame.setVisible(true);
+			}
+		});
+		
 		System.out.println(">chooseFile()");
 		fileChooser.setCurrentDirectory(chosenFile);		
 		fileChooser.setDialogTitle("Open task code file");
