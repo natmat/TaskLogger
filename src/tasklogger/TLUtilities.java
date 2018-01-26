@@ -24,8 +24,13 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
 public class TLUtilities {
+	public enum PlatformOS {
+		MAC, 
+		WINDOWS
+	};
 
 	private static String newTaskName;
+	public static Object OS;
 
 	public static String getHMSString(long totalTime) {
 		TimeZone tz = TimeZone.getTimeZone("UTC");
@@ -182,6 +187,16 @@ public class TLUtilities {
 			fileType = eFileType.FILE_TYPE_EXCEL;
 		}
 		return(fileType);
+	}
+
+	/* 
+	 * Return the PlatformOS running this app
+	 */
+	public static PlatformOS getOS() {
+		if ("Mac OS X".equals(System.getProperty("os.name")))
+			return(PlatformOS.MAC);
+		else
+			return(PlatformOS.WINDOWS);
 	}
 }
 

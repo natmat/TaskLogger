@@ -9,11 +9,6 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-/**
- * 
- * @author Nathan
- *
- */
 public class TaskLogger {
 	private static TLView view;
 	private static TLModel model;
@@ -34,7 +29,6 @@ public class TaskLogger {
 			}
 		});
 	}
-
 
 	private static void loadTodaysBackup() {
 		System.out.println("loadTodaysBackup()");

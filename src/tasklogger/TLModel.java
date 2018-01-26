@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import javax.swing.JOptionPane;
 
+import tasklogger.TLUtilities.PlatformOS;
+
 /**
  * @author Nathan
  * 
@@ -176,10 +178,13 @@ public class TLModel implements PropertyChangeListener {
 	}
 
 	private static String getTodaysCVSFileName() {
-		String fileName;
-		if ("Mac OS X".equals(System.getProperty("os.name"))) {
+		String fileName = null;
+		switch(TLUtilities.getOS()) {
+		case MAC: 
 			fileName = "/Users/Nathan/tmp/" + ROOT_FILE_NAME + "_" + TLUtilities.getToday();
-		} else {
+			break;
+		case WINDOWS:
+			deafult:
 			fileName = "C:/tmp/" + ROOT_FILE_NAME + "_" + TLUtilities.getToday();
 		}
 		return (fileName + ".csv");
